@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ChunkMetadata",
+  "description": "Metadata schema for document chunks in the Tax Authority RAG system. Every chunk carries its full legal lineage so the LLM can reconstruct exact citations (Document, Article, Paragraph). Metadata is propagated from parent to child during structural chunking.",
+  "type": "object",
+  "required": [
+    "chunk_id",
+    "doc_id",
+    "doc_type",
+    "title",
+    "security_classification",
+    "effective_date",
+    "version",
+    "hierarchy_path",
+    "language",
+    "chunk_sequence",
+    "token_count"
+  ],
+  "properties": {
+    "chunk_id": {
+      "type": "string",
+      "description": "Deterministic, human-readable chunk identifier. Format: {doc_id}::{article}::{paragraph}::{chunk_seq}. Example: 'AWR-2024-v3::art3.114::par2::chunk001'. Enables deduplication on re-index and lineage tracing.",
+      "pattern": "^[A-Za-z0-9._-]+(::[A-Za-z0-9._-]+)*$",
+      "examples": [
+        "AWR-2024-v3::art3.114::par2::chunk001",
+        "ECLI-NL-HR-2023-1234::section3::chunk002",
+        "POLICY-IH-2024-007::chapter2::sec1::chunk001",
+        "ELEARN-MOD-042::lesson3::chunk001"
+      ]
+    },
+    "doc_id": {
+      "type": "string",
+      "description": "Unique document identifier with version suffix. Format: {short_name}-{year}-v{version}. For case law, use the ECLI identifier. Examples: 'AWR-2024-v3', 'ECLI-NL-HR-2023-1234'.",
+      "examples": [
+        "AWR-2024-v3",
+        "WET-IB-2001-v12",
+        "ECLI-NL-HR-2023-1234",
+        "POLICY-IH-2024-007"
+      ]
+    },
+    "doc_type": {
+      "type": "string",
+      "enum": ["LEGISLATION", "CASE_LAW", "POLICY", "ELEARNING"],
+      "description": "Document category. Determines chunking strategy and retrieval behavior. LEGISLATION: Laws, regulations, tax codes (hierarchical article structure). CASE_LAW: Court rulings, verdicts (ECLI structure). POLICY: Internal manuals, memos, operational guidelines. ELEARNING: Training modules, internal wikis."
+    },
+    "title": {
+      "type": "string",
+      "description": "Full document title. For legislation: official statute name. For case law: short case description. Examples: 'Algemene wet inzake rijksbelastingen', 'Hoge Raad ruling on transfer pricing'.",
+      "examples": [
+        "Algemene wet inzake rijksbelastingen",
+        "Wet inkomstenbelasting 2001",
+        "Hoge Raad: Zakelijkheid verrekenprijzen",
+        "Handboek Invordering 2024"
+      ]
+    },
+    "article_num": {
+      "type": ["string", "null"],
+      "description": "Article number within the document. Null for document types without article structure (e.g., e-learning). Preserves original numbering including sub-articles (e.g., '3.114', '67a').",
+      "examples": ["3.114", "67a", "10.1", null],
+      "default": null
+    },
+    "paragraph_num": {
+      "type": ["string", "null"],
+      "description": "Paragraph number within the article. Null if the chunk covers an entire article or is from a non-hierarchical document.",
+      "examples": ["1", "2", "3a", null],
+      "default": null
+    },
+    "sub_paragraph": {
+      "type": ["string", "null"],
+      "description": "Sub-paragraph or point identifier (e.g., 'a', 'b', 'i', 'ii'). Captures the finest granularity of legal hierarchy.",
+      "examples": ["a", "b", "i", "1°", null],
+      "default": null
+    },
+    "chapter": {
+      "type": ["string", "null"],
+      "description": "Chapter number or name, if applicable. Legislation often has Chapter > Section > Article hierarchy.",
+      "examples": ["3", "IIA", "Hoofdstuk 10", null],
+      "default": null
+    },
+    "section": {
+      "type": ["string", "null"],
+      "description": "Section identifier within a chapter, if applicable.",
+      "examples": ["3.1", "Afdeling 2", null],
+      "default": null
+    },
+    "hierarchy_path": {
+      "type": "string",
+      "description": "Full breadcrumb path from document root to this chunk. Format: 'DocTitle > Chapter X > Section Y > Article Z > Paragraph N'. Critical for citation reconstruction — the LLM uses this to generate exact citations.",
+      "examples": [
+        "AWR > Hoofdstuk 3 > Afdeling 1 > Art 3.114 > Lid 2",
+        "Wet IB 2001 > Hoofdstuk 3 > Art 3.17 > Lid 1 > Sub a",
+        "ECLI:NL:HR:2023:1234 > Overweging 3.2",
+        "Handboek Invordering > Hoofdstuk 2 > Paragraaf 1"
+      ]
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date from which this version of the text is legally effective. ISO 8601 format. Used for temporal filtering: default query returns only chunks where effective_date <= NOW AND (expiry_date IS NULL OR expiry_date > NOW).",
+      "examples": ["2024-01-01", "2023-07-15", "2001-01-01"]
+    },
+    "expiry_date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "Date when this version was superseded or repealed. Null means currently active. Enables bi-temporal versioning: historical queries can retrieve expired provisions.",
+      "examples": ["2024-12-31", "2023-06-30", null],
+      "default": null
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Document version number. Incremented when the source document is amended. Enables tracking of legislative changes over time.",
+      "examples": [1, 3, 12]
+    },
+    "security_classification": {
+      "type": "string",
+      "enum": ["PUBLIC", "INTERNAL", "RESTRICTED", "CLASSIFIED_FIOD"],
+      "description": "Access control tier. Maps directly to OpenSearch DLS roles. PUBLIC: Available to all users. INTERNAL: Available to all tax authority employees. RESTRICTED: Senior inspectors and legal counsel only. CLASSIFIED_FIOD: Fraud investigation (FIOD) personnel only. CRITICAL: This field is indexed as a keyword and used in DLS filter queries at retrieval time (pre-retrieval enforcement)."
+    },
+    "source_url": {
+      "type": ["string", "null"],
+      "format": "uri",
+      "description": "URL to the original source document in the government document management system. Enables end-users to verify the source directly.",
+      "examples": [
+        "https://wetten.overheid.nl/BWBR0002320",
+        "https://uitspraken.rechtspraak.nl/details?id=ECLI:NL:HR:2023:1234",
+        null
+      ],
+      "default": null
+    },
+    "parent_chunk_id": {
+      "type": ["string", "null"],
+      "description": "Chunk ID of the parent node in the document hierarchy. Creates a tree structure: Document → Chapter → Article → Paragraph → Sub-paragraph. Used by LlamaIndex NodeRelationship for hierarchical retrieval. Null for root-level chunks.",
+      "examples": ["AWR-2024-v3::art3.114", "AWR-2024-v3::art3.114::par2", null],
+      "default": null
+    },
+    "language": {
+      "type": "string",
+      "enum": ["nl", "en", "nl-en"],
+      "description": "ISO 639-1 language code. 'nl' for Dutch (primary), 'en' for English (EU regulations), 'nl-en' for bilingual documents.",
+      "default": "nl"
+    },
+    "ecli_id": {
+      "type": ["string", "null"],
+      "description": "European Case Law Identifier. Only populated for CASE_LAW documents. Format: ECLI:{country}:{court}:{year}:{number}. Used for exact-ID retrieval shortcut — queries containing ECLI patterns bypass vector search and use direct keyword filtering.",
+      "pattern": "^ECLI:[A-Z]{2}:[A-Z]+:\\d{4}:[A-Za-z0-9]+$",
+      "examples": ["ECLI:NL:HR:2023:1234", "ECLI:NL:RBDHA:2024:567", null],
+      "default": null
+    },
+    "amendment_refs": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of doc_ids that this document amends or is amended by. Enables cross-reference tracking for legislative changes.",
+      "examples": [["AWR-2023-v2", "AWR-2022-v1"]],
+      "default": []
+    },
+    "chunk_sequence": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Sequential index of this chunk within its parent structural unit. Enables reconstructing original document order. 0-indexed.",
+      "examples": [0, 1, 2]
+    },
+    "token_count": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Number of tokens in the chunk text (using the embedding model's tokenizer). Target range: 256-512 tokens. Used for monitoring chunk size distribution and context window budgeting.",
+      "examples": [287, 412, 503]
+    },
+    "ingestion_timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of when this chunk was ingested/indexed. Used for cache invalidation: when a document is re-indexed, all cache entries referencing its chunks are invalidated.",
+      "examples": ["2024-06-15T14:30:00Z"]
+    }
+  },
+  "additionalProperties": false,
+
+  "_design_notes": {
+    "citation_reconstruction": "The LLM reconstructs citations from hierarchy_path + article_num + paragraph_num + sub_paragraph. Example output: 'Article 3.114, Paragraph 2, sub a of the Algemene wet inzake rijksbelastingen (AWR)'.",
+    "deterministic_chunk_id": "chunk_id is generated deterministically from doc_id + structural position + sequence number. This means re-ingesting the same document produces the same chunk_ids, enabling upsert (update-or-insert) instead of duplicate creation.",
+    "temporal_versioning": "effective_date + expiry_date implement bi-temporal versioning. Default query filter: effective_date <= NOW AND (expiry_date IS NULL OR expiry_date > NOW). Historical queries remove this filter.",
+    "security_enforcement": "security_classification is the RBAC pivot field. OpenSearch DLS roles filter on this field BEFORE any search scoring occurs (pre-retrieval enforcement). This prevents information leakage from classified documents influencing search rankings.",
+    "parent_child_hierarchy": "parent_chunk_id creates a tree that LlamaIndex uses for hierarchical retrieval. If a paragraph-level chunk is retrieved, the system can optionally fetch the parent article-level chunk for additional context."
+  }
+}

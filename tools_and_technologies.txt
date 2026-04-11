@@ -1,0 +1,363 @@
+================================================================================
+  TOOLS & TECHNOLOGIES INVENTORY
+  Enterprise RAG Architecture — National Tax Authority
+
+  Version: 1.0 | Last Updated: 2026-04-10
+  Stack Philosophy: Self-hosted, security-first, government-grade
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────────
+1. SEARCH & STORAGE LAYER
+────────────────────────────────────────────────────────────────────────────────
+
+Tool                        Version    Purpose
+──────────────────────────  ─────────  ────────────────────────────────────────
+OpenSearch                  2.15+      Primary search + vector DB. Provides
+                                       BM25 full-text search, k-NN dense
+                                       vector search, and Document-Level
+                                       Security (DLS) in a single self-hosted
+                                       system.
+
+OpenSearch k-NN Plugin      2.15+      HNSW index for approximate nearest
+                                       neighbor search on embeddings. Uses
+                                       nmslib engine. Config: m=16,
+                                       ef_construction=256, ef_search=128.
+
+OpenSearch Security Plugin  2.15+      RBAC, Document-Level Security (DLS),
+                                       field-level security, audit logging.
+                                       Enforces pre-retrieval access control.
+
+Redis Stack                 7.4+       Semantic cache layer. Uses RediSearch
+                                       module for vector similarity search on
+                                       cached query embeddings. Sub-ms lookup.
+                                       Self-hostable.
+
+────────────────────────────────────────────────────────────────────────────────
+2. INGESTION & DOCUMENT PROCESSING
+────────────────────────────────────────────────────────────────────────────────
+
+Tool                        Version    Purpose
+──────────────────────────  ─────────  ────────────────────────────────────────
+LlamaIndex                  0.11+      Core ingestion framework. Custom
+                                       NodeParsers for legal document
+                                       structure. Metadata propagation,
+                                       parent-child node relationships,
+                                       IngestionPipeline orchestration.
+
+LlamaIndex NodeParser       0.11+      Base class for custom
+                                       LegalDocumentParser. Handles structural
+                                       chunking (Article/Paragraph boundaries)
+                                       with metadata inheritance.
+
+LlamaIndex IngestionPipeline 0.11+     Orchestrates: Parse → Chunk → Embed →
+                                       Index. Supports transformations,
+                                       deduplication, and batch processing.
+
+Python re (regex)           stdlib     Legal structure detection. Identifies
+                                       Articles, Paragraphs, Sub-paragraphs,
+                                       ECLI identifiers, and amendment markers
+                                       in Dutch legal text.
+
+lxml / BeautifulSoup        4.x/4.12  XML/HTML parsing for legal documents
+                                       delivered in structured markup formats
+                                       (many government legal texts use XML).
+
+Apache Tika (optional)      2.x       Document format extraction (PDF, DOCX,
+                                       etc.) if source documents are not
+                                       already plain text or XML.
+
+────────────────────────────────────────────────────────────────────────────────
+3. EMBEDDING MODELS (Self-Hosted)
+────────────────────────────────────────────────────────────────────────────────
+
+Model                       Dim   Purpose
+──────────────────────────  ────  ──────────────────────────────────────────
+multilingual-e5-large       1024  Primary embedding model. Multilingual
+(intfloat/)                       (Dutch + English EU regulations).
+                                  Instruction-tuned. Self-hosted via HF
+                                  Transformers or ONNX Runtime.
+
+intfloat/e5-large-v2        1024  Alternative if corpus is English-dominant.
+                                  Strong MTEB benchmark performance.
+
+Sentence-Transformers       -     Framework for serving embedding models.
+                                  Provides encode() API, batching, and
+                                  normalization.
+
+ONNX Runtime                1.17+ Optimized inference for embedding model.
+                                  ~3x faster than pure PyTorch on CPU.
+                                  Critical for meeting 30ms embedding budget.
+
+────────────────────────────────────────────────────────────────────────────────
+4. RERANKING MODELS (Self-Hosted)
+────────────────────────────────────────────────────────────────────────────────
+
+Model                       Purpose
+──────────────────────────  ────────────────────────────────────────────────
+BAAI/bge-reranker-v2-m3    Primary reranker. Cross-encoder architecture.
+                            Multilingual (Dutch). Strong performance on
+                            legal/technical text. Self-hosted = no data
+                            leaves the network.
+
+cross-encoder/              Alternative (English-only). Well-benchmarked.
+ms-marco-MiniLM-L-12-v2    Lighter weight (~33M params vs ~560M for BGE).
+                            Lower latency but less accurate on Dutch text.
+
+Hugging Face Transformers   4.40+  Model serving framework for reranker.
+                                   Provides AutoModelForSequenceClassification.
+
+────────────────────────────────────────────────────────────────────────────────
+5. LARGE LANGUAGE MODELS
+────────────────────────────────────────────────────────────────────────────────
+
+Option A: Self-Hosted
+─────────────────────
+Model                       Purpose
+──────────────────────────  ────────────────────────────────────────────────
+Mixtral 8x22B               Primary self-hosted LLM. Strong reasoning,
+                            multilingual, open-weight. Served via vLLM.
+                            Fits on 4x A100 80GB.
+
+Llama 3.1 70B               Alternative self-hosted option. Strong general
+                            performance. Served via vLLM.
+
+vLLM                        0.6+   High-throughput LLM serving engine.
+                                   Continuous batching, PagedAttention,
+                                   OpenAI-compatible API.
+
+Option B: Cloud (Government)
+────────────────────────────
+Service                     Purpose
+──────────────────────────  ────────────────────────────────────────────────
+Azure OpenAI (Gov Cloud)    GPT-4/GPT-4o on Azure Government Cloud.
+                            Data residency guarantees (EU/NL region).
+                            BAA/DPA compliance for government data.
+
+────────────────────────────────────────────────────────────────────────────────
+6. ORCHESTRATION & AGENT FRAMEWORK
+────────────────────────────────────────────────────────────────────────────────
+
+Tool                        Version    Purpose
+──────────────────────────  ─────────  ────────────────────────────────────────
+LangGraph                   0.2+       State machine orchestration for CRAG.
+                                       StateGraph with conditional edges,
+                                       checkpoints, and visualizable control
+                                       flow. Core of Module 3.
+
+LangChain Core              0.3+       Base abstractions: PromptTemplates,
+                                       OutputParsers, ChatModels, Retrievers.
+                                       Used as building blocks within LangGraph.
+
+Pydantic                    2.x        Data validation for all schemas, state
+                                       objects, API request/response models.
+                                       TypedDict/BaseModel for LangGraph state.
+
+────────────────────────────────────────────────────────────────────────────────
+7. API & SERVING LAYER
+────────────────────────────────────────────────────────────────────────────────
+
+Tool                        Version    Purpose
+──────────────────────────  ─────────  ────────────────────────────────────────
+FastAPI                     0.111+     Async REST API framework. Handles user
+                                       requests, auth middleware, streaming
+                                       responses. Auto-generates OpenAPI docs.
+
+Uvicorn                     0.29+      ASGI server for FastAPI. High
+                                       performance async request handling.
+
+Python                      3.11+      Runtime. 3.11+ for performance
+                                       improvements (10-60% faster).
+
+httpx                       0.27+      Async HTTP client for internal service
+                                       calls (embedding service, LLM service).
+
+python-jose / PyJWT         -          JWT token validation for OIDC/OAuth2
+                                       integration with government IdP.
+
+────────────────────────────────────────────────────────────────────────────────
+8. EVALUATION & TESTING
+────────────────────────────────────────────────────────────────────────────────
+
+Tool                        Version    Purpose
+──────────────────────────  ─────────  ────────────────────────────────────────
+Ragas                       0.2+       RAG evaluation framework. Metrics:
+                                       - Context Precision (threshold: ≥0.85)
+                                       - Context Recall (threshold: ≥0.80)
+                                       - Faithfulness (threshold: ≥0.90)
+                                       - Answer Relevance (threshold: ≥0.85)
+
+DeepEval                    1.x        Complementary evaluation. Metrics:
+                                       - Faithfulness (LLM-as-judge)
+                                       - Hallucination detection
+                                       - Custom Citation Accuracy metric
+
+pytest                      8.x        Test runner for evaluation pipelines,
+                                       integration tests, and CI/CD gates.
+
+NDCG (custom)               -          Normalized Discounted Cumulative Gain
+                                       at k=8. Retrieval ranking quality.
+                                       Implemented as custom metric.
+
+────────────────────────────────────────────────────────────────────────────────
+9. OBSERVABILITY & MONITORING
+────────────────────────────────────────────────────────────────────────────────
+
+Tool                        Version    Purpose
+──────────────────────────  ─────────  ────────────────────────────────────────
+OpenTelemetry (Python SDK)  1.x        Distributed tracing instrumentation.
+                                       Traces every RAG pipeline step with
+                                       latency, metadata, and error tracking.
+
+Jaeger                      1.x        Trace visualization and analysis.
+                                       Query trace waterfall for debugging
+                                       latency issues in the RAG pipeline.
+
+Prometheus                  2.x        Metrics collection. Scrapes:
+                                       - Retrieval latency p50/p95/p99
+                                       - Cache hit rate
+                                       - LLM token usage
+                                       - Error rates by stage
+
+Grafana                     10.x       Dashboards and alerting. Key alerts:
+                                       - p99 TTFT > 1.5s
+                                       - Faithfulness drop > 5%
+                                       - Error rate > 1%
+
+LangSmith                   -          LLM-specific observability: prompt/
+                                       response logging, cost tracking,
+                                       trace visualization. Alternative:
+                                       Arize Phoenix (open-source).
+
+Arize Phoenix (alternative) -          Open-source LLM observability.
+                                       Preferred if LangSmith SaaS is not
+                                       acceptable for data governance.
+
+Structured Logging (JSON)   -          All application logs in structured
+                                       JSON format → indexed in OpenSearch
+                                       (separate index from document corpus).
+
+────────────────────────────────────────────────────────────────────────────────
+10. INFRASTRUCTURE & DEPLOYMENT
+────────────────────────────────────────────────────────────────────────────────
+
+Tool                        Version    Purpose
+──────────────────────────  ─────────  ────────────────────────────────────────
+Docker                      24.x       Containerization for all services.
+Docker Compose              2.x        Local development and integration
+                                       testing environment.
+
+Kubernetes                  1.28+      Production orchestration on government
+                                       cloud. Horizontal pod autoscaling for
+                                       API and embedding services.
+
+Helm                        3.x        Kubernetes package management.
+                                       OpenSearch, Redis, and application
+                                       charts.
+
+Terraform / Pulumi          -          Infrastructure as Code for cloud
+                                       resource provisioning (VPCs, compute,
+                                       storage, networking).
+
+NVIDIA GPU Operator         -          GPU scheduling in Kubernetes for LLM
+                                       and embedding model inference pods.
+
+────────────────────────────────────────────────────────────────────────────────
+11. SECURITY & AUTHENTICATION
+────────────────────────────────────────────────────────────────────────────────
+
+Tool                        Purpose
+──────────────────────────  ────────────────────────────────────────────────
+OpenSearch Security Plugin  RBAC, Document-Level Security (DLS), field-level
+                            security, audit logging. Core of pre-retrieval
+                            access control enforcement.
+
+OAuth 2.0 / OpenID Connect  User authentication. Integrates with government
+                            Identity Provider (Active Directory / ADFS /
+                            Azure AD).
+
+mTLS (mutual TLS)           Service-to-service encryption. All internal
+                            communication between API, OpenSearch, Redis,
+                            embedding service, and LLM service.
+
+HashiCorp Vault (optional)  Secrets management for API keys, database
+                            credentials, and TLS certificates.
+
+────────────────────────────────────────────────────────────────────────────────
+12. CI/CD PIPELINE
+────────────────────────────────────────────────────────────────────────────────
+
+Tool                        Purpose
+──────────────────────────  ────────────────────────────────────────────────
+GitHub Actions              CI/CD pipeline orchestration.
+ (or Azure DevOps)          Alternatives: GitLab CI, Jenkins.
+
+Evaluation Gate Pipeline    Automated eval before deployment:
+                            1. Run Ragas + DeepEval on golden test set
+                            2. Gate: Faithfulness ≥0.90, Citation Acc =1.0,
+                               Context Precision ≥0.85
+                            3. Block deployment if below thresholds
+
+Container Registry          Harbor (self-hosted) or Azure Container Registry
+                            for Docker image storage in government network.
+
+────────────────────────────────────────────────────────────────────────────────
+13. PYTHON DEPENDENCIES SUMMARY
+────────────────────────────────────────────────────────────────────────────────
+
+Core:
+  python                     >= 3.11
+  fastapi                    >= 0.111
+  uvicorn[standard]          >= 0.29
+  pydantic                   >= 2.0
+  httpx                      >= 0.27
+
+Ingestion & RAG:
+  llama-index                >= 0.11
+  langchain-core             >= 0.3
+  langgraph                  >= 0.2
+  opensearch-py              >= 2.6
+  redis[hiredis]             >= 5.0
+
+ML / Embeddings / Reranking:
+  transformers               >= 4.40
+  sentence-transformers      >= 3.0
+  torch                      >= 2.2
+  onnxruntime                >= 1.17   (optional, for optimized inference)
+
+Evaluation:
+  ragas                      >= 0.2
+  deepeval                   >= 1.0
+  pytest                     >= 8.0
+
+Observability:
+  opentelemetry-api          >= 1.0
+  opentelemetry-sdk          >= 1.0
+  opentelemetry-exporter-jaeger >= 1.0
+  prometheus-client          >= 0.20
+
+Security:
+  python-jose[cryptography]  >= 3.3   (JWT validation)
+  cryptography               >= 42.0
+
+================================================================================
+  NOTES
+================================================================================
+
+1. All ML models (embeddings, reranker, LLM) are self-hosted to ensure
+   government data never leaves the national network boundary.
+
+2. OpenSearch is the strategic choice because it unifies vector search,
+   full-text search, and Document-Level Security in a single system.
+
+3. Redis Stack is used exclusively for semantic caching, not as a primary
+   data store. Cache is role-partitioned and has a conservative 0.97
+   cosine similarity threshold.
+
+4. If self-hosted LLM is not feasible, Azure OpenAI on Government Cloud
+   (EU/NL region) is the approved cloud alternative with data residency
+   guarantees.
+
+5. Version numbers are minimums. Pin exact versions in production
+   requirements.txt / pyproject.toml.
+
+================================================================================

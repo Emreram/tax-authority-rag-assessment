@@ -1,0 +1,150 @@
+================================================================================
+QUERY DECOMPOSITION & REWRITE PROMPTS
+================================================================================
+
+This file contains TWO related prompts:
+  1. DECOMPOSITION PROMPT — Break complex multi-part queries into sub-queries
+  2. REWRITE PROMPT — Rephrase ambiguous queries with better legal terminology
+
+Both serve the CRAG state machine's query transformation pipeline.
+
+================================================================================
+PART 1: DECOMPOSITION PROMPT
+================================================================================
+
+PURPOSE:
+  Break a complex, multi-part tax question into independent sub-queries that
+  can each be answered by a single legal passage. Each sub-query is retrieved
+  independently, results are merged and deduplicated, then reranked together.
+
+WHEN USED:
+  Only for COMPLEX queries (multi-part questions requiring multiple legal provisions).
+  Called by: module3_crag_statemachine.py → transform_query() node
+  Triggered when: classify_query() classifies the query as QueryType.COMPLEX
+
+  Example triggers:
+    - "What are the income tax rates for Box 1 and Box 3, and how do they
+       interact with the arbeidskorting?"
+    - "I'm a freelancer with a home office — what can I deduct, and do I
+       need to charge BTW?"
+
+CONSTRAINTS:
+  - Maximum 3 sub-queries (more adds too much latency: 3 x 80ms retrieval)
+  - Each sub-query must be self-contained (no pronouns referencing other sub-queries)
+  - Each sub-query should target a specific legal provision or concept
+
+DESIGN NOTES:
+  - Temperature: 0.3 (low but non-zero, allows finding alternative phrasings)
+  - The original query is preserved alongside sub-queries for reranking context
+  - Sub-queries are parsed from numbered lines (1. ... 2. ... 3. ...)
+
+--- SYSTEM PROMPT ---
+
+You are a legal research assistant. Break this complex tax question into
+independent sub-questions that can each be answered by a single legal passage.
+
+Rules:
+- Each sub-question should be self-contained
+- Maximum 3 sub-questions (more adds too much latency)
+- Each sub-question should target a specific legal provision or concept
+- Return ONLY the sub-questions, one per line, numbered 1-3
+
+
+--- USER PROMPT ---
+
+{query}
+
+
+--- EXAMPLE INPUT/OUTPUT ---
+
+Input: "I'm a freelancer with a home office — what can I deduct for the home
+        office, and do I need to charge BTW on my services?"
+
+Output:
+  1. Welke kosten voor een werkruimte in de eigen woning zijn aftrekbaar voor een zelfstandige ondernemer?
+  2. Wanneer is een ondernemer BTW-plichtig voor dienstverlening?
+  3. Welke ondernemersaftrek en zelfstandigenaftrek zijn van toepassing voor freelancers?
+
+Why 3 sub-queries:
+  The original question mixes three distinct legal areas:
+    1. Home office deductibility (Art. 3.17 Wet IB)
+    2. VAT obligation (Wet OB 1968)
+    3. Entrepreneur deductions (Art. 3.76 Wet IB — zelfstandigenaftrek)
+  Each requires retrieval from different parts of the corpus.
+  Retrieving with the original question alone would miss at least one area.
+
+
+================================================================================
+PART 2: QUERY REWRITE PROMPT
+================================================================================
+
+PURPOSE:
+  Rephrase a query with more specific Dutch legal terminology when the initial
+  retrieval returned AMBIGUOUS results. The goal is to improve retrieval
+  precision on the retry attempt by using terms that better match the legal
+  document vocabulary.
+
+WHEN USED:
+  Only when the CRAG grader returns AMBIGUOUS AND retry_count < MAX_RETRIES (1).
+  Called by: module3_crag_statemachine.py → rewrite_and_retry() node
+  This is a LAST RESORT before refusing — the system gets exactly one chance
+  to reformulate and re-retrieve.
+
+CONSTRAINTS:
+  - Semantic meaning must be preserved (rewrite, not reinterpret)
+  - Must add specific legal terms if inferable
+  - If the question is English, also provide Dutch legal equivalents
+  - Return ONLY the rewritten question (no explanations)
+
+DESIGN NOTES:
+  - Temperature: 0.3 (same as decomposition — allows finding alternative terms)
+  - HyDE is NOT applied on retry (should_use_hyde set to False)
+  - After rewrite, the query goes through retrieve → grade_context again
+  - If still AMBIGUOUS/IRRELEVANT after retry → refuse()
+
+--- SYSTEM PROMPT ---
+
+You are a legal search specialist. The user's tax question did not retrieve
+sufficiently relevant documents. Rephrase the question using more specific
+Dutch legal terminology, statute names, or article references that might
+improve retrieval.
+
+Rules:
+- Keep the semantic meaning identical
+- Add specific legal terms if you can infer them
+- If the question is in English, also provide the Dutch legal equivalent
+- Return ONLY the rewritten question, nothing else
+
+
+--- USER PROMPT ---
+
+Original question: {query}
+
+Previous retrieval returned ambiguous results. Rewrite:
+
+
+--- EXAMPLE INPUT/OUTPUT ---
+
+Input:  "Can I deduct my home office?"
+
+Output: "Aftrekbaarheid werkruimte eigen woning artikel 3.17 Wet IB 2001
+         thuiskantoor zelfstandig gedeelte inkomenseis 70%"
+
+Why this works:
+  The original query is casual English. The rewrite adds:
+  - Dutch legal terms: "aftrekbaarheid", "werkruimte", "eigen woning"
+  - Specific article: "artikel 3.17 Wet IB 2001"
+  - Key qualifiers: "zelfstandig gedeelte", "inkomenseis 70%"
+  These terms have high BM25 overlap with the actual legal text.
+
+Input:  "belasting op erfenis"  (too vague, matched gift tax instead)
+
+Output: "Successiewet 1956 erfbelasting tarieven vrijstellingen artikel 24
+         erfgenamen nalatenschap aangifte successierecht"
+
+Why this works:
+  The original matched gift tax (schenkbelasting) because both fall under
+  the same law. The rewrite narrows to inheritance-specific terms:
+  - "erfbelasting" (not "schenkbelasting")
+  - "erfgenamen", "nalatenschap" (inheritance-specific vocabulary)
+  - "artikel 24" (the specific article on inheritance tax rates)

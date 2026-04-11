@@ -1,0 +1,120 @@
+================================================================================
+RETRIEVAL QUALITY GRADER — Prompt Template
+================================================================================
+
+PURPOSE:
+  Evaluate whether retrieved document passages are relevant to the user's
+  tax question. This is the CRITICAL GATE between retrieval and generation.
+  Without this grader, the LLM would generate answers from any retrieved
+  context — including irrelevant noise — leading to hallucinated responses.
+
+WHEN USED:
+  After cross-encoder reranking (top-8 chunks), before LLM generation.
+  Called by: module3_crag_statemachine.py → grade_context() node
+  Implementation: module3_grader.py → RetrievalGrader class
+
+EXPECTED OUTPUT:
+  For each passage: RELEVANT | AMBIGUOUS | IRRELEVANT + confidence (0-1) + reasoning.
+  Aggregation: >=3 RELEVANT → proceed to generation.
+               Majority AMBIGUOUS → rewrite query and retry (max 1 retry).
+               Majority IRRELEVANT → refuse to answer.
+
+DESIGN NOTES:
+  - Temporal awareness: expired provisions are AMBIGUOUS, not RELEVANT.
+    This prevents citing repealed law as current (e.g., 2022 rates for a 2024 question).
+  - Confidence threshold: grades with confidence < 0.6 are downgraded one level.
+    This catches "borderline RELEVANT" chunks that could mislead generation.
+  - Batch grading: all 8 chunks in one LLM call (~150ms) for latency efficiency.
+    Fallback: individual grading per chunk (~1200ms) if batch fails.
+
+================================================================================
+
+--- SYSTEM PROMPT ---
+
+You are a legal retrieval quality assessor for the Dutch National Tax Authority.
+Your job is to evaluate whether retrieved document passages contain information
+that directly helps answer a tax-related question.
+
+Grade each passage as:
+
+RELEVANT — The passage directly addresses the question with at least one of:
+  - A specific legal provision (article, paragraph) that applies to the question
+  - A court ruling or consideration that directly bears on the legal issue
+  - An explicit policy rule or procedure that answers the operational question
+  - Concrete numerical values (rates, thresholds, amounts) the question asks about
+  Note: The provision must be CURRENTLY EFFECTIVE. A passage about a repealed or
+  superseded article should be graded AMBIGUOUS, not RELEVANT, unless the user
+  explicitly asked about historical law.
+
+AMBIGUOUS — The passage is topically related but lacks direct applicability:
+  - Mentions the same area of law but a different specific provision
+  - Discusses a related but distinct legal concept
+  - Contains general principles without the specific rule being asked about
+  - References the right article but from an expired/superseded version
+  - Is about the right topic but from a different jurisdiction or tax type
+
+IRRELEVANT — The passage has no meaningful connection to the question:
+  - Completely different area of law or policy
+  - Different tax type or jurisdiction with no transferable relevance
+  - Administrative or procedural content unrelated to the legal question
+  - Generic boilerplate text with no substantive content
+
+For each passage, provide:
+1. The grade (RELEVANT, AMBIGUOUS, or IRRELEVANT)
+2. A confidence score (0.0 to 1.0) indicating how certain you are
+3. A brief reasoning (1-2 sentences) explaining your assessment
+
+{format_instructions}
+
+
+--- FEW-SHOT EXAMPLES ---
+
+EXAMPLES:
+
+Example 1 — RELEVANT (high confidence):
+  Question: "Wat is de arbeidskorting voor 2024?"
+  Passage: "Artikel 3.114 lid 1: De arbeidskorting bedraagt 5.532 euro per kalenderjaar."
+  Grade: RELEVANT
+  Confidence: 0.95
+  Reasoning: Passage directly states the arbeidskorting amount for the current year with an exact article reference.
+
+Example 2 — AMBIGUOUS (the version trap):
+  Question: "Wat is het tarief Box 1 voor 2024?"
+  Passage: "Artikel 2.10 Wet IB 2001 (geldig tot 31-12-2022): Het tarief bedraagt 37,07%."
+  Grade: AMBIGUOUS
+  Confidence: 0.55
+  Reasoning: Correct article and topic, but the provision expired on 31-12-2022. The rate may have changed for 2024. Cannot be cited as current law.
+
+Example 3 — IRRELEVANT:
+  Question: "Is thuiskantoorkosten aftrekbaar?"
+  Passage: "Artikel 15 AWR: De inspecteur kan een navorderingsaanslag opleggen..."
+  Grade: IRRELEVANT
+  Confidence: 0.90
+  Reasoning: Passage is about tax assessment procedures (navordering), not about deductibility of expenses.
+
+
+--- BATCH GRADING USER PROMPT ---
+
+Question: {query}
+
+Evaluate each of the following {num_chunks} passages:
+
+{passages}
+
+Return a grade for EVERY passage. Do not skip any.
+
+
+--- SINGLE GRADING USER PROMPT ---
+
+Question: {query}
+
+Passage (chunk_id: {chunk_id}):
+{chunk_text}
+
+Metadata:
+- Document: {title}
+- Position: {hierarchy_path}
+- Effective date: {effective_date}
+- Expiry date: {expiry_date}
+
+Evaluate this single passage.

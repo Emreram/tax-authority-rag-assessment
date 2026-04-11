@@ -1,0 +1,58 @@
+Technical Assessment: Enterprise RAG Architecture for the Tax Authority
+1. The Scenario
+The National Tax Authority is developing a secure, internal AI assistant for its employees (tax inspectors, legal counsel, and helpdesk staff). The system must flawlessly answer complex fiscal questions based on a massive corpus of 500,000 documents.
+
+The Corpus includes:
+
+Legislation & Regulations: Hierarchical legal texts (historical and current).
+
+Case Law & Jurisprudence: Dense, complex court rulings and verdicts.
+
+Internal Policy Guidelines: Operational manuals and memos.
+
+E-learning: Training modules and internal wikis.
+
+Strict System Constraints:
+
+Zero-Hallucination Tolerance: Fiscal advice must be 100% factually accurate. Every claim must include an exact citation (Document name, Article, Paragraph).
+
+Security & Access Control: Strict Role-Based Access Control (RBAC). A helpdesk employee must not be able to retrieve or generate answers based on classified fraud-investigation (FIOD) documents.
+
+High Performance at Scale: The system will process tens of millions of vector chunks. Time-to-First-Token (TTFT) must remain low (< 1.5 seconds) despite the scale.
+
+2. The Assignment
+As the Lead AI Engineer, you are tasked with designing the architecture and specifying the exact configurations for this system. Please detail your design for the following four modules. Provide conceptual architecture, specific configuration parameters, and (pseudo-)code where applicable.
+
+Your design should be concrete enough that a DevOps/AI engineering team can immediately begin implementation.
+
+Module 1: Ingestion & Knowledge Structuring (Data Pipeline)
+Standard recursive text splitters destroy the hierarchical context of legal documents.
+
+Chunking Strategy: Design a chunking strategy specifically for legal codes and case law. How do you ensure the LLM knows a chunk belongs to "Article 3.114, Paragraph 2"? Provide a brief pseudo-code or configuration example (e.g., using LlamaIndex or LangChain) showing how metadata is preserved.
+
+Vector Database & Scale: Which Vector DB do you select for 500,000 documents (potentially 20M+ chunks)? Specify the exact index configurations (e.g., HNSW parameters m and ef_construct) and memory optimization techniques (e.g., Quantization) you would use to prevent Out-Of-Memory (OOM) errors and latency spikes.
+
+Module 2: Retrieval Strategy (High Precision)
+Queries will contain a mix of exact matches (e.g., "Ruling ECLI:NL:HR:2023:123") and semantic concepts (e.g., "deductibility of home office expenses").
+
+Hybrid Search: Design the retrieval query. How do you combine Sparse (BM25/Keyword) and Dense (Vector) retrieval? What weighting/fusion strategy (e.g., alpha values or RRF) do you advise for this legal domain, and why?
+
+Reranking: To maintain precision without sacrificing latency, which reranking strategy/model (e.g., Cross-Encoder, Cohere) do you implement? Specify the Top-K parameters for both the initial retrieval and the final reranker output.
+
+Module 3: Agentic RAG & Self-Healing (Generation)
+Standard linear RAG pipelines are fragile. If retrieval fails, the LLM hallucinates.
+
+Query Transformation: Describe how you handle complex, multi-part tax questions using techniques like Query Decomposition or HyDE (Hypothetical Document Embeddings).
+
+Corrective RAG (CRAG) Implementation: Design a state-machine (control loop) using a framework like LangGraph.
+
+How do you implement a Retrieval Evaluator (Grader)?
+
+Define the exact fallback actions the system takes if the retrieved context is classified as 'Irrelevant', 'Ambiguous', or 'Relevant'.
+
+Module 4: Production Ops, Security & Evaluation
+Semantic Caching: To reduce costs and latency for FAQs (e.g., "What is the Box 1 tax rate for 2024?"), design a Semantic Cache (e.g., using Redis). What cosine similarity threshold is safe for financial/tax data?
+
+Database-Level Security: Explain exactly how you implement RBAC to ensure unauthorized users cannot access classified documents. Crucially, at what stage of the RAG pipeline must this filtering occur to prevent data leaks mathematically?
+
+CI/CD & Observability: Before deploying a new embedding model or LLM to production, how do you automatically evaluate the system? Specify the exact metrics (e.g., via DeepEval or Ragas) you would track for Faithfulness and Context Precision.

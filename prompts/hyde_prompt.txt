@@ -1,0 +1,83 @@
+================================================================================
+HyDE PROMPT — Hypothetical Document Embedding
+================================================================================
+
+PURPOSE:
+  Generate a hypothetical legal passage that WOULD answer the user's question,
+  then use its embedding for retrieval instead of the raw question embedding.
+  This bridges the vocabulary gap between casual user questions and formal
+  legal document language.
+
+WHEN USED:
+  Only for SIMPLE conceptual queries WITHOUT legal references.
+  Decision gate in: module3_crag_statemachine.py → classify_query() node
+
+  USE when:
+    - Query is conceptual without specific legal terminology
+    - User doesn't know the relevant article numbers or law names
+    - Example: "Can I deduct my home office expenses?"
+
+  DO NOT USE when:
+    - Query contains ECLI references (exact-ID path is better)
+    - Query contains Article/Artikel references (already precise)
+    - Query is a retry attempt (HyDE already tried, don't double-apply)
+    - Query is COMPLEX (decomposition is used instead)
+
+  Latency cost: ~300-500ms (LLM generation + embedding)
+  Only applied when the benefit outweighs the latency penalty.
+
+DESIGN NOTES:
+  - "accuracy of specific numbers is less important than using the right legal
+    terminology" — HyDE doesn't need to be factually correct. Its purpose is to
+    generate text that SOUNDS like a real legal passage, so the embedding is
+    closer to actual legal documents in vector space.
+  - Dutch output when the question is Dutch — the embedding model is multilingual
+    but performs best when query and passage are in the same language.
+  - The hypothetical text is used ONLY for embedding/retrieval. The actual answer
+    is generated from REAL retrieved passages, never from the HyDE text.
+
+================================================================================
+
+--- SYSTEM PROMPT ---
+
+You are a senior Dutch tax law expert. Given a tax question, write a short
+paragraph (3-5 sentences) that would appear in an official legal text or policy
+document answering this question. Include specific article numbers, legal terms,
+and provisions if you can infer them. Write in Dutch if the question is in Dutch.
+
+IMPORTANT: This is a hypothetical answer used for retrieval — accuracy of specific
+numbers is less important than using the right legal terminology and structure.
+
+
+--- USER PROMPT ---
+
+{query}
+
+
+--- EXAMPLE INPUT/OUTPUT ---
+
+Input:  "Can I deduct my home office expenses?"
+
+Output: "Op grond van artikel 3.17 Wet IB 2001 zijn kosten voor een werkruimte
+         in de eigen woning aftrekbaar indien de werkruimte een naar verkeersopvatting
+         zelfstandig gedeelte van de woning vormt en de belastingplichtige in die
+         werkruimte ten minste 70% van zijn inkomen verdient. De aftrekbaarheid
+         is beperkt tot de werkelijk gemaakte kosten verminderd met het
+         huurwaardeforfait."
+
+Why this works:
+  The raw question "Can I deduct my home office expenses?" contains no Dutch
+  legal terms. Its embedding would be far from the actual legal passages.
+
+  The HyDE text contains: "artikel 3.17", "Wet IB 2001", "werkruimte",
+  "eigen woning", "aftrekbaar", "huurwaardeforfait" — all terms that appear
+  in the real legal text. Its embedding is much closer to the actual article
+  in vector space, improving retrieval recall.
+
+Input:  "Wat zijn de regels voor schenking aan kinderen?"
+
+Output: "Ingevolge artikel 33 van de Successiewet 1956 geldt voor schenkingen
+         van ouders aan kinderen een jaarlijkse vrijstelling. Voor het
+         kalenderjaar 2024 bedraagt de reguliere vrijstelling 6.035 euro per
+         kind. Daarnaast bestaat op grond van artikel 33a een eenmalig verhoogde
+         vrijstelling van 28.947 euro voor kinderen tussen 18 en 40 jaar."

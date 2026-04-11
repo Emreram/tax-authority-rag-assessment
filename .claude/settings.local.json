@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l \"c:/Users/emres/Desktop/assesmentemre/pseudocode/\"*.py \"c:/Users/emres/Desktop/assesmentemre/schemas/\"*.json \"c:/Users/emres/Desktop/assesmentemre/eval/\"*.md \"c:/Users/emres/Desktop/assesmentemre/diagrams/\"*.md)",
+      "Bash(wc -l c:/Users/emres/Desktop/assesmentemre/drafts/*.md c:/Users/emres/Desktop/assesmentemre/pseudocode/*.py c:/Users/emres/Desktop/assesmentemre/diagrams/*.md c:/Users/emres/Desktop/assesmentemre/schemas/*.json c:/Users/emres/Desktop/assesmentemre/prompts/*.txt c:/Users/emres/Desktop/assesmentemre/eval/*.md c:/Users/emres/Desktop/assesmentemre/notes/*.md c:/Users/emres/Desktop/assesmentemre/tools_and_technologies.txt)"
+    ]
+  }
+}

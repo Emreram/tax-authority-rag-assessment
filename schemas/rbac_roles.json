@@ -1,0 +1,204 @@
+{
+  "_design_notes": {
+    "purpose": "Role-Based Access Control (RBAC) configuration for the Tax Authority RAG system. Defines 4 security tiers mapped to OpenSearch Document-Level Security (DLS) roles.",
+    "enforcement_point": "PRE-RETRIEVAL. DLS filters are applied BEFORE any search scoring occurs. Classified documents are excluded from the search space entirely — they never appear in BM25 rankings, kNN results, or RRF fusion. This prevents information leakage through ranking distortion, result count variance, and timing side-channels.",
+    "why_not_post_retrieval": "Post-retrieval filtering is mathematically unsafe. If top-k=40 and 10 results are CLASSIFIED_FIOD, post-filtering returns 30 results. The user can infer existence of classified docs from: (1) result count < k, (2) ranking gaps, (3) response time variance. Pre-retrieval filtering eliminates these side-channels because classified docs are never candidates.",
+    "integration": "Roles are assigned via the organization's Identity Provider (Active Directory / OIDC). The API gateway passes the user's JWT token to OpenSearch, which resolves the DLS role and applies the filter query automatically."
+  },
+
+  "security_tiers": {
+    "PUBLIC": {
+      "description": "Publicly available legal texts, published legislation, published case law, general tax information. Accessible to all users including external-facing systems if applicable.",
+      "example_content": [
+        "Published legislation on wetten.overheid.nl",
+        "Published court rulings on rechtspraak.nl",
+        "General tax rate tables",
+        "Public tax guides and FAQs"
+      ]
+    },
+    "INTERNAL": {
+      "description": "Internal operational documents accessible to all tax authority employees. Includes policy guidelines, operational manuals, e-learning materials, and internal memos.",
+      "example_content": [
+        "Internal policy handbooks (Handboek Invordering)",
+        "Operational procedure manuals",
+        "E-learning training modules",
+        "Internal memos and circulars"
+      ]
+    },
+    "RESTRICTED": {
+      "description": "Sensitive documents accessible only to senior tax inspectors and legal counsel. Includes detailed audit methodologies, advanced legal interpretations, and sensitive policy guidance.",
+      "example_content": [
+        "Advanced audit methodologies",
+        "Legal counsel opinions on complex cases",
+        "Sensitive policy interpretations",
+        "Pre-publication draft regulations"
+      ]
+    },
+    "CLASSIFIED_FIOD": {
+      "description": "Highly classified fraud investigation documents. Accessible ONLY to FIOD (Fiscale Inlichtingen- en Opsporingsdienst) personnel. Includes investigation techniques, suspect profiles, intelligence reports, and ongoing case materials.",
+      "example_content": [
+        "Fraud investigation methodologies",
+        "Intelligence reports",
+        "Ongoing investigation case files",
+        "Suspect analysis documents",
+        "Interagency cooperation protocols"
+      ]
+    }
+  },
+
+  "opensearch_roles": {
+
+    "role_public_user": {
+      "_comment": "External or minimal-access user. Can only see PUBLIC documents.",
+      "cluster_permissions": [],
+      "index_permissions": [
+        {
+          "index_patterns": ["tax_authority_rag_chunks"],
+          "allowed_actions": ["read", "search"],
+          "dls": "{\"bool\":{\"must\":[{\"term\":{\"security_classification\":\"PUBLIC\"}}]}}",
+          "fls": [],
+          "masked_fields": []
+        }
+      ]
+    },
+
+    "role_helpdesk": {
+      "_comment": "Helpdesk staff. Can see PUBLIC and INTERNAL documents. CANNOT see RESTRICTED or CLASSIFIED_FIOD. This is the role mentioned in the assessment: 'A helpdesk employee must not be able to retrieve answers based on classified FIOD documents.'",
+      "cluster_permissions": [],
+      "index_permissions": [
+        {
+          "index_patterns": ["tax_authority_rag_chunks"],
+          "allowed_actions": ["read", "search"],
+          "dls": "{\"bool\":{\"must_not\":[{\"terms\":{\"security_classification\":[\"RESTRICTED\",\"CLASSIFIED_FIOD\"]}}]}}",
+          "fls": [],
+          "masked_fields": []
+        }
+      ]
+    },
+
+    "role_tax_inspector": {
+      "_comment": "Tax inspectors and senior staff. Can see PUBLIC, INTERNAL, and RESTRICTED documents. CANNOT see CLASSIFIED_FIOD.",
+      "cluster_permissions": [],
+      "index_permissions": [
+        {
+          "index_patterns": ["tax_authority_rag_chunks"],
+          "allowed_actions": ["read", "search"],
+          "dls": "{\"bool\":{\"must_not\":[{\"term\":{\"security_classification\":\"CLASSIFIED_FIOD\"}}]}}",
+          "fls": [],
+          "masked_fields": []
+        }
+      ]
+    },
+
+    "role_legal_counsel": {
+      "_comment": "Legal counsel. Same access as tax inspectors: PUBLIC, INTERNAL, RESTRICTED. No FIOD access unless dual-roled.",
+      "cluster_permissions": [],
+      "index_permissions": [
+        {
+          "index_patterns": ["tax_authority_rag_chunks"],
+          "allowed_actions": ["read", "search"],
+          "dls": "{\"bool\":{\"must_not\":[{\"term\":{\"security_classification\":\"CLASSIFIED_FIOD\"}}]}}",
+          "fls": [],
+          "masked_fields": []
+        }
+      ]
+    },
+
+    "role_fiod_investigator": {
+      "_comment": "FIOD fraud investigation personnel. Full access to all tiers including CLASSIFIED_FIOD. The only role that can retrieve classified investigation documents.",
+      "cluster_permissions": [],
+      "index_permissions": [
+        {
+          "index_patterns": ["tax_authority_rag_chunks"],
+          "allowed_actions": ["read", "search"],
+          "dls": "",
+          "fls": [],
+          "masked_fields": []
+        }
+      ],
+      "_note": "Empty DLS string = no document-level restriction = full access to all security classifications."
+    },
+
+    "role_ingestion_service": {
+      "_comment": "Service account for the ingestion pipeline. Write access to index documents. No search access needed (principle of least privilege).",
+      "cluster_permissions": [],
+      "index_permissions": [
+        {
+          "index_patterns": ["tax_authority_rag_chunks"],
+          "allowed_actions": ["crud", "create_index", "manage"],
+          "dls": "",
+          "fls": [],
+          "masked_fields": []
+        }
+      ]
+    }
+  },
+
+  "role_to_tier_matrix": {
+    "_comment": "Quick reference: which tiers each role can access.",
+    "headers": ["Role", "PUBLIC", "INTERNAL", "RESTRICTED", "CLASSIFIED_FIOD"],
+    "rows": [
+      ["role_public_user",       "YES", "NO",  "NO",  "NO"],
+      ["role_helpdesk",          "YES", "YES", "NO",  "NO"],
+      ["role_tax_inspector",     "YES", "YES", "YES", "NO"],
+      ["role_legal_counsel",     "YES", "YES", "YES", "NO"],
+      ["role_fiod_investigator", "YES", "YES", "YES", "YES"],
+      ["role_ingestion_service", "N/A (write-only, no search access)", "", "", ""]
+    ]
+  },
+
+  "role_mapping": {
+    "_comment": "Maps OpenSearch roles to Identity Provider groups. The organization's Active Directory / OIDC IdP assigns users to groups; OpenSearch role mapping translates groups to DLS roles.",
+    "mappings": [
+      {
+        "opensearch_role": "role_helpdesk",
+        "idp_groups": ["TAX_HELPDESK", "TAX_SERVICE_DESK"],
+        "description": "All helpdesk and service desk employees"
+      },
+      {
+        "opensearch_role": "role_tax_inspector",
+        "idp_groups": ["TAX_INSPECTORS", "TAX_SENIOR_INSPECTORS"],
+        "description": "All tax inspector levels"
+      },
+      {
+        "opensearch_role": "role_legal_counsel",
+        "idp_groups": ["TAX_LEGAL", "TAX_LEGAL_COUNSEL"],
+        "description": "Legal department staff"
+      },
+      {
+        "opensearch_role": "role_fiod_investigator",
+        "idp_groups": ["FIOD_INVESTIGATORS", "FIOD_ANALYSTS"],
+        "description": "FIOD fraud investigation personnel only"
+      }
+    ]
+  },
+
+  "mathematical_proof_pre_retrieval": {
+    "_comment": "Formal argument for why RBAC filtering MUST occur pre-retrieval, not post-retrieval.",
+    "scenario": "Helpdesk user queries 'transfer pricing investigation procedures'. Database contains relevant CLASSIFIED_FIOD documents.",
+    "post_retrieval_failure_modes": [
+      {
+        "mode": "Result count leakage",
+        "explanation": "top-k=40 retrieval returns 40 results. 12 are CLASSIFIED_FIOD. Post-filtering returns 28. User observes 28 < 40 and infers: 'There are 12 classified documents about my query that I cannot see.' This leaks the EXISTENCE of classified investigation material on this topic.",
+        "formula": "P(leak) = P(classified_docs ∈ top-k) = 1 - (1 - c/N)^k, where c = classified doc count, N = total docs, k = retrieval depth. For even modest c, P(leak) → 1."
+      },
+      {
+        "mode": "Ranking distortion",
+        "explanation": "Dense retrieval computes similarity scores against ALL documents including classified ones. The relative ranking of non-classified docs is influenced by the presence of classified docs in the scoring pool. Different queries about similar topics will produce different ranking patterns depending on whether classified docs exist, creating an information side-channel."
+      },
+      {
+        "mode": "Timing side-channel",
+        "explanation": "Post-filtering adds processing time proportional to the number of filtered documents. A query that triggers filtering of 50 classified docs takes measurably longer than a query with 0 classified docs. The user can infer the existence and rough quantity of classified material from response time variance."
+      }
+    ],
+    "pre_retrieval_guarantee": "With pre-retrieval DLS filtering, classified documents are excluded from the search index view BEFORE any scoring, ranking, or retrieval occurs. The search space is mathematically restricted: S_user = S_total \\ S_classified. The user's query operates on S_user only. No information about S_classified can leak because the search algorithm never sees those documents. Result count is always exactly k (assuming k non-classified docs exist). Ranking is computed only over permitted documents. Timing is independent of classified document count."
+  },
+
+  "cache_partitioning": {
+    "_comment": "The semantic cache (Redis) MUST be partitioned by security tier to prevent cross-tier cache poisoning.",
+    "strategy": "Cache keys include the user's maximum security tier. A response cached from a FIOD-tier query (which may include classified context) is NEVER served to a helpdesk-tier user.",
+    "key_format": "cache:{security_tier}:{query_embedding_hash}",
+    "example": "cache:INTERNAL:a3f8b2c1... → cached response using only PUBLIC + INTERNAL documents",
+    "rule": "A cache lookup for tier T only searches cache entries with tier <= T. A helpdesk user (INTERNAL tier) can hit cache entries tagged INTERNAL or PUBLIC, but never RESTRICTED or CLASSIFIED_FIOD."
+  }
+}

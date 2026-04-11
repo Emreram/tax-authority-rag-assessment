@@ -1,0 +1,319 @@
+{
+  "_design_notes": {
+    "purpose": "Complete OpenSearch index mapping for the Tax Authority RAG system. Supports hybrid search (BM25 + k-NN), document-level security (DLS), temporal versioning, and exact-ID retrieval shortcuts.",
+    "scale": "Designed for ~20M chunks (500K docs × ~40 chunks/doc). HNSW params and quantization configured to prevent OOM at this scale.",
+    "memory_estimate": "20M vectors × 1024 dim × 4 bytes (fp32) = ~81.9 GB raw. With SQ8 quantization: ~20.5 GB. With HNSW graph overhead (~1.5x): ~30.7 GB. Fits in a 3-node cluster with 32GB RAM each.",
+    "index_name": "tax_authority_rag_chunks"
+  },
+
+  "settings": {
+    "index": {
+      "number_of_shards": 6,
+      "number_of_replicas": 1,
+      "refresh_interval": "30s",
+
+      "knn": true,
+      "knn.algo_param.ef_search": 128,
+
+      "analysis": {
+        "analyzer": {
+          "dutch_legal_analyzer": {
+            "type": "custom",
+            "tokenizer": "standard",
+            "filter": [
+              "lowercase",
+              "dutch_stop",
+              "dutch_stemmer",
+              "asciifolding"
+            ],
+            "char_filter": ["legal_normalization"]
+          },
+          "exact_match_analyzer": {
+            "type": "custom",
+            "tokenizer": "keyword",
+            "filter": ["lowercase", "trim"]
+          }
+        },
+        "filter": {
+          "dutch_stop": {
+            "type": "stop",
+            "stopwords": "_dutch_"
+          },
+          "dutch_stemmer": {
+            "type": "stemmer",
+            "language": "dutch"
+          }
+        },
+        "char_filter": {
+          "legal_normalization": {
+            "type": "pattern_replace",
+            "pattern": "\\s+",
+            "replacement": " "
+          }
+        }
+      }
+    },
+
+    "_shard_notes": "6 shards for 20M docs allows ~3.3M chunks per shard. OpenSearch recommends 10-50GB per shard. At ~4KB per chunk doc, each shard is ~13.3GB. 1 replica for HA. Increase to 2 replicas for read-heavy production workload."
+  },
+
+  "mappings": {
+    "properties": {
+
+      "chunk_id": {
+        "type": "keyword",
+        "doc_values": true,
+        "_comment": "Deterministic chunk identifier. Used for deduplication (upsert on re-index) and citation validation (post-generation check that cited chunk_ids exist in retrieved context)."
+      },
+
+      "doc_id": {
+        "type": "keyword",
+        "doc_values": true,
+        "_comment": "Document-level identifier. Indexed as keyword for exact filtering. Used in cache invalidation: when doc is re-indexed, invalidate all cache entries referencing this doc_id."
+      },
+
+      "doc_type": {
+        "type": "keyword",
+        "_comment": "LEGISLATION | CASE_LAW | POLICY | ELEARNING. Used for faceted filtering and document-type-specific retrieval strategies."
+      },
+
+      "title": {
+        "type": "text",
+        "analyzer": "dutch_legal_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 512
+          }
+        },
+        "_comment": "Full-text searchable with Dutch legal analyzer. Keyword sub-field for exact aggregations."
+      },
+
+      "chunk_text": {
+        "type": "text",
+        "analyzer": "dutch_legal_analyzer",
+        "_comment": "The actual chunk content. Indexed for BM25 full-text search using Dutch legal analyzer (stemming, stop words). This is the primary field for sparse retrieval."
+      },
+
+      "embedding": {
+        "type": "knn_vector",
+        "dimension": 1024,
+        "method": {
+          "name": "hnsw",
+          "space_type": "cosinesimil",
+          "engine": "nmslib",
+          "parameters": {
+            "m": 16,
+            "ef_construction": 256
+          }
+        },
+        "_comment": "Dense vector embedding from multilingual-e5-large (1024-dim). HNSW index with m=16 (16 bidirectional links per node, balances memory and recall), ef_construction=256 (high quality graph construction, one-time build cost). Space type: cosine similarity (normalized for E5 embeddings). Engine: nmslib (fastest for HNSW in OpenSearch). ef_search=128 is set at index level in settings.",
+        "_memory_note": "20M vectors × 1024 dim × 4 bytes = 81.9 GB (fp32). Apply SQ8 quantization to reduce to ~20.5 GB. See quantization config below."
+      },
+
+      "article_num": {
+        "type": "keyword",
+        "_comment": "Article number (e.g., '3.114', '67a'). Keyword for exact match. Used in exact-ID retrieval shortcut when query contains article reference patterns."
+      },
+
+      "paragraph_num": {
+        "type": "keyword",
+        "_comment": "Paragraph number within article."
+      },
+
+      "sub_paragraph": {
+        "type": "keyword",
+        "_comment": "Sub-paragraph identifier (e.g., 'a', 'i')."
+      },
+
+      "chapter": {
+        "type": "keyword",
+        "_comment": "Chapter identifier. Used for hierarchical filtering."
+      },
+
+      "section": {
+        "type": "keyword",
+        "_comment": "Section identifier within chapter."
+      },
+
+      "hierarchy_path": {
+        "type": "text",
+        "analyzer": "dutch_legal_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 1024
+          }
+        },
+        "_comment": "Full breadcrumb path. Text-analyzed for search, keyword sub-field for exact display in citations."
+      },
+
+      "effective_date": {
+        "type": "date",
+        "format": "yyyy-MM-dd",
+        "_comment": "Date this version became effective. Used in temporal filter: effective_date <= NOW. Critical for returning only current law by default."
+      },
+
+      "expiry_date": {
+        "type": "date",
+        "format": "yyyy-MM-dd",
+        "_comment": "Date this version was superseded. Null = currently active. Used in temporal filter: expiry_date IS NULL OR expiry_date > NOW."
+      },
+
+      "version": {
+        "type": "integer",
+        "_comment": "Document version number. Enables sorting by version to get the latest amendment."
+      },
+
+      "security_classification": {
+        "type": "keyword",
+        "_comment": "PUBLIC | INTERNAL | RESTRICTED | CLASSIFIED_FIOD. THIS IS THE CRITICAL RBAC FIELD. OpenSearch Document-Level Security (DLS) roles filter on this field BEFORE any scoring occurs. See rbac_roles.json for the DLS query definitions."
+      },
+
+      "source_url": {
+        "type": "keyword",
+        "index": false,
+        "_comment": "Stored but not indexed. Returned in search results for end-user source verification."
+      },
+
+      "parent_chunk_id": {
+        "type": "keyword",
+        "_comment": "Parent node in document hierarchy. Enables parent-child retrieval: fetch parent article when a paragraph chunk is retrieved."
+      },
+
+      "language": {
+        "type": "keyword",
+        "_comment": "nl | en | nl-en. Used for language-specific filtering if needed."
+      },
+
+      "ecli_id": {
+        "type": "keyword",
+        "_comment": "ECLI identifier for case law. Enables exact-ID retrieval shortcut: queries matching ECLI pattern (ECLI:NL:*) bypass vector search and use direct keyword filter on this field."
+      },
+
+      "amendment_refs": {
+        "type": "keyword",
+        "_comment": "Array of doc_ids this document references or is referenced by. Enables cross-reference expansion."
+      },
+
+      "chunk_sequence": {
+        "type": "integer",
+        "_comment": "Order within parent structural unit. Enables document reconstruction."
+      },
+
+      "token_count": {
+        "type": "integer",
+        "_comment": "Chunk token count. Used for analytics and monitoring chunk size distribution."
+      },
+
+      "ingestion_timestamp": {
+        "type": "date",
+        "format": "strict_date_time",
+        "_comment": "When this chunk was indexed. Used for cache invalidation tracking."
+      }
+    }
+  },
+
+  "_quantization_config": {
+    "_comment": "Apply AFTER initial indexing. Reduces memory footprint ~4x with <2% recall loss.",
+    "method": "OpenSearch disk-based vector search with Faiss SQ8 quantization",
+    "steps": [
+      "1. For new index, use faiss engine with SQ (scalar quantization) encoder instead of nmslib:",
+      {
+        "alternative_mapping_for_quantized_index": {
+          "embedding": {
+            "type": "knn_vector",
+            "dimension": 1024,
+            "method": {
+              "name": "hnsw",
+              "space_type": "innerproduct",
+              "engine": "faiss",
+              "parameters": {
+                "m": 16,
+                "ef_construction": 256,
+                "encoder": {
+                  "name": "sq",
+                  "parameters": {
+                    "type": "fp16"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "2. fp16 quantization: 1024 dim × 2 bytes = 2KB per vector (vs 4KB fp32). 20M vectors = ~40 GB.",
+      "3. For maximum compression, use 'type': 'sq8' (1 byte per dim): 20M × 1KB = ~20 GB.",
+      "4. Trade-off: fp16 has negligible recall loss. sq8 has ~1-2% recall loss but 4x memory savings.",
+      "5. Recommendation: Use fp16 for primary index. If memory-constrained, use sq8 with higher ef_search (192) to compensate."
+    ]
+  },
+
+  "_search_pipeline_config": {
+    "_comment": "OpenSearch search pipeline for hybrid search with RRF normalization.",
+    "pipeline_id": "tax_rag_hybrid_pipeline",
+    "description": "Combines BM25 and k-NN results using Reciprocal Rank Fusion (RRF).",
+    "request_processors": [],
+    "response_processors": [
+      {
+        "normalization-processor": {
+          "normalization": {
+            "technique": "min_max"
+          },
+          "combination": {
+            "technique": "arithmetic_mean",
+            "parameters": {
+              "weights": [0.4, 0.6]
+            }
+          }
+        }
+      }
+    ],
+    "_rrf_alternative": {
+      "_comment": "OpenSearch 2.15+ supports RRF natively. Preferred over score normalization because BM25 and cosine scores have different distributions.",
+      "combination": {
+        "technique": "rrf",
+        "parameters": {
+          "rank_constant": 60
+        }
+      }
+    },
+    "_recommendation": "Use RRF (rank_constant=60) if on OpenSearch 2.15+. Fall back to weighted arithmetic_mean with weights [0.4 BM25, 0.6 kNN] on older versions."
+  },
+
+  "_temporal_filter_template": {
+    "_comment": "Default query filter to return only currently-effective legal provisions. Applied to every query unless the user explicitly requests historical data.",
+    "bool": {
+      "must": [
+        {
+          "range": {
+            "effective_date": {
+              "lte": "now/d"
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "bool": {
+            "must_not": [
+              {
+                "exists": {
+                  "field": "expiry_date"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "range": {
+            "expiry_date": {
+              "gt": "now/d"
+            }
+          }
+        }
+      ],
+      "minimum_should_match": 1
+    }
+  }
+}
