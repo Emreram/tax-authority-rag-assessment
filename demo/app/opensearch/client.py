@@ -1,4 +1,4 @@
-from opensearchpy import OpenSearch, RequestsHttpConnection
+from opensearchpy import OpenSearch
 from app.config import get_settings
 import structlog
 
@@ -12,7 +12,6 @@ def get_opensearch_client() -> OpenSearch:
         http_compress=True,
         use_ssl=False,
         verify_certs=False,
-        connection_class=RequestsHttpConnection,
         timeout=30,
         max_retries=3,
         retry_on_timeout=True,

@@ -1,5 +1,8 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from redis import Redis
 from app.config import get_settings
 from app.opensearch.client import get_opensearch_client
@@ -97,11 +100,9 @@ app.include_router(query.router, prefix="/v1", tags=["Query"])
 app.include_router(health.router, tags=["Health"])
 app.include_router(cache.router, prefix="/v1", tags=["Cache"])
 
+STATIC_DIR = Path(__file__).parent / "static"
+
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return {
-        "message": "Dutch Tax Authority RAG Demo",
-        "docs": "/docs",
-        "health": "/health/detailed",
-    }
+    return FileResponse(STATIC_DIR / "index.html")

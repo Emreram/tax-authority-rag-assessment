@@ -22,8 +22,8 @@ SEED_DATA_PATH = Path("/app/seed_data/chunks.json")
 def wait_for_opensearch(client: OpenSearch, retries: int = 30, delay: int = 5) -> None:
     for i in range(retries):
         try:
-            health = client.cluster.health(wait_for_status="yellow", timeout="10s")
-            log.info("opensearch_ready", status=health["status"])
+            info = client.info()
+            log.info("opensearch_ready", version=info["version"]["number"])
             return
         except Exception as e:
             log.info("opensearch_waiting", attempt=i + 1, error=str(e))

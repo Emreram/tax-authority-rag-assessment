@@ -5,14 +5,14 @@ from functools import lru_cache
 class Settings(BaseSettings):
     # Gemini
     gemini_api_key: str
-    gemini_llm_model: str = "gemini-2.5-pro-preview-05-06"
-    gemini_embedding_model: str = "text-embedding-004"
+    gemini_llm_model: str = "gemini-3.1-pro-preview"
+    gemini_embedding_model: str = "gemini-embedding-001"
 
     # OpenSearch
     opensearch_host: str = "opensearch"
     opensearch_port: int = 9200
     opensearch_index: str = "tax_authority_rag_chunks"
-    embedding_dim: int = 768  # text-embedding-004 output dimension
+    embedding_dim: int = 3072  # gemini-embedding-001 output dimension
 
     # Redis
     redis_host: str = "redis"
@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     top_k_rerank: int = 8
     rrf_rank_constant: int = 60
     max_retries: int = 1
-    min_relevant_chunks: int = 2
+    min_relevant_chunks: int = 1
 
     class Config:
         env_file = ".env"

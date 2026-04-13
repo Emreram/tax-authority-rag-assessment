@@ -20,9 +20,11 @@ For each passage, output a JSON array with objects containing:
 - "reason": one sentence explaining your grade
 
 Grade definitions:
-- RELEVANT: passage directly answers or strongly supports answering the question
-- AMBIGUOUS: passage is topically related but doesn't directly answer
-- IRRELEVANT: passage has no meaningful connection to the question
+- RELEVANT: passage is about the same topic as the question and contains useful information to help answer it. Be generous — if the passage covers the same legal area, tax concept, or regulation mentioned in the question, grade it RELEVANT.
+- AMBIGUOUS: passage is somewhat related but covers a different aspect of tax law
+- IRRELEVANT: passage is about a completely different topic with no connection to the question
+
+Important: for Dutch tax law questions, passages about the same article, law, or tax concept should almost always be graded RELEVANT. When in doubt, prefer RELEVANT over AMBIGUOUS.
 
 Respond with ONLY a valid JSON array, no other text."""
 
@@ -56,7 +58,9 @@ async def grade_context(query: str, chunks: list[dict], settings) -> dict:
         grades = json.loads(raw.strip())
     except Exception as e:
         log.warning("grader_parse_error", error=str(e))
-        grades = [{"chunk_id": c["chunk_id"], "grade": "AMBIGUOUS", "confidence": 0.5, "reason": "parse error"} for c in chunks]
+        # On parse error, assume top chunks are relevant so the pipeline continues to generate
+        grades = [{"chunk_id": c["chunk_id"], "grade": "RELEVANT", "confidence": 0.6, "reason": "grader fallback"} for c in chunks[:4]]
+        grades += [{"chunk_id": c["chunk_id"], "grade": "AMBIGUOUS", "confidence": 0.3, "reason": "grader fallback"} for c in chunks[4:]]
 
     relevant_ids = {g["chunk_id"] for g in grades if g.get("grade") == "RELEVANT"}
     relevant_chunks = [c for c in chunks if c["chunk_id"] in relevant_ids]

@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRAG Pipeline — Dutch Tax Authority</title>
+<style>
+/* ─── Reset & Base ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0f1117;
+  --surface: #1a1d27;
+  --surface2: #222633;
+  --border: #2d3348;
+  --text: #e4e7f1;
+  --text-dim: #8b90a5;
+  --accent: #4f8ff7;
+  --accent-glow: rgba(79,143,247,0.15);
+  --green: #34d399;
+  --orange: #fb923c;
+  --red: #f87171;
+  --purple: #a78bfa;
+  --radius: 12px;
+  --font: 'Segoe UI', -apple-system, system-ui, sans-serif;
+  --mono: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', monospace;
+}
+html { font-size: 15px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── Animated Background ─── */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(79,143,247,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(167,139,250,0.04) 0%, transparent 50%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ─── Layout ─── */
+.app { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+/* ─── Header ─── */
+.header {
+  text-align: center;
+  padding: 40px 0 32px;
+  animation: fadeDown 0.6s ease;
+}
+.header-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  color: var(--accent);
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+}
+.header-badge .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+.header h1 { font-size: 2rem; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+.header h1 span { color: var(--accent); }
+.header p { color: var(--text-dim); font-size: 0.95rem; max-width: 600px; margin: 0 auto; }
+
+/* ─── State Machine Diagram ─── */
+.pipeline-diagram {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  padding: 20px 0; margin-bottom: 24px;
+  animation: fadeDown 0.8s ease;
+  flex-wrap: wrap;
+}
+.pipeline-node {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.75rem;
+  font-family: var(--mono);
+  color: var(--text-dim);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+.pipeline-node.active { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); box-shadow: 0 0 20px rgba(79,143,247,0.1); }
+.pipeline-node.done { border-color: var(--green); color: var(--green); background: rgba(52,211,153,0.08); }
+.pipeline-node.refused { border-color: var(--red); color: var(--red); background: rgba(248,113,113,0.08); }
+.pipeline-arrow { color: var(--text-dim); font-size: 0.7rem; opacity: 0.4; }
+
+/* ─── Main Grid ─── */
+.main-grid { display: grid; grid-template-columns: 420px 1fr; gap: 24px; }
+@media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+/* ─── Cards ─── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  animation: fadeUp 0.5s ease;
+}
+.card-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.card-title svg { width: 16px; height: 16px; opacity: 0.6; }
+
+/* ─── Query Panel ─── */
+.query-panel { position: sticky; top: 24px; }
+.input-group { margin-bottom: 16px; }
+.input-group label { display: block; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 6px; font-weight: 500; }
+.query-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.95rem;
+  font-family: var(--font);
+  resize: vertical; min-height: 80px;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.query-input:focus { border-color: var(--accent); }
+.query-input::placeholder { color: var(--text-dim); opacity: 0.5; }
+
+/* ─── Tier Selector ─── */
+.tier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tier-btn {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+  font-family: var(--font);
+}
+.tier-btn:hover { border-color: var(--accent); color: var(--text); }
+.tier-btn.selected { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+.tier-btn .tier-label { display: block; font-weight: 600; }
+.tier-btn .tier-desc { display: block; font-size: 0.68rem; color: var(--text-dim); margin-top: 2px; opacity: 0.7; }
+
+/* ─── Submit Button ─── */
+.submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: var(--accent);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.submit-btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 4px 20px rgba(79,143,247,0.3); }
+.submit-btn:active { transform: translateY(0); }
+.submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
+.submit-btn.loading { background: var(--surface2); border: 1px solid var(--border); color: var(--text-dim); }
+
+/* ─── Example Queries ─── */
+.examples { margin-top: 20px; }
+.examples-title { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+.example-btn {
+  display: block; width: 100%;
+  text-align: left;
+  background: var(--surface2);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.example-btn:hover { border-color: var(--accent); background: var(--accent-glow); }
+.example-btn .example-tier {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.example-tier.PUBLIC { background: rgba(52,211,153,0.15); color: var(--green); }
+.example-tier.INTERNAL { background: rgba(79,143,247,0.15); color: var(--accent); }
+.example-tier.RESTRICTED { background: rgba(251,146,60,0.15); color: var(--orange); }
+.example-tier.CLASSIFIED_FIOD { background: rgba(248,113,113,0.15); color: var(--red); }
+
+/* ─── Results Panel ─── */
+.results-panel { min-height: 400px; }
+.results-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  height: 400px; color: var(--text-dim); text-align: center;
+}
+.results-empty svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.3; }
+.results-empty p { font-size: 0.9rem; }
+
+/* ─── Response Card ─── */
+.response-section { margin-bottom: 20px; animation: fadeUp 0.4s ease; }
+.response-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+}
+.source-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.source-badge.pipeline { background: rgba(79,143,247,0.15); color: var(--accent); }
+.source-badge.cache { background: rgba(52,211,153,0.15); color: var(--green); }
+.timing-badge {
+  font-size: 0.75rem; color: var(--text-dim);
+  font-family: var(--mono);
+}
+
+.response-text {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 20px;
+  line-height: 1.7;
+  font-size: 0.92rem;
+  white-space: pre-wrap;
+  border-left: 3px solid var(--accent);
+}
+
+/* ─── Citations ─── */
+.citations-grid { display: grid; gap: 8px; margin-top: 8px; }
+.citation-item {
+  background: var(--surface2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--purple);
+  font-size: 0.82rem;
+}
+.citation-item .cite-id { font-family: var(--mono); color: var(--purple); font-size: 0.75rem; font-weight: 600; }
+.citation-item .cite-title { color: var(--text); margin-top: 2px; }
+.citation-item .cite-path { color: var(--text-dim); font-size: 0.75rem; margin-top: 2px; }
+
+/* ─── Pipeline Trace ─── */
+.trace-container { margin-top: 8px; }
+.trace-step {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface2);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 0.82rem;
+  animation: fadeLeft 0.3s ease;
+}
+.trace-step .step-icon {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.trace-step .step-icon.ok { background: rgba(52,211,153,0.15); color: var(--green); }
+.trace-step .step-icon.warn { background: rgba(251,146,60,0.15); color: var(--orange); }
+.trace-step .step-icon.err { background: rgba(248,113,113,0.15); color: var(--red); }
+.trace-step .step-name { font-weight: 600; color: var(--text); min-width: 140px; font-family: var(--mono); font-size: 0.78rem; }
+.trace-step .step-result { color: var(--text-dim); flex: 1; }
+.trace-step .step-time { font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); }
+
+/* ─── Timing Bars ─── */
+.timing-bars { margin-top: 8px; }
+.timing-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.8rem; }
+.timing-row .timing-label { min-width: 100px; color: var(--text-dim); font-size: 0.75rem; }
+.timing-row .timing-bar-bg { flex: 1; height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.timing-row .timing-bar { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+.timing-row .timing-val { min-width: 60px; text-align: right; font-family: var(--mono); font-size: 0.72rem; color: var(--text-dim); }
+
+/* ─── Health Bar ─── */
+.health-bar {
+  display: flex; gap: 16px; justify-content: center;
+  padding: 12px 0;
+  margin-bottom: 16px;
+  animation: fadeDown 0.7s ease;
+}
+.health-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.78rem; color: var(--text-dim);
+}
+.health-dot { width: 8px; height: 8px; border-radius: 50%; }
+.health-dot.ok { background: var(--green); }
+.health-dot.err { background: var(--red); }
+
+/* ─── Animations ─── */
+@keyframes fadeDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeLeft { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.spinner { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; vertical-align: middle; margin-right: 8px; }
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-badge">
+      <span class="dot"></span>
+      CRAG Pipeline v1.0
+    </div>
+    <h1>Dutch Tax Authority <span>RAG</span></h1>
+    <p>Corrective Retrieval-Augmented Generation with OpenSearch hybrid search, RBAC security tiers, and citation-grounded responses.</p>
+  </div>
+
+  <!-- Health Bar -->
+  <div class="health-bar" id="healthBar">
+    <div class="health-item"><span class="health-dot" id="osHealth"></span> OpenSearch</div>
+    <div class="health-item"><span class="health-dot" id="redisHealth"></span> Redis</div>
+    <div class="health-item"><span class="health-dot" id="apiHealth"></span> API</div>
+    <div class="health-item" id="docCount" style="font-family:var(--mono); font-size:0.72rem;"></div>
+    <div class="health-item" id="cacheCount" style="font-family:var(--mono); font-size:0.72rem;"></div>
+  </div>
+
+  <!-- Pipeline Diagram -->
+  <div class="pipeline-diagram" id="pipelineDiagram">
+    <div class="pipeline-node" data-node="cache_lookup">cache</div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-node" data-node="classify_query">classify</div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-node" data-node="retrieve">retrieve</div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-node" data-node="grade_context">grade</div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-node" data-node="generate">generate</div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-node" data-node="validate_output">validate</div>
+    <span class="pipeline-arrow">&rarr;</span>
+    <div class="pipeline-node" data-node="respond">respond</div>
+    <span class="pipeline-arrow" style="margin-left:8px">|</span>
+    <div class="pipeline-node" data-node="refuse">refuse</div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="main-grid">
+
+    <!-- Left: Query Panel -->
+    <div class="query-panel">
+      <div class="card">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Query
+        </div>
+
+        <div class="input-group">
+          <label>Question (Dutch tax law)</label>
+          <textarea class="query-input" id="queryInput" placeholder="e.g. Wat is de arbeidskorting voor 2024?" rows="3"></textarea>
+        </div>
+
+        <div class="input-group">
+          <label>Security Tier</label>
+          <div class="tier-grid">
+            <button class="tier-btn selected" data-tier="PUBLIC" onclick="selectTier(this)">
+              <span class="tier-label">PUBLIC</span>
+              <span class="tier-desc">Legislation &amp; case law</span>
+            </button>
+            <button class="tier-btn" data-tier="INTERNAL" onclick="selectTier(this)">
+              <span class="tier-label">INTERNAL</span>
+              <span class="tier-desc">+ Internal policies</span>
+            </button>
+            <button class="tier-btn" data-tier="RESTRICTED" onclick="selectTier(this)">
+              <span class="tier-label">RESTRICTED</span>
+              <span class="tier-desc">+ Transfer pricing</span>
+            </button>
+            <button class="tier-btn" data-tier="CLASSIFIED_FIOD" onclick="selectTier(this)">
+              <span class="tier-label">CLASSIFIED_FIOD</span>
+              <span class="tier-desc">+ FIOD investigation</span>
+            </button>
+          </div>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="submitQuery()">
+          Run CRAG Pipeline
+        </button>
+      </div>
+
+      <!-- Example Queries -->
+      <div class="card examples" style="margin-top:16px;">
+        <div class="card-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+          Demo Queries
+        </div>
+        <button class="example-btn" onclick="loadExample('Wat is de arbeidskorting voor 2024?','PUBLIC')">
+          <span class="example-tier PUBLIC">PUBLIC</span> Wat is de arbeidskorting voor 2024?
+        </button>
+        <button class="example-btn" onclick="loadExample('Wat zijn de BTW-tarieven in Nederland?','PUBLIC')">
+          <span class="example-tier PUBLIC">PUBLIC</span> Wat zijn de BTW-tarieven in Nederland?
+        </button>
+        <button class="example-btn" onclick="loadExample('ECLI:NL:HR:2021:1523','PUBLIC')">
+          <span class="example-tier PUBLIC">PUBLIC</span> ECLI:NL:HR:2021:1523 <span style="opacity:0.5;font-size:0.72rem">(exact reference)</span>
+        </button>
+        <button class="example-btn" onclick="loadExample('Hoe werkt transfer pricing onderzoek?','INTERNAL')">
+          <span class="example-tier INTERNAL">INTERNAL</span> Hoe werkt transfer pricing onderzoek?
+        </button>
+        <button class="example-btn" onclick="loadExample('Hoe werkt transfer pricing onderzoek?','CLASSIFIED_FIOD')">
+          <span class="example-tier CLASSIFIED_FIOD">FIOD</span> Same query, higher clearance &rarr; more results
+        </button>
+        <button class="example-btn" onclick="loadExample('Who built the Eiffel Tower?','PUBLIC')">
+          <span class="example-tier PUBLIC">PUBLIC</span> Who built the Eiffel Tower? <span style="opacity:0.5;font-size:0.72rem">(refusal demo)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Right: Results Panel -->
+    <div class="results-panel" id="resultsPanel">
+      <div class="card">
+        <div class="results-empty" id="emptyState">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <p>Run a query to see the CRAG pipeline in action.<br><span style="font-size:0.8rem;opacity:0.6;">Click a demo query or type your own.</span></p>
+        </div>
+        <div id="resultsContent" style="display:none;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let selectedTier = 'PUBLIC';
+
+function selectTier(btn) {
+  document.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedTier = btn.dataset.tier;
+}
+
+function loadExample(query, tier) {
+  document.getElementById('queryInput').value = query;
+  document.querySelectorAll('.tier-btn').forEach(b => {
+    b.classList.toggle('selected', b.dataset.tier === tier);
+  });
+  selectedTier = tier;
+  submitQuery();
+}
+
+function resetDiagram() {
+  document.querySelectorAll('.pipeline-node').forEach(n => {
+    n.classList.remove('active', 'done', 'refused');
+  });
+}
+
+function animateDiagram(trace) {
+  resetDiagram();
+  trace.forEach((step, i) => {
+    setTimeout(() => {
+      const node = document.querySelector(`.pipeline-node[data-node="${step.node}"]`);
+      if (!node) return;
+      document.querySelectorAll('.pipeline-node.active').forEach(n => {
+        n.classList.remove('active');
+        n.classList.add(step.node === 'refuse' ? 'refused' : 'done');
+      });
+      node.classList.add('active');
+      if (i === trace.length - 1) {
+        setTimeout(() => {
+          node.classList.remove('active');
+          node.classList.add(step.node === 'refuse' ? 'refused' : 'done');
+        }, 400);
+      }
+    }, i * 300);
+  });
+}
+
+async function submitQuery() {
+  const query = document.getElementById('queryInput').value.trim();
+  if (!query) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.innerHTML = '<span class="spinner"></span> Running pipeline...';
+
+  resetDiagram();
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsContent').style.display = 'none';
+
+  try {
+    const start = performance.now();
+    const res = await fetch('/v1/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query, security_tier: selectedTier }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Pipeline error');
+    }
+
+    const data = await res.json();
+    const clientMs = (performance.now() - start).toFixed(0);
+
+    animateDiagram(data.pipeline_trace);
+    renderResults(data, clientMs);
+    fetchHealth();
+  } catch (err) {
+    document.getElementById('resultsContent').style.display = 'block';
+    document.getElementById('resultsContent').innerHTML = `
+      <div class="response-section">
+        <div class="response-text" style="border-left-color:var(--red); color:var(--red);">
+          Error: ${escapeHtml(err.message)}
+        </div>
+      </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.innerHTML = 'Run CRAG Pipeline';
+  }
+}
+
+function renderResults(data, clientMs) {
+  const content = document.getElementById('resultsContent');
+  content.style.display = 'block';
+
+  const isCache = data.source === 'cache';
+  const totalMs = data.timing.total_ms;
+
+  // Build timing bars
+  const timingEntries = [
+    { label: 'Classification', ms: data.timing.classification_ms, color: var_accent },
+    { label: 'Retrieval', ms: data.timing.retrieval_ms, color: '#34d399' },
+    { label: 'Grading', ms: data.timing.grading_ms, color: '#fb923c' },
+    { label: 'Generation', ms: data.timing.generation_ms, color: '#a78bfa' },
+    { label: 'Cache', ms: data.timing.cache_ms, color: '#facc15' },
+  ].filter(e => e.ms > 0);
+
+  const maxMs = Math.max(...timingEntries.map(e => e.ms), 1);
+
+  let html = `
+    <!-- Response -->
+    <div class="response-section">
+      <div class="response-header">
+        <span class="source-badge ${isCache ? 'cache' : 'pipeline'}">
+          ${isCache ? '&#x26A1; Cache Hit' : '&#x2699; Pipeline'}
+        </span>
+        <span class="timing-badge">${totalMs.toFixed(0)}ms server &middot; ${clientMs}ms e2e</span>
+        ${data.query_type ? `<span class="timing-badge" style="color:var(--purple)">${data.query_type}</span>` : ''}
+        ${data.grading_result ? `<span class="timing-badge" style="color:${data.grading_result === 'RELEVANT' ? 'var(--green)' : data.grading_result === 'IRRELEVANT' ? 'var(--red)' : 'var(--orange)'}">${data.grading_result}</span>` : ''}
+      </div>
+      <div class="response-text">${escapeHtml(data.response)}</div>
+    </div>`;
+
+  // Citations
+  if (data.citations && data.citations.length > 0) {
+    html += `<div class="response-section">
+      <div class="card-title" style="margin-top:4px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        Citations (${data.citations.length})
+      </div>
+      <div class="citations-grid">
+        ${data.citations.map(c => `
+          <div class="citation-item">
+            <div class="cite-id">${escapeHtml(c.chunk_id)}</div>
+            <div class="cite-title">${escapeHtml(c.title)}</div>
+            <div class="cite-path">${escapeHtml(c.hierarchy_path)}${c.effective_date ? ' &middot; ' + c.effective_date : ''}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }
+
+  // Pipeline Trace
+  html += `<div class="response-section">
+    <div class="card-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+      Pipeline Trace
+    </div>
+    <div class="trace-container">
+      ${data.pipeline_trace.map((step, i) => {
+        const iconClass = step.result === 'IRRELEVANT' || step.result === 'INVALID' || step.node === 'refuse' ? 'err'
+          : step.result === 'AMBIGUOUS' ? 'warn' : 'ok';
+        return `<div class="trace-step" style="animation-delay:${i * 80}ms">
+          <div class="step-icon ${iconClass}">${i + 1}</div>
+          <div class="step-name">${step.node}</div>
+          <div class="step-result">${escapeHtml(step.result || '')} ${step.detail ? '<span style="opacity:0.5;font-size:0.75rem">' + escapeHtml(step.detail) + '</span>' : ''}</div>
+          <div class="step-time">${step.duration_ms.toFixed(0)}ms</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`;
+
+  // Timing Bars
+  if (timingEntries.length > 0) {
+    html += `<div class="response-section">
+      <div class="card-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        Timing Breakdown
+      </div>
+      <div class="timing-bars">
+        ${timingEntries.map(e => `
+          <div class="timing-row">
+            <span class="timing-label">${e.label}</span>
+            <div class="timing-bar-bg"><div class="timing-bar" style="width:${(e.ms / maxMs * 100).toFixed(1)}%; background:${e.color};"></div></div>
+            <span class="timing-val">${e.ms.toFixed(0)}ms</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  }
+
+  content.innerHTML = html;
+}
+
+const var_accent = '#4f8ff7';
+
+function escapeHtml(text) {
+  if (!text) return '';
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Health check
+async function fetchHealth() {
+  try {
+    const res = await fetch('/health/detailed');
+    const data = await res.json();
+    document.getElementById('osHealth').className = 'health-dot ' + (data.services?.opensearch?.status === 'connected' ? 'ok' : 'err');
+    document.getElementById('redisHealth').className = 'health-dot ' + (data.services?.redis?.status === 'connected' ? 'ok' : 'err');
+    document.getElementById('apiHealth').className = 'health-dot ok';
+    if (data.services?.opensearch?.index_doc_count !== undefined) {
+      document.getElementById('docCount').textContent = data.services.opensearch.index_doc_count + ' docs indexed';
+    }
+    if (data.services?.redis?.cache_entries !== undefined) {
+      document.getElementById('cacheCount').textContent = data.services.redis.cache_entries + ' cached';
+    }
+  } catch {
+    document.getElementById('apiHealth').className = 'health-dot err';
+  }
+}
+
+// Keyboard shortcut
+document.getElementById('queryInput').addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') submitQuery();
+});
+
+// Init
+fetchHealth();
+setInterval(fetchHealth, 30000);
+</script>
+</body>
+</html>
