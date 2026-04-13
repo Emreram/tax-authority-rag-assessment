@@ -14,6 +14,7 @@ a multi-agent AI workflow (ChatGPT 5.4, Claude Code with
 sub-agents, Hermes Agent), and gives a global overview of
 the architecture I designed.
 
+then watch the demo video (example of a ready to use enviroment) 
 
 MAIN WRITTEN SUBMISSION
 -----------------------
