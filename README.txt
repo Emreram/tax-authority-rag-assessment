@@ -16,6 +16,10 @@ the architecture I designed.
 
 then watch the demo video (example of a ready to use enviroment) 
 
+The pseudocode and written submission reference a multi-agent architecture
+Module 3 describes an agentic CRAG pipeline where the LLM can decide to rewrite queries, decompose complex questions, and route between states
+The grading gate and rewrite loop are the "agentic" parts the system corrects itself
+
 MAIN WRITTEN SUBMISSION
 -----------------------
 After the presentation, the full technical write-up is in:
