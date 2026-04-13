@@ -8,3 +8,5 @@ pyvenv.cfg
 get-pip.py
 build_pptx*.py
 *.docx
+demo/.env
+demo/opensearch-data/

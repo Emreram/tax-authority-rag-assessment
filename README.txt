@@ -58,6 +58,26 @@ Everything the submission references lives in this repo:
   requirements.txt  Python dependencies
 
 
+LIVE DEMO (Docker)
+------------------
+A working CRAG pipeline you can run locally:
+
+  cd demo
+  cp .env.example .env          # add your Gemini API key
+  docker-compose up --build
+
+Opens at: http://localhost:8000/docs
+
+Runs OpenSearch + Redis + FastAPI with the full CRAG state
+machine. Try the demo queries in demo/README.md to see:
+  - Citation-grounded answers with pipeline trace
+  - RBAC tiers (PUBLIC vs CLASSIFIED_FIOD access)
+  - Redis semantic cache (second call ~10ms)
+  - IRRELEVANT query refusal
+
+Requires: Docker Desktop + a Google Gemini API key.
+
+
 ORIGINAL ASSIGNMENT
 -------------------
   assesment.txt     The assessment brief as received
