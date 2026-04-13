@@ -2,7 +2,7 @@
   "_design_notes": {
     "purpose": "Complete OpenSearch index mapping for the Tax Authority RAG system. Supports hybrid search (BM25 + k-NN), document-level security (DLS), temporal versioning, and exact-ID retrieval shortcuts.",
     "scale": "Designed for ~20M chunks (500K docs × ~40 chunks/doc). HNSW params and quantization configured to prevent OOM at this scale.",
-    "memory_estimate": "20M vectors × 1024 dim × 4 bytes (fp32) = ~81.9 GB raw. With SQ8 quantization: ~20.5 GB. With HNSW graph overhead (~1.5x): ~30.7 GB. Fits in a 3-node cluster with 32GB RAM each.",
+    "memory_estimate": "20M vectors × 1024 dim × 4 bytes (fp32) = ~81.9 GB raw. Primary: fp16 quantization → ~41 GB vectors + HNSW graph overhead (~1.5x) = ~61 GB total. Fits in a 3-node cluster with 32 GB RAM each. Fallback: SQ8 quantization → ~20.5 GB vectors + HNSW overhead = ~31 GB total (use when memory-constrained; ~1-2% recall loss).",
     "index_name": "tax_authority_rag_chunks"
   },
 
@@ -250,35 +250,40 @@
   },
 
   "_search_pipeline_config": {
-    "_comment": "OpenSearch search pipeline for hybrid search with RRF normalization.",
+    "_comment": "OpenSearch 2.15+ search pipeline. Primary: RRF (rank-based, robust to BM25/cosine score distribution mismatch). Fallback for OpenSearch < 2.15: weighted arithmetic_mean with min-max normalization.",
     "pipeline_id": "tax_rag_hybrid_pipeline",
-    "description": "Combines BM25 and k-NN results using Reciprocal Rank Fusion (RRF).",
+    "description": "Combines BM25 and k-NN results using Reciprocal Rank Fusion (RRF). Requires OpenSearch 2.15+.",
     "request_processors": [],
     "response_processors": [
       {
         "normalization-processor": {
-          "normalization": {
-            "technique": "min_max"
-          },
           "combination": {
-            "technique": "arithmetic_mean",
+            "technique": "rrf",
             "parameters": {
-              "weights": [0.4, 0.6]
+              "rank_constant": 60
             }
           }
         }
       }
     ],
-    "_rrf_alternative": {
-      "_comment": "OpenSearch 2.15+ supports RRF natively. Preferred over score normalization because BM25 and cosine scores have different distributions.",
-      "combination": {
-        "technique": "rrf",
-        "parameters": {
-          "rank_constant": 60
+    "_fallback_for_opensearch_pre_2_15": {
+      "_comment": "Use this fallback on OpenSearch < 2.15 which lacks native RRF support. min-max normalization + weighted arithmetic_mean approximates rank-based fusion but is sensitive to score distribution shifts.",
+      "response_processors": [
+        {
+          "normalization-processor": {
+            "normalization": {
+              "technique": "min_max"
+            },
+            "combination": {
+              "technique": "arithmetic_mean",
+              "parameters": {
+                "weights": [0.4, 0.6]
+              }
+            }
+          }
         }
-      }
-    },
-    "_recommendation": "Use RRF (rank_constant=60) if on OpenSearch 2.15+. Fall back to weighted arithmetic_mean with weights [0.4 BM25, 0.6 kNN] on older versions."
+      ]
+    }
   },
 
   "_temporal_filter_template": {

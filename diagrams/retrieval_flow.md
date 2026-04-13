@@ -327,5 +327,5 @@ matters.
 - Function signatures: [module2_retrieval.py](../pseudocode/module2_retrieval.py) — `hybrid_retrieve`, `exact_id_retrieve`, `rerank_chunks`, `_bm25_retrieve`, `_knn_retrieve`, `_rrf_fuse`, `embed_query`, `build_temporal_filter`
 - Top-k constants: `BM25_TOP_K = 20`, `KNN_TOP_K = 20`, `TOP_K_RETRIEVAL = 40`, `TOP_K_RERANK = 8` — match module3_crag_statemachine.py lines 68-69
 - RRF: `RRF_RANK_CONSTANT = 60` — matches OpenSearch native search pipeline config in [schemas/opensearch_index_mapping.json](../schemas/opensearch_index_mapping.json) `_search_pipeline_config`
-- Reranker model: `BAAI/bge-reranker-v2-m3` — listed in [tools_and_technologies.txt](../tools_and_technologies.txt)
+- Reranker model: `BAAI/bge-reranker-v2-m3` — listed in [tools_and_technologies.txt](../reference/tools_and_technologies.txt)
 - Embedding model: `intfloat/multilingual-e5-large` — same model used at ingestion time in [module1_ingestion.py](../pseudocode/module1_ingestion.py)

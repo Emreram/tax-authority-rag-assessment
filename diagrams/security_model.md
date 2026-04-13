@@ -372,5 +372,5 @@ have no reason to encounter filtered content.
 - Cache key format `cache:{security_tier}:{hash}`: [schemas/rbac_roles.json](../schemas/rbac_roles.json) `cache_partitioning.key_format` + [pseudocode/module4_cache.py](../pseudocode/module4_cache.py)
 - Tier hierarchy logic: `get_accessible_tiers()` in [module4_cache.py](../pseudocode/module4_cache.py)
 - IdP group → role mapping: [schemas/rbac_roles.json](../schemas/rbac_roles.json) `role_mapping.mappings`
-- Assumption A4 (IdP exists), A17 (security is first-class), A18 (audit trail): [notes/assumptions.md](../notes/assumptions.md)
+- Assumption A4 (IdP exists), A17 (security is first-class), A18 (audit trail): [reference/assumptions.md](../reference/assumptions.md)
 - DLS Bypass Rate = 0.0 gate: [eval/metrics_matrix.md](../eval/metrics_matrix.md) Section 4

@@ -1,0 +1,103 @@
+name: RAG Evaluation Gate
+
+# Runs on every PR and on pushes to the staging branch.
+# Stage 1 (retrieval gate) runs on all PRs.
+# Stage 2 (generation gate) runs only when merging to staging.
+# Canary and production monitoring are handled by the deployment pipeline (see docs/deployment.md).
+
+on:
+  pull_request:
+    branches: [main, staging]
+  push:
+    branches: [staging]
+
+env:
+  OPENSEARCH_HOST: ${{ secrets.OPENSEARCH_HOST }}
+  REDIS_URL: ${{ secrets.REDIS_URL }}
+  PYTHONPATH: ${{ github.workspace }}
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # STAGE 1 — Retrieval gate (runs on every PR)
+  # Blocks merge if Context Precision@8 < 0.85 or Context Recall < 0.80
+  # ─────────────────────────────────────────────────────────────
+  retrieval-gate:
+    name: Stage 1 — Retrieval Quality Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run retrieval evaluation on golden test set
+        run: |
+          python eval/run_retrieval_eval.py \
+            --golden-set eval/golden_test_set_spec.json \
+            --threshold-precision 0.85 \
+            --threshold-recall 0.80 \
+            --threshold-ndcg 0.75 \
+            --output eval/results/retrieval_gate_${{ github.sha }}.json
+
+      - name: Upload retrieval results
+        uses: actions/upload-artifact@v4
+        with:
+          name: retrieval-eval-${{ github.sha }}
+          path: eval/results/retrieval_gate_*.json
+
+  # ─────────────────────────────────────────────────────────────
+  # STAGE 2 — Generation gate (runs only on staging pushes)
+  # Blocks deploy if Faithfulness < 0.90 or Citation Accuracy < 1.0
+  # ─────────────────────────────────────────────────────────────
+  generation-gate:
+    name: Stage 2 — Generation Quality Gate
+    if: github.ref == 'refs/heads/staging'
+    needs: retrieval-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run end-to-end generation evaluation
+        run: |
+          python eval/run_generation_eval.py \
+            --golden-set eval/golden_test_set_spec.json \
+            --threshold-faithfulness 0.90 \
+            --threshold-answer-relevance 0.85 \
+            --threshold-citation-accuracy 1.0 \
+            --threshold-hallucination-rate 0.02 \
+            --output eval/results/generation_gate_${{ github.sha }}.json
+
+      - name: Run security gate (DLS bypass check)
+        run: |
+          python eval/run_security_eval.py \
+            --adversarial-set eval/golden_test_set_spec.json \
+            --threshold-dls-bypass 0.0 \
+            --threshold-cache-contamination 0.0
+
+      - name: Upload generation results
+        uses: actions/upload-artifact@v4
+        with:
+          name: generation-eval-${{ github.sha }}
+          path: eval/results/generation_gate_*.json
+
+# ─────────────────────────────────────────────────────────────
+# STAGES 3 & 4 — Canary + Production
+# Stage 3: 5% traffic canary for 2h; auto-rollback if TTFT p95 > 1500ms
+#           or refusal rate > 20% or Faithfulness drops > 5% week-over-week.
+# Stage 4: Full rollout + continuous monitoring via Prometheus/Grafana alerts.
+# These stages are triggered by the deployment pipeline, not this workflow.
+# See: docs/deployment.md — Canary Deployment section.
+# ─────────────────────────────────────────────────────────────

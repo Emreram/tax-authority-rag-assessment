@@ -93,7 +93,7 @@ catastrophic, not merely suboptimal.
 
 This choice aligns with Assumption A16 (prefer false negatives over false
 positives) and Assumption A14 (zero-hallucination tolerance) from
-[notes/assumptions.md](../notes/assumptions.md).
+[reference/assumptions.md](../reference/assumptions.md).
 
 **Why we do not use a score-dependent threshold**: a dynamic threshold (e.g., "0.97
 for rate queries, 0.90 for procedural queries") would require pre-classifying
@@ -548,8 +548,8 @@ Alert thresholds from [eval/metrics_matrix.md §6 Stage 4](../eval/metrics_matri
 | [eval/metrics_matrix.md](../eval/metrics_matrix.md) | Retrieval / generation / E2E / security metrics with thresholds and tools; CI/CD 4-stage pipeline; golden test set spec |
 | [diagrams/security_model.md](../diagrams/security_model.md) | Visual proof of pre-retrieval vs post-retrieval; cache partitioning diagram; three attack scenarios |
 | [diagrams/architecture_overview.md](../diagrams/architecture_overview.md) | Shows the cache placement (before the state machine) and the full component grid |
-| [notes/assumptions.md](../notes/assumptions.md) | A4 (existing IdP), A14 (zero hallucination), A16 (false negatives > false positives), A17 (security first-class), A18 (audit trails) |
+| [reference/assumptions.md](../reference/assumptions.md) | A4 (existing IdP), A14 (zero hallucination), A16 (false negatives > false positives), A17 (security first-class), A18 (audit trails) |
 
 **Ends Module 4.** The four modules together cover the full assessment scope.
-The `drafts/final_submission.md` file assembles them into a single document with
+The `drafts/final_submission_v2.md` file assembles them into a single document with
 front matter, inlined architecture overview, and appendices.

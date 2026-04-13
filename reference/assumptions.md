@@ -19,7 +19,7 @@
 | # | Assumption | Architectural Impact |
 |---|-----------|---------------------|
 | A5 | **Primary corpus language is Dutch**, with some English EU regulations and CJEU case law. | Use `multilingual-e5-large` for embeddings (not English-only models). BM25 analyzer uses Dutch stemming and stop words. |
-| A6 | **500,000 documents average ~40 chunks each**, yielding ~20 million total chunks. | Drives HNSW parameterization (m=16), quantization strategy (SQ8/fp16), shard count (6), and memory planning (~30-40GB for vector index). |
+| A6 | **500,000 documents average ~40 chunks each**, yielding ~20 million total chunks. | Drives HNSW parameterization (m=16), quantization strategy (fp16 primary ~61 GB total / SQ8 fallback ~31 GB), shard count (6), and memory planning. |
 | A7 | **Documents are ingested in batch** (nightly or on-change re-index), not real-time streaming. New legislation, updated policies, and new rulings are published on a known schedule. | Batch IngestionPipeline design. Deterministic chunk IDs enable upsert on re-index. No streaming architecture needed. |
 | A8 | **Legal documents follow the standard Dutch legislative structure**: Wet (Act) → Hoofdstuk (Chapter) → Afdeling (Section) → Artikel (Article) → Lid (Paragraph) → Sub (Sub-paragraph). | Structure-aware chunking parser uses these boundaries. Regex patterns target Dutch legal formatting conventions. |
 | A9 | **Case law uses ECLI identifiers** (European Case Law Identifier) as the standard reference system. Format: `ECLI:NL:{court}:{year}:{number}`. | Exact-ID retrieval shortcut: queries containing ECLI patterns bypass vector search and use direct keyword filtering. |

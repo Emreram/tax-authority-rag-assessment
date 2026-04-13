@@ -653,7 +653,7 @@ accurate errors.
 | [prompts/hyde_prompt.txt](../prompts/hyde_prompt.txt) | Standalone HyDE prompt with usage notes |
 | [prompts/decomposition_prompt.txt](../prompts/decomposition_prompt.txt) | Standalone decomposition + rewrite prompts |
 | [diagrams/crag_state_machine.md](../diagrams/crag_state_machine.md) | Visual state diagram with all 9 states, conditional edges, and three worked traces |
-| [notes/assumptions.md](../notes/assumptions.md) | A12 (exact citations), A13 (TTFT<1500ms), A14 (zero hallucination), A16 (prefer refusal) |
+| [reference/assumptions.md](../reference/assumptions.md) | A12 (exact citations), A13 (TTFT<1500ms), A14 (zero hallucination), A16 (prefer refusal) |
 
 **Ends Module 3.** Module 4 takes the state machine and the retrieval service and
 wraps them in production concerns: the semantic cache that sits *before* the state

@@ -24,7 +24,7 @@ Concretely, a recursive splitter applied to Wet IB 2001 produces chunks like:
 The chunk containing "bedraagt 5.532 euro" no longer contains "art. 3.114, eerste lid". The LLM receives a numerically-correct statement about the employment tax credit but has no evidence of which article of which law it comes from. Ask that LLM "cite your source" and it will do one of two things:
 
 1. Refuse (best case — but the user now receives no answer for a question the system *should* have answered).
-2. Hallucinate a plausible-looking citation (worst case — a fabricated legal reference in a Dutch tax authority response). This is exactly the failure mode Assumption [A14](../notes/assumptions.md) (zero-hallucination tolerance) and [A12](../notes/assumptions.md) (exact citations required) forbid.
+2. Hallucinate a plausible-looking citation (worst case — a fabricated legal reference in a Dutch tax authority response). This is exactly the failure mode Assumption [A14](../reference/assumptions.md) (zero-hallucination tolerance) and [A12](../reference/assumptions.md) (exact citations required) forbid.
 
 Structure-aware chunking prevents both failures by treating the legal hierarchy as the primary splitting signal and character count as a secondary constraint.
 
@@ -32,7 +32,7 @@ Structure-aware chunking prevents both failures by treating the legal hierarchy 
 
 ## 1.2 Chunking strategy — structure-aware parsing
 
-Dutch legal documents have an explicit hierarchy (Assumption [A8](../notes/assumptions.md)):
+Dutch legal documents have an explicit hierarchy (Assumption [A8](../reference/assumptions.md)):
 
 ```
   Wet (Act)
@@ -91,7 +91,7 @@ The schema is defined formally in [schemas/chunk_metadata.json](../schemas/chunk
 
 **The three fields that directly answer the assessment question**: `hierarchy_path`, `article_num`, and `paragraph_num`. The LLM sees them in the retrieved context and uses them to compose the citation token the generation prompt requires: `[Source: {chunk_id} | {hierarchy_path}]`. See [prompts/generator_system_prompt.txt](../prompts/generator_system_prompt.txt) for the exact prompt instruction that forces this.
 
-**Deterministic chunk IDs.** The `chunk_id` follows the format `{doc_id}::{structural_parts}::chunk{seq:03d}`. Identical input produces an identical chunk_id on re-ingestion, which means OpenSearch can **upsert** (update-or-insert) rather than create duplicates. This is critical for Assumption [A7](../notes/assumptions.md) (nightly batch re-index) — without deterministic IDs, the index would double in size on every re-run.
+**Deterministic chunk IDs.** The `chunk_id` follows the format `{doc_id}::{structural_parts}::chunk{seq:03d}`. Identical input produces an identical chunk_id on re-ingestion, which means OpenSearch can **upsert** (update-or-insert) rather than create duplicates. This is critical for Assumption [A7](../reference/assumptions.md) (nightly batch re-index) — without deterministic IDs, the index would double in size on every re-run.
 
 ---
 
@@ -197,7 +197,7 @@ The full `LegalDocumentChunker._parse_nodes()` loop also sets `NodeRelationship.
 
 ## 1.5 Vector database selection — why OpenSearch 2.15+
 
-The corpus is 500K documents × ~40 chunks each = ~20M chunks (Assumption [A6](../notes/assumptions.md)). At that scale, and under the sovereignty and RBAC constraints of Assumptions [A1](../notes/assumptions.md), [A2](../notes/assumptions.md), and [A17](../notes/assumptions.md), the vector DB choice is narrow. We select **OpenSearch 2.15+ with the k-NN plugin**.
+The corpus is 500K documents × ~40 chunks each = ~20M chunks (Assumption [A6](../reference/assumptions.md)). At that scale, and under the sovereignty and RBAC constraints of Assumptions [A1](../reference/assumptions.md), [A2](../reference/assumptions.md), and [A17](../reference/assumptions.md), the vector DB choice is narrow. We select **OpenSearch 2.15+ with the k-NN plugin**.
 
 **Decision matrix — rejected alternatives:**
 
@@ -214,7 +214,7 @@ The corpus is 500K documents × ~40 chunks each = ~20M chunks (Assumption [A6](.
 
 1. **Unified hybrid search in one engine.** BM25 (via Lucene) and dense k-NN (via the k-NN plugin with nmslib/faiss engines) share the same index, the same query DSL, the same filter pipeline. Retrieval is one call, not two.
 2. **Native Document-Level Security** via the OpenSearch Security Plugin. The DLS filter is applied *inside the search engine, before BM25 scoring and kNN distance computation*. This is the only way to prevent the information leakage modes that §1.7 outlines (and that [diagrams/security_model.md §5](../diagrams/security_model.md) proves formally).
-3. **Self-hostable.** Runs on-premises or in Azure Gov / AWS GovCloud. Satisfies [A1](../notes/assumptions.md) and [A2](../notes/assumptions.md).
+3. **Self-hostable.** Runs on-premises or in Azure Gov / AWS GovCloud. Satisfies [A1](../reference/assumptions.md) and [A2](../reference/assumptions.md).
 4. **Government battle-tested.** Already deployed in multiple EU public sector systems, well understood by security audit teams. Lower procurement friction than a newer engine.
 
 **Acknowledged tradeoff.** Pure-vector benchmark numbers for Qdrant and Milvus can be ~15–25% lower in p99 latency than OpenSearch at the same recall target. We accept this gap because it is measured in the tens of milliseconds (well within the 80 ms retrieval budget in [§6 of the architecture overview](../diagrams/architecture_overview.md)) and because the gains do not compensate for losing unified hybrid search and native DLS.
@@ -291,13 +291,13 @@ Spread across a 3-node cluster with 64 GB RAM each (headroom for OS cache, JVM h
 | **Dedicated coordinator nodes** | Separates search coordination from data holding | Three extra small nodes; negligible in a gov-cloud budget |
 | **`refresh_interval: 30s`** | Batch new segments every 30 s instead of 1 s default | Slight staleness in cache-miss paths during nightly re-index, but ingest throughput 10× higher |
 
-These together give a stable memory profile under the concurrent-user load described in Assumption [A10](../notes/assumptions.md) (200–500 simultaneous queries).
+These together give a stable memory profile under the concurrent-user load described in Assumption [A10](../reference/assumptions.md) (200–500 simultaneous queries).
 
 ---
 
 ## 1.8 Temporal versioning — the expired-law trap
 
-Legislation is amended. A 2022 version of article 3.114 differs from the 2024 version by several hundred euros in the arbeidskorting amount. If the index contains both and the retriever returns either, the system has a non-trivial probability of citing a repealed rate as current law. This is an Assumption [A14](../notes/assumptions.md) violation even without any "hallucination" in the LLM's own output — the failure is upstream.
+Legislation is amended. A 2022 version of article 3.114 differs from the 2024 version by several hundred euros in the arbeidskorting amount. If the index contains both and the retriever returns either, the system has a non-trivial probability of citing a repealed rate as current law. This is an Assumption [A14](../reference/assumptions.md) violation even without any "hallucination" in the LLM's own output — the failure is upstream.
 
 **Bi-temporal model.** Every chunk carries two dates:
 
@@ -326,7 +326,7 @@ Step 3 is critical: without cache invalidation, a cached answer referencing the 
 
 ## 1.9 Ingestion pipeline (offline path)
 
-The online query path and the offline ingestion path are fully separated. Ingestion runs as a nightly batch job (Assumption [A7](../notes/assumptions.md)) or on-demand when a document management system event signals a new publication. The pipeline is LlamaIndex's `IngestionPipeline` with these transformations:
+The online query path and the offline ingestion path are fully separated. Ingestion runs as a nightly batch job (Assumption [A7](../reference/assumptions.md)) or on-demand when a document management system event signals a new publication. The pipeline is LlamaIndex's `IngestionPipeline` with these transformations:
 
 ```
   Source Documents (PDF / HTML / XML from wetten.overheid.nl,
@@ -368,7 +368,7 @@ The online query path and the offline ingestion path are fully separated. Ingest
     - See module4_cache.py
 ```
 
-**Why `multilingual-e5-large`** (Assumption [A5](../notes/assumptions.md)): the corpus is primarily Dutch with some English EU regulations and CJEU case law. An English-only model (e5-large-v2, bge-base-en) would fail on Dutch legal jargon. The multilingual variant is trained on the mC4 / MIRACL / NusaX suite and produces aligned embeddings across Dutch, English, and German, which matches our corpus language mix. Same model is used at indexing time and query time — they share a vector space by construction, so the "passage:" / "query:" prefixes are the only asymmetry.
+**Why `multilingual-e5-large`** (Assumption [A5](../reference/assumptions.md)): the corpus is primarily Dutch with some English EU regulations and CJEU case law. An English-only model (e5-large-v2, bge-base-en) would fail on Dutch legal jargon. The multilingual variant is trained on the mC4 / MIRACL / NusaX suite and produces aligned embeddings across Dutch, English, and German, which matches our corpus language mix. Same model is used at indexing time and query time — they share a vector space by construction, so the "passage:" / "query:" prefixes are the only asymmetry.
 
 **Ingestion is the only write path** into the OpenSearch index. The query path in [Module 2](module2_draft.md) and [Module 3](module3_draft.md) is pure-read. This separation is what makes cache invalidation reliable: the callback fires exactly when a document's chunks change, and at no other time.
 
@@ -382,8 +382,8 @@ The online query path and the offline ingestion path are fully separated. Ingest
 | [schemas/opensearch_index_mapping.json](../schemas/opensearch_index_mapping.json) | Complete OpenSearch index mapping (mappings, settings, analyzers, HNSW, DLS hooks) |
 | [pseudocode/module1_ingestion.py](../pseudocode/module1_ingestion.py) | Full `LegalDocumentChunker`, `MetadataInheritanceManager`, `IngestionPipeline` |
 | [diagrams/architecture_overview.md §4](../diagrams/architecture_overview.md) | Ingestion pipeline diagram in system context |
-| [notes/assumptions.md](../notes/assumptions.md) | A5 (Dutch corpus), A6 (scale), A7 (batch), A8 (hierarchy), A12 (citations), A14 (zero-hallucination) |
-| [tools_and_technologies.txt](../tools_and_technologies.txt) | LlamaIndex, OpenSearch, multilingual-e5-large versions |
+| [reference/assumptions.md](../reference/assumptions.md) | A5 (Dutch corpus), A6 (scale), A7 (batch), A8 (hierarchy), A12 (citations), A14 (zero-hallucination) |
+| [tools_and_technologies.txt](../reference/tools_and_technologies.txt) | LlamaIndex, OpenSearch, multilingual-e5-large versions |
 
 ---
 

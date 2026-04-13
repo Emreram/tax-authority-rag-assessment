@@ -18,7 +18,7 @@ A naive retrieval design picks "vector search because it's modern" or "BM25 beca
 | **Conceptual / paraphrase** | "Can I write off my home office as a freelancer?" | Dense vectors (semantic match to Dutch `werkruimte` / `zelfstandigenaftrek`) | BM25 (no keyword overlap between the English question and Dutch legal jargon) |
 | **Mixed** | "What does article 3.114 say about the maximum arbeidskorting?" | Both — the article number anchors BM25, the concept guides kNN | A pure-vector approach collapses onto the concept and misses the specific article |
 
-A single-path retriever gives up 30–50% recall on whichever half of the distribution it is not optimized for. We do not get to choose one half; the helpdesk, legal counsel, and inspector personas (Assumption [A11](../notes/assumptions.md)) ask questions across this full range. The design has to handle both.
+A single-path retriever gives up 30–50% recall on whichever half of the distribution it is not optimized for. We do not get to choose one half; the helpdesk, legal counsel, and inspector personas (Assumption [A11](../reference/assumptions.md)) ask questions across this full range. The design has to handle both.
 
 ---
 
@@ -120,7 +120,7 @@ The top-40 from RRF is still too wide to hand directly to an 8K-token LLM contex
 
 **Why a cross-encoder** rather than re-using the bi-encoder (e5-large) with a second scoring pass? A bi-encoder computes `query_emb` and `chunk_emb` independently and compares them with cosine — the representations never see each other. A cross-encoder feeds `(query, chunk)` into a single transformer that attends across both sequences jointly. For reranking, joint attention gives substantially higher precision at the top of the list (published BEIR benchmarks show +5 to +10 points of NDCG@10). The cost is latency per pair — which is why we only use the cross-encoder after RRF has narrowed the pool to 40.
 
-**Why not Cohere Rerank v3.** Cohere offers a hosted reranker with strong benchmark numbers. It is disqualified by Assumption [A2](../notes/assumptions.md) (data sovereignty — tax data cannot leave national jurisdiction) and Assumption [A1](../notes/assumptions.md) (self-hosted requirement). `bge-reranker-v2-m3` is the best multilingual self-hosted option at the time of this submission.
+**Why not Cohere Rerank v3.** Cohere offers a hosted reranker with strong benchmark numbers. It is disqualified by Assumption [A2](../reference/assumptions.md) (data sovereignty — tax data cannot leave national jurisdiction) and Assumption [A1](../reference/assumptions.md) (self-hosted requirement). `bge-reranker-v2-m3` is the best multilingual self-hosted option at the time of this submission.
 
 **Model caching.** The reranker is loaded once per process and kept in GPU memory. Per-request, we only pay the inference cost (~200 ms for 40 pairs batched). Cold-start cost (~1.5 s for weight load + warm-up) is amortized over the full process lifetime.
 
@@ -229,7 +229,7 @@ Summed from §2.6 Stage E and reconciled against the TTFT budget in [diagrams/ar
 | Cross-encoder rerank | 200 ms | 187 ms |
 | **Total retrieval stage** | **315 ms** | **294 ms** |
 
-The retrieval stage consumes ~320 ms of the 1500 ms TTFT budget, leaving ~1180 ms for cache check (15 ms), grading (150 ms), LLM first token (800 ms), and buffer (~215 ms). The measured example lands ~20 ms under budget on each sub-stage — healthy headroom for network jitter and GC pauses (Assumption [A13](../notes/assumptions.md)).
+The retrieval stage consumes ~320 ms of the 1500 ms TTFT budget, leaving ~1180 ms for cache check (15 ms), grading (150 ms), LLM first token (800 ms), and buffer (~215 ms). The measured example lands ~20 ms under budget on each sub-stage — healthy headroom for network jitter and GC pauses (Assumption [A13](../reference/assumptions.md)).
 
 ---
 
@@ -240,8 +240,8 @@ The retrieval stage consumes ~320 ms of the 1500 ms TTFT budget, leaving ~1180 m
 | [pseudocode/module2_retrieval.py](../pseudocode/module2_retrieval.py) | Full `hybrid_retrieve`, `exact_id_retrieve`, `rerank_chunks`, RRF implementation, worked example in §12 |
 | [schemas/opensearch_index_mapping.json](../schemas/opensearch_index_mapping.json) | Index mapping, analyzers, `ef_search`, HNSW params, native RRF search pipeline config |
 | [diagrams/retrieval_flow.md](../diagrams/retrieval_flow.md) | Visual of the three-path dispatch, RRF formula box, worked example tables, DLS enforcement callout |
-| [tools_and_technologies.txt](../tools_and_technologies.txt) | `multilingual-e5-large`, `BAAI/bge-reranker-v2-m3`, OpenSearch k-NN plugin versions |
-| [notes/assumptions.md](../notes/assumptions.md) | A1 (self-hosted), A2 (data sovereignty), A5 (Dutch corpus), A11 (user personas), A13 (TTFT) |
+| [tools_and_technologies.txt](../reference/tools_and_technologies.txt) | `multilingual-e5-large`, `BAAI/bge-reranker-v2-m3`, OpenSearch k-NN plugin versions |
+| [reference/assumptions.md](../reference/assumptions.md) | A1 (self-hosted), A2 (data sovereignty), A5 (Dutch corpus), A11 (user personas), A13 (TTFT) |
 
 ---
 

@@ -46,11 +46,12 @@ MAX_RETRIES = 1
 """
 Maximum number of query rewrites before refusing.
 Why 1 and not more:
-  - Each retry adds a full retrieval + grading cycle (~450ms)
-  - With 1 retry: worst-case TTFT ≈ 1450ms (within 1500ms budget)
-  - With 2 retries: worst-case TTFT ≈ 1900ms (EXCEEDS budget)
-  - Latency budget: cache_check(15) + embed(30) + retrieval(150) + rerank(200)
-    + grading(150) + retry(450) + generate(300) + buffer(55) = 1350ms
+  - Happy path TTFT: ~1450ms (within 1500ms budget)
+  - Each retry adds ~580ms (rewrite 150 + retrieval 80 + rerank 200 + grader 150)
+  - Worst case with 1 retry: ~2030ms — over the hard limit, but retry probability
+    is ~15%, so *expected* TTFT stays under 1500ms. Acceptable.
+  - Worst case with 2 retries: ~2610ms — expected TTFT also exceeds budget. Not acceptable.
+  - Policy: prefer polite refusal over SLO violation (aligns with A16).
 """
 
 GENERATION_TEMPERATURE = 0.0

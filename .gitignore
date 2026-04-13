@@ -1,0 +1,10 @@
+.claude/
+__pycache__/
+*.pyc
+Lib/
+Scripts/
+share/
+pyvenv.cfg
+get-pip.py
+build_pptx*.py
+*.docx
