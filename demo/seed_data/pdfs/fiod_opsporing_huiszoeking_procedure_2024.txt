@@ -1,0 +1,53 @@
+CLASSIFIED FIOD — Opsporingsprocedure Huiszoeking
+Versie 2024.2 · uitsluitend voor FIOD-rechercheurs · classificatie 'beperkt'
+Bron: Procedurehandboek FIOD, herziening Q1 2024
+
+Hoofdstuk 1 — Wettelijk kader
+
+Paragraaf 1.1 Bevoegdheidsbasis
+1. Doorzoeking ter inbeslagneming op basis van artikel 96b Wetboek van Strafvordering (Sv) — bij verdenking van een strafbaar feit waarvoor voorlopige hechtenis is toegelaten.
+2. Doorzoeking voor waarheidsvinding op basis van artikel 110 Sv — vereist machtiging rechter-commissaris.
+3. Doorzoeking met verdenking van fiscaal misdrijf op basis van artikel 81 AWR jo. artikel 96b Sv.
+
+Paragraaf 1.2 Drempelvereisten
+Voor het toepassen van huiszoeking moet voldoen zijn aan:
+- Concrete verdenking van een misdrijf (geen oriënterend onderzoek);
+- Onderzoeksbelang dat doorzoeking rechtvaardigt;
+- Proportionaliteit en subsidiariteit (minder ingrijpende middelen overwogen);
+- Schriftelijke machtiging van de officier van justitie of rechter-commissaris.
+
+Hoofdstuk 2 — Operationele uitvoering
+
+Artikel 2.1 Briefing en samenstelling team
+1. Standaard team: ten minste 4 FIOD-rechercheurs, 1 zoekspecialist, 1 IT-forensisch medewerker bij vermoeden van digitale bewijsstukken.
+2. Pre-operationele briefing: locatieplattegrond, risicoprofiel verdachte, lijst van te vorderen specifieke documenten, communicatieprocedure.
+
+Artikel 2.2 Aanvang
+1. Aanvangstijdstip: binnen daglichtperiode, behalve in spoedeisende gevallen of bij gevaar voor verduistering van bewijs (artikel 97 Sv).
+2. Aanbellen, identificatie tonen, doel van doorzoeking expliciet benoemen, machtiging tonen.
+3. Bij weigering toegang: forceren is toegestaan na 5 minuten en derde aankondiging; protocol van geforceerde binnenkomst opmaken.
+
+Artikel 2.3 In-situ procedure
+1. Volledige inventarisatie kamer voor kamer, fotografisch vastgelegd vóór aanvang doorzoeking.
+2. Beslag uitsluitend op voorwerpen die binnen de scope van de machtiging vallen (geen 'fishing expeditions').
+3. Digitale bewijsstukken worden geforensificeerd via FIOD Digital Forensics Lab; originele apparaten in zegelzak.
+
+Hoofdstuk 3 — Bewijsbewerking
+
+Paragraaf 3.1 Inbeslaggenomen documenten
+1. Originelen worden gewaarmerkt met datum, locatie en initialen; kopieën gaan naar verdachte met ondertekend ontvangstbewijs.
+2. Documenten met advocaat-cliëntprivilege (geheimhoudersinformatie) worden afzonderlijk geseald en getoetst door rechter-commissaris voor inhoudelijke beoordeling.
+
+Paragraaf 3.2 Digitale data
+1. Forensische image (bit-by-bit) wordt aangemaakt; chain-of-custody log start bij aanvang doorzoeking.
+2. Hashing met SHA-256; hash wordt vastgelegd in proces-verbaal.
+3. Analyse vindt plaats in afgeschermde FIOD-omgeving; geen netwerkkoppeling tijdens onderzoek.
+
+Hoofdstuk 4 — Verslaglegging
+
+Paragraaf 4.1 Proces-verbaal
+Binnen 5 werkdagen wordt een gedetailleerd proces-verbaal opgemaakt met:
+- Tijdlijn van de operatie;
+- Lijst inbeslaggenomen voorwerpen met locatie van vondst;
+- Verklaringen ter plaatse afgelegd;
+- Eventuele incidenten of bezwaren.

@@ -18,6 +18,7 @@ from openai import AsyncOpenAI
 import structlog
 
 from app.config import get_settings
+from app.pipeline.breaker import breaker, BreakerOpenError  # noqa: F401  (re-exported for routers)
 
 log = structlog.get_logger()
 
@@ -44,18 +45,26 @@ async def generate(
     model: Optional[str] = None,
 ) -> str:
     s = get_settings()
-    resp = await get_client().chat.completions.create(
-        model=model or s.llm_model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        temperature=temperature,
-        max_tokens=max_tokens,
-        stream=False,
-        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
-    )
-    return resp.choices[0].message.content or ""
+    breaker.before()
+    try:
+        resp = await get_client().chat.completions.create(
+            model=model or s.llm_model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stream=False,
+            extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+        )
+        breaker.on_success()
+        return resp.choices[0].message.content or ""
+    except BreakerOpenError:
+        raise
+    except Exception:
+        breaker.on_failure()
+        raise
 
 
 async def generate_stream(
@@ -66,23 +75,36 @@ async def generate_stream(
     model: Optional[str] = None,
 ) -> AsyncIterator[str]:
     s = get_settings()
-    stream = await get_client().chat.completions.create(
-        model=model or s.llm_model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        temperature=temperature,
-        max_tokens=max_tokens,
-        stream=True,
-        extra_body={"chat_template_kwargs": {"enable_thinking": False}},
-    )
-    async for chunk in stream:
-        if not chunk.choices:
-            continue
-        delta = chunk.choices[0].delta.content or ""
-        if delta:
-            yield delta
+    breaker.before()
+    got_any = False
+    try:
+        stream = await get_client().chat.completions.create(
+            model=model or s.llm_model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens,
+            stream=True,
+            extra_body={"chat_template_kwargs": {"enable_thinking": False}},
+        )
+        async for chunk in stream:
+            if not chunk.choices:
+                continue
+            delta = chunk.choices[0].delta.content or ""
+            if delta:
+                got_any = True
+                yield delta
+        if got_any:
+            breaker.on_success()
+        else:
+            breaker.on_failure()
+    except BreakerOpenError:
+        raise
+    except Exception:
+        breaker.on_failure()
+        raise
 
 
 async def generate_json(
@@ -94,6 +116,7 @@ async def generate_json(
 ) -> dict:
     """Structured JSON output. Falls back to prompt-parsing if response_format unsupported."""
     s = get_settings()
+    breaker.before()
     try:
         resp = await get_client().chat.completions.create(
             model=model or s.llm_model,
@@ -107,8 +130,12 @@ async def generate_json(
             extra_body={"chat_template_kwargs": {"enable_thinking": False}},
         )
         text = resp.choices[0].message.content or ""
+        breaker.on_success()
+    except BreakerOpenError:
+        raise
     except Exception as e:
         log.warning("json_mode_unsupported_fallback_to_plain", error=str(e))
+        # Note: generate() has its own breaker tracking, so we don't double-count here.
         text = await generate(
             system_prompt + "\n\nRespond ONLY with a valid JSON object, nothing else.",
             user_prompt,

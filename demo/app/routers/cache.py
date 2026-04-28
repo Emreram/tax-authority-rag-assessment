@@ -19,6 +19,14 @@ async def cache_stats(request: Request):
     return stats
 
 
+@router.get("/audit/recent", summary="Recent query audit-trail (last 50)")
+async def audit_recent(request: Request, limit: int = 50):
+    """M10 — per-query audit log. Used by the Operations → Toegang dashboard."""
+    from app.audit import list_recent
+    rows = list_recent(request.app.state.redis, limit=max(1, min(limit, 200)))
+    return {"entries": rows, "count": len(rows)}
+
+
 @router.get("/cache/entries", summary="List all cache entries with optional similarity scoring")
 async def cache_entries(request: Request, query: str | None = None, tier: str = "PUBLIC"):
     """Returns one row per cached entry. If ?query= is provided, also returns cosine

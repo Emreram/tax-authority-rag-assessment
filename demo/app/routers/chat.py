@@ -27,12 +27,13 @@ from app.config import get_settings
 from app.models import SecurityTier
 from app.pipeline import memory
 from app.pipeline import embedder as _embedder
+from app.audit import log_query as audit_log_query
 from app.pipeline.cache import check_cache_semantic, store_cache_semantic
 from app.pipeline.citation_format import compact_citations
-from app.pipeline.classifier import classify_query
+from app.pipeline.classifier import classify_query, decompose_complex
 from app.pipeline.generator import rewrite_query
 from app.pipeline.grader import grade_context
-from app.pipeline.llm import generate_stream
+from app.pipeline.llm import generate_stream, BreakerOpenError
 from app.pipeline.retriever import retrieve
 from app.pipeline.validator import validate_citations
 
@@ -82,6 +83,7 @@ async def _streaming_pipeline(
     redis_client = request.app.state.redis
 
     t_total = time.time()
+    t_first_token: float | None = None  # M2: TTFT — set on first user-visible token
 
     # ─── memory / follow-up resolution ───
     resolved, original = await memory.resolve_followup(redis_client, session_id, body.query)
@@ -99,6 +101,9 @@ async def _streaming_pipeline(
             detail += f", sim={cached['_similarity']}"
         detail += ")"
         yield _sse("trace", {"node": "cache_lookup", "result": "HIT", "detail": detail, "duration_ms": cache_ms})
+        # M2: emit TTFT for cache-hit path before any tokens
+        ttft_ms = (time.time() - t_total) * 1000
+        yield _sse("ttft", {"ms": round(ttft_ms, 1), "source": "cache"})
         for piece in _split_for_stream(cached["response"]):
             yield _sse("token", piece)
             await asyncio.sleep(0.01)
@@ -109,6 +114,12 @@ async def _streaming_pipeline(
         for c in cached["citations"]:
             yield _sse("citation", c)
         memory.append_turn(redis_client, session_id, body.query, cached["response"])
+        # M10: audit log — cache-hit
+        audit_log_query(
+            redis_client, session_id=session_id, tier=tier.value, query=body.query,
+            grade="CACHE_HIT", citations=[c.get("chunk_id", "") for c in cached.get("citations", [])],
+            ttft_ms=ttft_ms, source="cache",
+        )
         yield _sse("done", {"session_id": session_id, "source": "cache", "total_ms": (time.time() - t_total) * 1000})
         return
     yield _sse("trace", {"node": "cache_lookup", "result": "MISS", "duration_ms": cache_ms})
@@ -117,6 +128,19 @@ async def _streaming_pipeline(
     t0 = time.time()
     query_type = await classify_query(query)
     yield _sse("trace", {"node": "classify_query", "result": query_type, "duration_ms": (time.time() - t0) * 1000})
+
+    # ─── decompose (M5) — only for COMPLEX queries ───
+    sub_queries: list[str] = []
+    if query_type == "COMPLEX":
+        t0 = time.time()
+        sub_queries = await decompose_complex(query)
+        if sub_queries:
+            yield _sse("trace", {
+                "node": "decompose",
+                "result": f"{len(sub_queries)} sub-queries",
+                "detail": " | ".join(sub_queries),
+                "duration_ms": (time.time() - t0) * 1000,
+            })
 
     # ─── retrieve + grade loop ───
     retrieve_ms = grade_ms = 0.0
@@ -128,10 +152,28 @@ async def _streaming_pipeline(
 
     while True:
         t0 = time.time()
-        retrieved = await retrieve(os_client, current_query, tier, query_type, settings)
+        # M5: when sub-queries exist, retrieve each in parallel and merge via RRF.
+        if sub_queries and current_query == query:  # only on first pass; retries use rewrite
+            sub_results = await asyncio.gather(*[
+                retrieve(os_client, sq, tier, "SIMPLE", settings) for sq in sub_queries
+            ])
+            seen: dict[str, tuple[float, dict]] = {}
+            for sub_hits in sub_results:
+                for rank, h in enumerate(sub_hits):
+                    cid = h["chunk_id"]
+                    score = 1.0 / (60 + rank + 1)
+                    prev = seen.get(cid)
+                    seen[cid] = ((prev[0] if prev else 0.0) + score, h)
+            merged = sorted(seen.values(), key=lambda x: -x[0])[: settings.top_k_rerank]
+            retrieved = [m[1] for m in merged]
+        else:
+            retrieved = await retrieve(os_client, current_query, tier, query_type, settings)
         dt = (time.time() - t0) * 1000
         retrieve_ms += dt
-        yield _sse("trace", {"node": "retrieve", "result": f"{len(retrieved)} chunks", "detail": f"tier={tier.value}", "duration_ms": dt})
+        # M4/M5: surface any trace-events the retriever collected (HyDE, rerank, …)
+        for sub_evt in getattr(retrieve, "last_trace_events", []) or []:
+            yield _sse("trace", sub_evt)
+        yield _sse("trace", {"node": "retrieve", "result": f"{len(retrieved)} chunks", "detail": f"tier={tier.value}{' · sub-RRF merged' if sub_queries else ''}", "duration_ms": dt})
         for c in retrieved:
             yield _sse("chunk", {"chunk_id": c["chunk_id"], "hierarchy_path": c.get("hierarchy_path", ""), "status": "retrieved"})
 
@@ -153,16 +195,28 @@ async def _streaming_pipeline(
             yield _sse("trace", {"node": "rewrite_and_retry", "result": f"retry {retries}/{settings.max_retries}", "detail": current_query[:80], "duration_ms": 0})
             continue
 
-        # refuse
+        # refuse — M8: tier-aware, framed as a feature (not an error).
         refuse_text = (
-            "Op basis van de beschikbare documentatie kan ik uw vraag niet beantwoorden. "
-            "Probeer uw vraag te herformuleren."
+            f"Ik heb geen geverifieerd antwoord op deze vraag binnen jouw toegangsniveau "
+            f"(**{tier.value}**). Mogelijke vervolgstappen:\n\n"
+            "- Probeer een specifiekere formulering met een wetsartikel of begrip.\n"
+            "- Overleg met een collega die toegang heeft tot een hogere classificatie.\n"
+            "- Stel de vraag aan een fiscaal jurist als verificatie nodig is.\n\n"
+            "Deze interactie is gelogd voor audit-doeleinden."
         )
+        # M2: emit TTFT for refuse path
+        ttft_ms = (time.time() - t_total) * 1000
+        yield _sse("ttft", {"ms": round(ttft_ms, 1), "source": "refuse"})
         for piece in _split_for_stream(refuse_text):
             yield _sse("token", piece)
             await asyncio.sleep(0.01)
         yield _sse("trace", {"node": "refuse", "result": grading_result, "duration_ms": 0})
         memory.append_turn(redis_client, session_id, body.query, refuse_text)
+        # M10: audit log — refuse path
+        audit_log_query(
+            redis_client, session_id=session_id, tier=tier.value, query=body.query,
+            grade=grading_result, citations=[], ttft_ms=ttft_ms, source="refuse",
+        )
         yield _sse("done", {"session_id": session_id, "source": "pipeline", "grading_result": grading_result, "total_ms": (time.time() - t_total) * 1000})
         return
 
@@ -212,6 +266,11 @@ async def _streaming_pipeline(
     full_text = ""
     yield _sse("trace", {"node": "generate", "result": "streaming", "duration_ms": 0})
     async for token in generate_stream(GENERATOR_SYSTEM, user_prompt, temperature=0.0, max_tokens=900):
+        # M2: emit TTFT on the very first token from the LLM
+        if t_first_token is None:
+            t_first_token = time.time()
+            ttft_ms = (t_first_token - t_total) * 1000
+            yield _sse("ttft", {"ms": round(ttft_ms, 1), "source": "pipeline"})
         full_text += token
         yield _sse("token", token)
     gen_ms = (time.time() - t0) * 1000
@@ -288,6 +347,14 @@ async def _streaming_pipeline(
         )
         memory.append_turn(redis_client, session_id, body.query, cleaned_text)
 
+    # M10: audit log — pipeline-success path
+    audit_log_query(
+        redis_client, session_id=session_id, tier=tier.value, query=body.query,
+        grade=grading_result,
+        citations=[c.get("chunk_id", "") for c in citations_out],
+        ttft_ms=(t_first_token - t_total) * 1000 if t_first_token else None,
+        source="pipeline",
+    )
     yield _sse("done", {
         "session_id": session_id,
         "source": "pipeline",
@@ -310,6 +377,19 @@ async def chat_stream(request: Request, body: ChatRequest):
         try:
             async for evt in _streaming_pipeline(request, body):
                 yield evt
+        except BreakerOpenError as e:
+            log.warning("chat_stream_breaker_open", detail=str(e))
+            yield _sse("trace", {"node": "refuse", "result": "BREAKER_OPEN", "detail": str(e), "duration_ms": 0})
+            yield _sse("ttft", {"ms": 0.0, "source": "refuse"})
+            msg = (
+                "Het inferentie-systeem is tijdelijk overbelast en accepteert geen nieuwe "
+                "verzoeken. Probeer over enkele minuten opnieuw — de circuit-breaker reset "
+                "automatisch zodra de backend weer reageert."
+            )
+            for piece in _split_for_stream(msg):
+                yield _sse("token", piece)
+                await asyncio.sleep(0.005)
+            yield _sse("done", {"source": "breaker", "total_ms": 0})
         except Exception as e:
             log.error("chat_stream_error", error=str(e))
             yield {"event": "error", "data": json.dumps({"detail": str(e)})}

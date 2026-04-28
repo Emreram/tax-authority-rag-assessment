@@ -33,7 +33,7 @@
     },
   };
 </script>
-<link rel="stylesheet" href="/static/theme.css?v=15">
+<link rel="stylesheet" href="/static/theme.css?v=16">
 </head>
 <body class="bg-bd-ink text-slate-100 font-sans antialiased min-h-screen">
 
@@ -204,6 +204,18 @@
           </div>
           <div id="tree-container" class="font-mono text-xs max-h-96 overflow-y-auto"></div>
         </div>
+
+        <!-- Vector quantization (memory projection) -->
+        <div class="bg-bd-surface border border-bd-border rounded-xl p-5">
+          <div class="flex items-end justify-between mb-3">
+            <div>
+              <h2 class="text-lg font-semibold">Vector quantization</h2>
+              <p class="text-sm text-slate-400">Geheugenprojectie van de huidige index per precisie. Productie-aanname: 20M chunks.</p>
+            </div>
+          </div>
+          <div id="quant-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+          <p class="text-[11px] text-slate-500 mt-3">Op deze laptop draait de index op fp32 (geen quantization). Productie kiest int8 of PQ8 om binnen het cluster-geheugen te blijven.</p>
+        </div>
       </div>
     </section>
 
@@ -228,6 +240,7 @@
         </form>
 
         <div id="retrieval-timings" role="status" aria-live="polite" class="text-xs text-slate-400 font-mono"></div>
+        <div id="retrieval-config-pills" class="flex flex-wrap gap-2 text-[11px] font-mono"></div>
 
         <div class="grid md:grid-cols-2 gap-4">
           <div class="bg-bd-surface border border-bd-border rounded-xl p-5">
@@ -307,6 +320,15 @@
           </div>
           <div class="text-[11px] text-slate-500 mb-3">Drempel <span id="cache-threshold" class="text-bd-orange">0.97</span></div>
           <div id="cache-entries" class="space-y-1.5"></div>
+        </div>
+
+        <div class="bg-bd-surface border border-bd-border rounded-xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold tracking-wide text-bd-navy">Audit-trail (laatste 50)</h3>
+            <button id="audit-refresh" class="text-[11px] border border-bd-border rounded px-2 py-1 hover:border-bd-navy">↻ Vernieuwen</button>
+          </div>
+          <p class="text-[11px] text-slate-500 mb-3">Elke query wordt gelogd met tijd, tier, vraag, grading-uitkomst en TTFT. Bewaartermijn: 7 dagen.</p>
+          <div id="audit-table" class="text-xs space-y-1"></div>
         </div>
       </div>
     </section>
@@ -399,6 +421,6 @@
 <!-- ═══════════════════ TOAST CONTAINER ═══════════════════ -->
 <div id="toast-container" role="status" aria-live="polite" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm"></div>
 
-<script src="/static/app.js?v=15"></script>
+<script src="/static/app.js?v=16"></script>
 </body>
 </html>

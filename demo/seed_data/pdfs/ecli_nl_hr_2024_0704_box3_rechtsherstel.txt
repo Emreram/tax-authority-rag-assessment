@@ -1,0 +1,73 @@
+Hoge Raad der Nederlanden — Belastingkamer
+Arrest van 6 juni 2024
+ECLI:NL:HR:2024:704
+
+Onderwerp: toetsing van de Wet rechtsherstel box 3 ("Herstelwet") en de Overbruggingswet box 3 aan artikel 14 EVRM en artikel 1 EP. Vervolg op het Kerstarrest van 24 december 2021 (ECLI:NL:HR:2021:1963).
+
+Hoofdstuk 1 — Geding in cassatie
+
+De Staatssecretaris van Financiën heeft beroep in cassatie ingesteld tegen de uitspraak van het Gerechtshof 's-Hertogenbosch van 2 november 2022, betreffende de aan belanghebbende voor het jaar 2017 opgelegde aanslag in de inkomstenbelasting. De Advocaat-Generaal M.R.T. Pauwels heeft op 9 februari 2024 geconcludeerd tot ongegrondverklaring.
+
+Hoofdstuk 2 — Inleiding
+
+Artikel 2.1 — Inzet
+In deze zaak gaat het om het stelsel van heffing van inkomstenbelasting over belastbaar inkomen uit sparen en beleggen (box 3), specifiek of het stelsel onder de Herstelwet en het voorafgaande beleidsbesluit van 28 juni 2022 een inbreuk vormt op artikel 14 EVRM en artikel 1 EP.
+
+Artikel 2.2 — Achtergrond
+De Herstelwet is tot stand gekomen naar aanleiding van het Kerstarrest. Die wet kent een stelsel van heffing dat is gebaseerd op een forfaitaire berekening van het rendement op vermogen in box 3, met een specifiek forfaitair rendement voor banktegoeden.
+
+Hoofdstuk 3 — Uitgangspunten in cassatie
+
+Aan belanghebbende is voor 2017 een aanslag IB/PVV opgelegd met daarin een forfaitair bepaald belastbaar inkomen uit sparen en beleggen van € 47.811. Het werkelijke rendement bedroeg € 36.000.
+
+Hoofdstuk 4 — Procedure voor het Hof
+
+Het Hof heeft de aanslag verminderd door rekening te houden met een belastbaar inkomen uit sparen en beleggen gelijk aan het werkelijke rendement van € 36.000.
+
+Hoofdstuk 5 — Aan de beoordeling voorafgaande overwegingen
+
+Afdeling 5.1 — Het Kerstarrest
+
+Lid 1: Het Kerstarrest oordeelde dat het stelsel 2017 in box 3 in strijd is met artikel 14 EVRM en artikel 1 EP, omdat het een verhoudingsgewijs zware financiële last verbindt aan de keuze om niet over te gaan tot risicovol beleggen.
+
+Lid 2: De Hoge Raad herhaalt dat geen rechtvaardiging is aan te wijzen voor het stelsel 2017, en dat schending optreedt bij iedere heffing naar een voordeel uit sparen en beleggen dat hoger is dan het werkelijke rendement — ongeacht of het verschil aanzienlijk is.
+
+Afdeling 5.2 — De Herstelwet
+
+Lid 1: De Herstelwet kent voor drie categorieën vermogensbestanddelen (banktegoeden, overige bezittingen, schulden) elk een eigen percentage van het forfaitaire rendement. Voor banktegoeden wordt het percentage gebaseerd op het gemiddelde maandelijkse rentepercentage op deposito's. Voor schulden op de gemiddelde maandelijkse rente over woninghypotheken. Voor overige bezittingen blijft de formule uit het stelsel 2017 voor rendementsklasse II van toepassing.
+
+Afdeling 5.3 — Toetsing Herstelwet
+
+Lid 1: Het probleem onder het stelsel 2017 voor belastingplichtigen die niet hebben gekozen voor risicovol beleggen, wordt door de nieuwe berekening doorgaans opgelost door het forfaitaire rendement op banktegoeden — dat in de regel het werkelijke rendement benadert.
+
+Lid 2: Voor overige bezittingen blijft echter onverminderd het probleem bestaan dat een relatief ongelijke behandeling optreedt tussen succesvolle en minder succesvolle beleggers. Aan het begrip "risico" bij beleggen is immers eigen dat een individuele belegger geen garantie heeft dat hij het gemiddelde rendement zal behalen.
+
+Lid 3: De Hoge Raad komt tot de slotsom dat ook van het forfaitaire stelsel in de Herstelwet in redelijkheid niet kan worden gezegd dat het de proportionaliteitstoets kan doorstaan. Het leidt tot een met artikel 14 EVRM in samenhang met artikel 1 EP strijdige discriminatie.
+
+Lid 4: Hetgeen geldt voor de Herstelwet, geldt eveneens voor de Overbruggingswet box 3 (in werking sinds 1 januari 2023).
+
+Afdeling 5.4 — Begrip werkelijk rendement
+
+Lid 1: Bij de vergelijking tussen werkelijk en forfaitair rendement dient het rendement op het gehele vermogen van de belastingplichtige in box 3 in de beschouwingen te worden betrokken — niet alleen op bepaalde categorieën.
+
+Lid 2: De realiteit brengt mee dat rekening wordt gehouden met het werkelijke rendement op alle vermogensbestanddelen die de belastingplichtige in de loop van het jaar heeft gehad — niet alleen op de peildatum.
+
+Lid 3: Bij de bepaling dient te worden gekeken naar het nominale rendement.
+
+Lid 4: Het werkelijke rendement omvat zowel directe inkomsten (rente, dividend, huur) als positieve en negatieve waardeveranderingen — ook ongerealiseerde.
+
+Lid 5: Bij de vaststelling van het rendement op bezittingen kan geen rekening worden gehouden met kosten. Bij schulden kan wél rekening worden gehouden met de daarop betrekking hebbende renten.
+
+Afdeling 5.5 — Rechtsherstel
+
+Indien zich een verdragsschending voordoet, dient die ongedaan te worden gemaakt door toekenning van een op rechtsherstel gerichte en naar redelijkheid vast te stellen compensatie. De aanslag wordt verminderd zodat alleen nog belasting in box 3 wordt geheven over het werkelijke rendement.
+
+Hoofdstuk 6 — Beoordeling van het middel
+
+Het middel van de Staatssecretaris faalt. Het Hof heeft de aanslag terecht verminderd door uit te gaan van een belastbaar inkomen uit sparen en beleggen gelijk aan het werkelijke rendement.
+
+Hoofdstuk 7 — Beslissing
+
+De Hoge Raad verklaart het beroep in cassatie ongegrond en wijst het verzoek om rentevergoeding af.
+
+Dit arrest is gewezen door de raadsheer M.W.C. Feteris als voorzitter, en de raadsheren J. Wortel, M.T. Boerlage, P.A.G.M. Cools en A.E.H. van der Voort Maarschalk, en in het openbaar uitgesproken op 6 juni 2024.

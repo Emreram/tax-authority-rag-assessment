@@ -1,0 +1,37 @@
+INTERN — Transfer Pricing Advance Pricing Agreements 2024
+Belastingdienst, kantoor Grote Ondernemingen
+Status: INTERNAL · niet voor extern gebruik · versie 3.4
+
+Hoofdstuk 1 — APA-procedure
+
+Paragraaf 1.1 Aanvraag
+Een Advance Pricing Agreement (APA) wordt op verzoek van de belastingplichtige verstrekt door het APA/ATR-team. De aanvraag bevat ten minste:
+- Volledige beschrijving van de intercompany transactie(s);
+- Functie- en risicoanalyse conform de OECD Transfer Pricing Guidelines 2022;
+- Voorgestelde verrekenprijs-methodiek (CUP, RPM, CPM, TNMM of profit split);
+- Vergelijkbaarheidsstudie met benchmark-data uit Amadeus of vergelijkbare databases;
+- Looptijdvoorstel (standaard 4-5 jaar).
+
+Paragraaf 1.2 Beoordelingstermijn
+De Belastingdienst streeft naar een uitspraak binnen 6 maanden na volledige aanvraag. Bij internationale APA's (multilateraal) kan de doorlooptijd oplopen tot 24 maanden vanwege coordinatie met buitenlandse autoriteiten.
+
+Hoofdstuk 2 — Substance-eisen
+
+Artikel 2.1 Reële economische activiteit
+Voor toepassing van een APA moet de Nederlandse entiteit voldoen aan minimale substance-eisen:
+1. Eigen kantoorruimte in Nederland;
+2. Ten minste 2 FTE met aantoonbare expertise op de relevante functies;
+3. Lokaal genomen significante beslissingen (board minutes vereist);
+4. Eigen jaarrekening conform Titel 9 Boek 2 BW;
+5. Lokale loonadministratie via Nederlandse payroll-provider.
+
+Artikel 2.2 Anti-misbruik
+Bij vermoeden van inhoudsloze structuren (mailbox companies) wordt de APA-aanvraag afgewezen of een eerder verleende APA herzien op basis van artikel 8b Wet Vpb 1969.
+
+Hoofdstuk 3 — Compliance en MAP
+
+Paragraaf 3.1 Annual reporting
+APA-houders rapporteren jaarlijks of de critical assumptions nog van toepassing zijn. Bij materiële wijzigingen moet een revision request worden ingediend binnen 30 dagen.
+
+Paragraaf 3.2 Mutual Agreement Procedure
+Bij geschillen met buitenlandse belastingautoriteiten kan een MAP worden gestart conform artikel 25 OECD-modelverdrag. Nederland past de tweezijdige procedure toe; bij stalemate na 24 maanden kan arbitrage worden ingeroepen.

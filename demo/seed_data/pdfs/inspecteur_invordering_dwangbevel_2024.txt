@@ -1,0 +1,45 @@
+RESTRICTED — Handboek Invordering Belastingschulden
+Hoofdstuk 7: Dwangbevel en executoriale fase
+Versie 2024.1 · alleen voor medewerkers met inspecteur-tier of hoger
+
+Hoofdstuk 7 — Dwangbevel en executoriale invordering
+
+Paragraaf 7.1 Voorwaarden uitvaardiging dwangbevel
+1. Een dwangbevel kan worden uitgevaardigd indien:
+   a) De aanslag formeel is opgelegd en bekendgemaakt;
+   b) De betalingstermijn (standaard 6 weken) is verstreken;
+   c) De belastingschuld niet (volledig) is voldaan;
+   d) Er geen lopende betalingsregeling is afgesproken;
+   e) De ontvanger eerst een aanmaning heeft verzonden.
+
+2. Het dwangbevel wordt namens de ontvanger uitgevaardigd door de belastingdeurwaarder. De aanmaning betreft een formele schriftelijke vooraankondiging met een aanvullende termijn van 10 dagen.
+
+Paragraaf 7.2 Betekening
+Het dwangbevel wordt persoonlijk betekend door een belastingdeurwaarder of (na 1 januari 2024) elektronisch via MijnOverheid in voorgeschreven gevallen. Bij betekening op een bedrijfslocatie wordt een kopie achtergelaten en een fotokopie naar het privéadres van de bestuurder gestuurd.
+
+Paragraaf 7.3 Verzet
+Tegen het dwangbevel staat verzet open binnen 6 weken na betekening. Het verzet schorst de executie niet, behalve in gevallen genoemd in artikel 17 Invorderingswet 1990.
+
+Hoofdstuk 8 — Executiemiddelen
+
+Artikel 8.1 Beslag op roerende zaken
+1. Bij niet-betaling na het dwangbevel kan beslag worden gelegd op roerende zaken via een proces-verbaal van inbeslagneming.
+2. Eerste levensbehoeften en gereedschappen tot een waarde van € 2.500 zijn vrijgesteld op basis van artikel 447 Rv.
+
+Artikel 8.2 Loonbeslag
+Loonbeslag op uitkering of arbeidsloon is slechts toegestaan binnen de beslagvrije voet (artikel 475d Rv). De beslagvrije voet wordt jaarlijks geïndexeerd; voor 2024 bedraagt deze € 1.886 per maand voor alleenstaanden, met opslagen voor partners en kinderen.
+
+Artikel 8.3 Bankbeslag
+Beslag onder een bankrekening is een momentopname (peilmoment beslagdatum); saldo dat na het peilmoment binnenkomt valt buiten het beslag, behalve bij doorlopend executoriaal derdenbeslag (DEDB).
+
+Hoofdstuk 9 — Bijzondere bevoegdheden
+
+Paragraaf 9.1 Aansprakelijkheidsstelling
+De ontvanger kan op grond van artikel 33-43 Invorderingswet 1990 derden hoofdelijk aansprakelijk stellen voor de belastingschuld:
+- Bestuurders BV/NV (artikel 36);
+- Inleners (artikel 34);
+- Aannemers in een ketenaansprakelijkheid (artikel 35);
+- Erfgenamen (artikel 39).
+
+Paragraaf 9.2 Civiele faillissementsaanvraag
+Bij blijvend onvermogen tot betaling kan de ontvanger het faillissement aanvragen via een verzoekschrift ex artikel 1 Faillissementswet. Vereist is summierlijk bewijs van pluraliteit van schuldeisers en geen redelijk uitzicht op herstel.

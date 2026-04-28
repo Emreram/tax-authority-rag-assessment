@@ -54,6 +54,26 @@ services:
       - ./seed_data:/app/seed_data:ro
       - ../eval:/app/eval:ro
       - hf-cache:/root/.cache/huggingface
+    healthcheck:
+      test: ["CMD-SHELL","curl -sf http://localhost:8000/health | grep -q '\"warmup_complete\":true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 90s
+
+  preingest:
+    image: alpine/curl:8.10.0
+    depends_on:
+      api:
+        condition: service_healthy
+    volumes:
+      - ./scripts:/scripts:ro
+      - ./seed_data:/seed_data:ro
+    environment:
+      - API_HOST=http://api:8000
+      - DOC_DIR=/seed_data/pdfs
+    entrypoint: ["sh","-c","apk add --no-cache python3 >/dev/null 2>&1 || true; sh /scripts/preingest.sh"]
+    restart: "no"
 
 volumes:
   opensearch-data:

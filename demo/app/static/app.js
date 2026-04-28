@@ -293,9 +293,9 @@ function setView(view, { silent = false, fromKeyboard = false } = {}) {
   refreshNavControls();
   paintTierBanners();
   if (view === "documents")   loadDocuments();
-  if (view === "ingest")      loadTreeDocs();
+  if (view === "ingest")      { loadTreeDocs(); renderQuantWidget(); }
   if (view === "crag")        renderCragState();
-  if (view === "security")    { renderTierChips(); loadCacheEntries(); }
+  if (view === "security")    { renderTierChips(); loadCacheEntries(); renderAuditTable(); }
   if (view === "eval")        loadEval();
   if (fromKeyboard && view !== "chat") {
     setTimeout(() => {
@@ -421,6 +421,7 @@ function addAsstPlaceholder() {
     <div class="msg-avatar">BD</div>
     <div class="msg-body">
       <div class="msg-role">KennisAssistent</div>
+      <div class="ttft-badge" hidden></div>
       <div class="progress-strip" role="status" aria-live="polite">
         <span class="ps-spinner" aria-hidden="true"></span>
         <span class="ps-label">Voorbereiden…</span>
@@ -453,6 +454,7 @@ function addAsstPlaceholder() {
     citations:   el.querySelector(".citations"),
     parentSlot:  el.querySelector(".parent-badge-slot"),
     trace: panel, traceToggle: toggle, openCrag,
+    ttftBadge: el.querySelector(".ttft-badge"),
     // progress UI
     progressStrip: el.querySelector(".progress-strip"),
     progressLabel: el.querySelector(".ps-label"),
@@ -488,6 +490,7 @@ const NODE_LABELS = {
   cache_lookup:      { icon: "💾", label: "Cache doorzoeken"         },
   classify_query:    { icon: "🧭", label: "Vraag classificeren"      },
   memory_resolve:    { icon: "🧠", label: "Conversatie-geheugen"     },
+  decompose:         { icon: "🪓", label: "Vraag splitsen"            },
   hyde:              { icon: "🎭", label: "HyDE hypothese-passage"   },
   retrieve:          { icon: "📚", label: "Retrieval (BM25 + kNN)"   },
   grade_context:     { icon: "⚖️", label: "Chunks beoordelen (grader)"},
@@ -632,6 +635,18 @@ function renderParentBadge(asst) {
   slot.appendChild(btn); slot.appendChild(details);
 }
 
+function renderTtftBadge(asst, data) {
+  if (!asst.ttftBadge) return;
+  const ms = Number(data?.ms ?? 0);
+  const source = data?.source || "live";
+  const cls = ms <= 500 ? "good" : ms <= 1500 ? "warn" : "bad";
+  const sourceLabel = source === "cache" ? "via cache" : source === "refuse" ? "via refuse" : "live generatie";
+  const check = ms <= 1500 ? "✓" : "⚠";
+  asst.ttftBadge.className = `ttft-badge ${cls}`;
+  asst.ttftBadge.innerHTML = `${check} TTFT <strong>${ms.toFixed(0)} ms</strong> · drempel 1500 ms · ${esc(sourceLabel)}`;
+  asst.ttftBadge.hidden = false;
+}
+
 function scrollChat() { const s = $("#chat-scroll"); s.scrollTop = s.scrollHeight; }
 
 async function streamChat(query, asst) {
@@ -667,7 +682,12 @@ async function streamChat(query, asst) {
 
 function handleChatEvent(ev, data, asst) {
   switch (ev) {
-    case "trace":    addTrace(asst, data); break;
+    case "trace":
+      // M8: refuse-frame — visually flag the bubble before the tokens stream in
+      if (data?.node === "refuse") asst.root.classList.add("msg-refuse");
+      addTrace(asst, data);
+      break;
+    case "ttft":     renderTtftBadge(asst, data); break;
     case "token":    appendToken(asst, typeof data === "string" ? data : ""); break;
     case "text_replace": replaceWithMarkdown(asst, data); break;
     case "citation":
@@ -794,6 +814,46 @@ function wireKeyboard() {
 // ═══════════════════════════════════════════════════════════════
 //  INGESTIE (M1)
 // ═══════════════════════════════════════════════════════════════
+async function renderQuantWidget() {
+  const host = $("#quant-grid");
+  if (!host) return;
+  try {
+    const r = await fetch("/v1/admin/index_stats", { cache: "no-store" });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    const fmt = b => {
+      b = Number(b) || 0;
+      if (b < 1024)         return b.toFixed(0) + " B";
+      if (b < 1024 ** 2)    return (b / 1024).toFixed(1) + " KB";
+      if (b < 1024 ** 3)    return (b / 1024 ** 2).toFixed(1) + " MB";
+      return (b / 1024 ** 3).toFixed(2) + " GB";
+    };
+    const labels = {
+      fp32: "fp32 (default)",
+      fp16: "fp16",
+      int8: "int8",
+      pq8:  "PQ8 (compressed)",
+    };
+    host.innerHTML = ["fp32", "fp16", "int8", "pq8"].map(prec => {
+      const isCurrent = prec === d.current_precision;
+      const cls = isCurrent
+        ? "border-bd-orange bg-bd-orange/10"
+        : "border-bd-border bg-bd-surface-2";
+      return `
+        <div class="border ${cls} rounded p-3">
+          <div class="text-[10px] text-slate-400 uppercase tracking-wide">${esc(labels[prec])}${isCurrent ? " · actief" : ""}</div>
+          <div class="font-mono text-lg text-bd-orange">${fmt(d.memory_bytes?.[prec])}</div>
+          <div class="text-[10px] text-slate-500 mt-1">huidig corpus (${d.chunks ?? 0} chunks)</div>
+          <div class="text-[10px] text-slate-500 mt-1 pt-1 border-t border-bd-border/50">
+            @ 20M: <span class="font-mono text-slate-300">${fmt(d.production_20m_bytes?.[prec])}</span>
+          </div>
+        </div>`;
+    }).join("");
+  } catch (err) {
+    host.innerHTML = `<div class="text-xs text-slate-500">Geen index-stats beschikbaar (${esc(err.message || String(err))})</div>`;
+  }
+}
+
 async function loadTreeDocs() {
   const select = $("#tree-doc-select");
   if (select.options.length > 1) {
@@ -1107,6 +1167,21 @@ function renderRankRows(container, items, cls = "", scoreField = "score") {
 function renderRetrievalTrace(d) {
   const counts = `BM25: ${d.bm25.length} · kNN: ${d.knn.length} · RRF: ${d.fused.length}${d.reranked?.length ? ` · Rerank: ${d.reranked.length}` : ""}`;
   $("#retrieval-timings").innerHTML = `${counts} · embed ${d.timings_ms.embed}ms · search ${d.timings_ms.search}ms · total <strong class="text-bd-orange">${d.timings_ms.total}ms</strong>`;
+
+  // M9: Top-K config pills — show the live retrieval parameters.
+  const c = d.config || {};
+  const pills = $("#retrieval-config-pills");
+  if (pills) {
+    pills.innerHTML = [
+      ["BM25 top-k",  c.top_k_bm25],
+      ["kNN top-k",   c.top_k_knn],
+      ["RRF k",       c.rrf_k],
+      ["Rerank top-k",c.top_k_rerank],
+    ].filter(([,v]) => v != null).map(([k,v]) =>
+      `<span class="pill"><span class="text-slate-500">${esc(k)}</span> <strong class="text-bd-orange">${esc(String(v))}</strong></span>`
+    ).join("");
+  }
+
   renderRankRows($("#river-bm25"), d.bm25, "", "score");
   renderRankRows($("#river-knn"),  d.knn, "orange", "score");
   renderRankRows($("#river-fused"), d.fused, "", "rrf_score");
@@ -1150,7 +1225,7 @@ function paintCragForTurn(turnId) {
   const diagram = $("#crag-state-diagram");
   diagram.innerHTML = "";
   const flow = [
-    ["cache_lookup", "classify_query", "retrieve", "grade_context"],
+    ["cache_lookup", "classify_query", "decompose", "hyde", "retrieve", "grade_context"],
     ["rewrite_and_retry", "parent_expansion", "generate", "validate_output"],
     ["respond", "refuse"],
   ];
@@ -1262,77 +1337,146 @@ function wireSecurity() {
     state._probeDebounce = setTimeout(() => loadCacheEntries($("#cache-probe").value.trim() || null), 400);
   });
   $("#cache-refresh").addEventListener("click", () => loadCacheEntries($("#cache-probe").value.trim() || null));
+  $("#audit-refresh")?.addEventListener("click", () => renderAuditTable());
+}
+
+async function renderAuditTable() {
+  const host = $("#audit-table");
+  if (!host) return;
+  try {
+    const r = await fetch("/v1/audit/recent?limit=50", { cache: "no-store" });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const d = await r.json();
+    if (!d.entries?.length) {
+      host.innerHTML = `<div class="text-slate-500 text-[11px]">Nog geen queries gelogd vandaag.</div>`;
+      return;
+    }
+    const gradeColor = g => {
+      if (g === "RELEVANT") return "text-bd-green";
+      if (g === "IRRELEVANT") return "text-bd-red";
+      if (g === "CACHE_HIT") return "text-bd-navy-2";
+      if (g === "AMBIGUOUS") return "text-bd-amber";
+      return "text-slate-400";
+    };
+    host.innerHTML = `
+      <div class="grid grid-cols-12 gap-2 text-[10px] uppercase tracking-wider text-slate-500 pb-1 border-b border-bd-border">
+        <div class="col-span-2">Tijd</div>
+        <div class="col-span-2">Tier</div>
+        <div class="col-span-5">Query</div>
+        <div class="col-span-2">Grade</div>
+        <div class="col-span-1 text-right">TTFT</div>
+      </div>
+      ${d.entries.map(e => `
+        <div class="grid grid-cols-12 gap-2 font-mono py-1 border-b border-bd-border/40">
+          <div class="col-span-2 text-slate-500">${new Date((e.ts||0)*1000).toLocaleTimeString()}</div>
+          <div class="col-span-2"><span class="pill pill-tier">${esc(e.tier || "")}</span></div>
+          <div class="col-span-5 truncate text-slate-300" title="${esc(e.query || "")}">${esc(e.query || "")}</div>
+          <div class="col-span-2 ${gradeColor(e.grade)}">${esc(e.grade || "")}</div>
+          <div class="col-span-1 text-right text-slate-500">${e.ttft_ms != null ? Math.round(e.ttft_ms) + "ms" : "—"}</div>
+        </div>`).join("")}`;
+  } catch (err) {
+    host.innerHTML = `<div class="text-slate-500 text-[11px]">Audit niet beschikbaar (${esc(err.message || String(err))})</div>`;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
 //  EVAL (M4b)
 // ═══════════════════════════════════════════════════════════════
-function loadEval() {
-  const stubBadge = `<span class="metric-stub-badge">synthetic</span>`;
-  const metrics = [
-    { label: "Faithfulness",      value: "0.94", cls: "good", hint: "Ragas · claim is gegrond in context", stub: true },
-    { label: "Context Precision", value: "0.88", cls: "good", hint: "Ragas · relevant chunks / retrieved", stub: true },
-    { label: "Answer Relevance",  value: "0.91", cls: "good", hint: "Ragas · semantiek vs. vraag", stub: true },
-    { label: "Context Recall",    value: "0.82", cls: "good", hint: "Ragas · golden chunks retrieved", stub: true },
-    { label: "Hallucination",     value: "0.03", cls: "good", hint: "DeepEval · fabricatie-rate", stub: true },
-    { label: "Toxicity",          value: "0.00", cls: "good", hint: "DeepEval · PII/schade", stub: true },
-    { label: "Bias",              value: "0.02", cls: "good", hint: "DeepEval · demografische drift", stub: true },
-    { label: "p95 latency",       value: "2.1s", cls: "warn", hint: "warm cache; cold ~30s op deze CPU", stub: false },
-  ];
+async function loadEval() {
+  let data = null;
+  try {
+    const r = await fetch("/v1/eval/latest", { cache: "no-store" });
+    if (r.ok) data = await r.json();
+  } catch {}
+
+  const metrics = data ? buildLiveMetrics(data) : buildEmptyMetrics();
   $("#eval-metrics").innerHTML = metrics.map(m => `
     <div class="metric-card">
-      <div class="metric-label">${esc(m.label)}${m.stub ? stubBadge : ""}</div>
+      <div class="metric-label">${esc(m.label)}</div>
       <div class="metric-value ${m.cls}">${esc(m.value)}</div>
       <div class="text-[11px] text-slate-400">${esc(m.hint)}</div>
     </div>`).join("");
-  renderGate(0, 5, []);
-  if (!state._evalRan) {
-    $("#eval-runner").innerHTML = `<div class="text-xs text-slate-400">Klik "Run golden set" om de 5 golden-queries live door de pipeline te sturen. Dit kan enkele minuten duren op deze CPU.</div>`;
+
+  renderGate(data);
+
+  if (data) {
+    const ts = new Date(data.ts * 1000).toLocaleString();
+    const dur = Math.round(data.total_duration_s || 0);
+    const judge = data.ragas?.judge_model || data.deepeval?.judge_model || "—";
+    $("#eval-runner").innerHTML = `
+      <div class="text-xs text-slate-400">
+        Laatste run: <strong>${esc(ts)}</strong> · ${data.golden_count} queries · ${dur}s · judge <code class="text-bd-orange">${esc(judge)}</code>
+      </div>`;
+  } else {
+    $("#eval-runner").innerHTML = `<div class="text-xs text-slate-400">
+      Geen run beschikbaar. Klik "Run" om de golden set door Ragas + DeepEval te sturen. Duurt 1-3 minuten op CPU.
+    </div>`;
   }
 }
 
-async function runGoldenSet() {
-  state._evalRan = true;
-  const host = $("#eval-runner");
-  renderLoading(host, { rows: 5, text: "Golden set draait… live pipeline per query" });
-  try {
-    const r = await fetch("/eval.json", { cache: "no-store" });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const d = await r.json();
-    host.innerHTML = `
-      <div class="mb-2 text-xs"><strong>${d.passed} / ${d.total}</strong> geslaagd</div>
-      <div class="space-y-1">
-        ${d.entries.map(e => `
-          <div class="flex items-center gap-2 text-[11px] p-2 rounded border ${e.passed ? "border-green-400/40 bg-green-400/10" : "border-red-400/40 bg-red-400/10"}">
-            <span class="font-mono ${e.passed ? "text-green-300" : "text-red-300"}">${e.passed ? "PASS" : "FAIL"}</span>
-            <span class="flex-1 truncate">${esc(e.query || e.id || "")}</span>
-            <span class="font-mono text-slate-500">${Math.round(e.ms || 0)}ms</span>
-          </div>`).join("")}
-      </div>`;
-    renderGate(d.passed, d.total, d.entries);
-  } catch (err) { renderError(host, { err, onRetry: runGoldenSet }); }
+function buildLiveMetrics(d) {
+  const r = d.ragas || {};
+  const e = d.deepeval || {};
+  // Higher-is-better metrics (Ragas): green when ≥ threshold
+  const hib = (v, t) => v == null ? "warn" : v >= t ? "good" : v >= t * 0.85 ? "warn" : "bad";
+  // Lower-is-better metrics (DeepEval): green when ≤ threshold
+  const lib = (v, t) => v == null ? "warn" : v <= t ? "good" : v <= t * 1.5 ? "warn" : "bad";
+  const fmt = v => v == null ? "—" : Number(v).toFixed(2);
+  return [
+    {label: "Faithfulness",       value: fmt(r.faithfulness),       cls: hib(r.faithfulness, 0.90),       hint: "Ragas · claim is gegrond in context"},
+    {label: "Context Recall",     value: fmt(r.context_recall),     cls: hib(r.context_recall, 0.85),     hint: "Ragas · golden chunks retrieved"},
+    {label: "Answer Relevancy",   value: fmt(r.answer_relevancy),   cls: hib(r.answer_relevancy, 0.85),   hint: "Ragas · semantiek vs vraag"},
+    {label: "Hallucination",      value: fmt(e.hallucination),      cls: lib(e.hallucination, 0.10),      hint: "DeepEval · fabricatie-rate"},
+    {label: "Bias",               value: fmt(e.bias),               cls: lib(e.bias, 0.10),               hint: "DeepEval · demografische drift"},
+    {label: "Toxicity",           value: fmt(e.toxicity),           cls: lib(e.toxicity, 0.05),           hint: "DeepEval · PII / schade"},
+  ];
 }
 
-function renderGate(passed, total, entries) {
-  const pct = total ? passed / total : 0;
+function buildEmptyMetrics() {
+  return ["Faithfulness", "Context Recall", "Answer Relevancy", "Hallucination", "Bias", "Toxicity"]
+    .map(label => ({ label, value: "—", cls: "warn", hint: "Nog geen run" }));
+}
+
+async function runGoldenSet() {
+  const host = $("#eval-runner");
+  renderLoading(host, { rows: 5, text: "Ragas + DeepEval draaien over de golden set… dit kan 1-3 minuten duren op CPU." });
+  try {
+    const r = await fetch("/v1/eval/run", { method: "POST" });
+    if (r.status === 409) throw new Error("Er draait al een eval-run; wacht tot die klaar is.");
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    await r.json();           // we read the body so the connection closes cleanly
+    await loadEval();         // refreshes metrics-grid + gate from cached result
+  } catch (err) {
+    renderError(host, { err, onRetry: runGoldenSet });
+  }
+}
+
+function renderGate(d) {
+  const r = d?.ragas || {};
+  const e = d?.deepeval || {};
   const stages = [
-    { name: "Retrieval Quality", req: "≥ 80% golden set",        pass: pct >= 0.8 },
-    { name: "Generation Quality",req: "Faithfulness ≥ 0.90",      pass: true },
-    { name: "Security",          req: "0 tier-leaks in 100 probes",pass: true },
-    { name: "Performance",       req: "p95 ≤ 5s (cache warm)",    pass: true },
+    { name: "Retrieval Quality",  req: "Context Recall ≥ 0.85",  pass: (r.context_recall   ?? 0) >= 0.85 },
+    { name: "Generation Quality", req: "Faithfulness ≥ 0.90",    pass: (r.faithfulness     ?? 0) >= 0.90 },
+    { name: "Answer Quality",     req: "Answer Relevancy ≥ 0.85",pass: (r.answer_relevancy ?? 0) >= 0.85 },
+    { name: "Safety",             req: "Hallucination ≤ 0.10",   pass: (e.hallucination    ?? 1) <= 0.10 },
   ];
-  const ship = stages.every(s => s.pass);
+  const haveData = !!d;
+  const ship = haveData && stages.every(s => s.pass);
   $("#eval-gate").innerHTML = `
     <div class="flex items-center justify-between pb-2 border-b border-bd-border mb-2">
       <span class="text-xs text-slate-400">Gate verdict</span>
-      <span class="text-sm font-bold ${ship ? "text-green-400" : "text-red-400"}">${ship ? "✓ SHIP" : "✗ HOLD"}</span>
+      <span class="text-sm font-bold ${haveData ? (ship ? "text-green-400" : "text-red-400") : "text-slate-400"}">
+        ${haveData ? (ship ? "✓ SHIP" : "✗ HOLD") : "— geen run —"}
+      </span>
     </div>
     ${stages.map(s => `
       <div class="flex items-center justify-between">
         <span>${esc(s.name)} <span class="text-slate-500 text-[10px]">(${esc(s.req)})</span></span>
-        <span class="${s.pass ? "text-green-400" : "text-red-400"} font-bold">${s.pass ? "✓" : "✗"}</span>
+        <span class="${haveData ? (s.pass ? "text-green-400" : "text-red-400") : "text-slate-500"} font-bold">${haveData ? (s.pass ? "✓" : "✗") : "·"}</span>
       </div>`).join("")}
-    <p class="text-[10px] text-slate-500 pt-2 border-t border-bd-border mt-2">In productie draait dit op CI bij elke PR. Falen → deploy blocked.</p>`;
+    <p class="text-[10px] text-slate-500 pt-2 border-t border-bd-border mt-2">
+      In productie draait dit op CI bij elke PR. Falen → deploy blocked.
+    </p>`;
 }
 
 function wireEval() { $("#eval-run-btn").addEventListener("click", runGoldenSet); }

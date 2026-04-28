@@ -78,6 +78,39 @@ async def health_detailed(request: Request):
     return status
 
 
+@router.get("/v1/admin/index_stats", summary="Index size + memory projection per quantization mode")
+async def index_stats(request: Request):
+    """Memory math for the live OpenSearch index across precisions.
+    Used by the Operations → Ingestie quantization-widget. Numbers are
+    deterministic (n × dim × bytes × HNSW-overhead); no quantization is
+    actually applied at runtime — this is the projection panel for the
+    production-scale story (assessment §Module 1).
+    """
+    settings = get_settings()
+    try:
+        n = request.app.state.opensearch.count(index=settings.opensearch_index)["count"]
+    except Exception as e:
+        return {"error": str(e), "chunks": 0}
+
+    dim = settings.embedding_dim
+    overhead = 1.8  # HNSW graph overhead factor (m=16 connections + ef=128 neighbours)
+
+    # Bytes per vector at each precision (× HNSW overhead)
+    bytes_per_vec = {"fp32": dim * 4, "fp16": dim * 2, "int8": dim * 1, "pq8": dim * 0.125}
+    memory_now = {k: int(n * v * overhead) for k, v in bytes_per_vec.items()}
+    memory_20m = {k: int(20_000_000 * v * overhead) for k, v in bytes_per_vec.items()}
+
+    return {
+        "chunks": n,
+        "dim": dim,
+        "overhead": overhead,
+        "current_precision": "fp32",  # OpenSearch default for this demo
+        "memory_bytes": memory_now,
+        "production_20m_bytes": memory_20m,
+        "production_target_chunks": 20_000_000,
+    }
+
+
 @router.get("/health/pipeline", summary="Pipeline architecture info")
 async def pipeline_info():
     return {

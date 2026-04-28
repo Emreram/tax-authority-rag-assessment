@@ -180,3 +180,60 @@ async def eval_json(request: Request):
         except Exception as e:
             out.append({"id": entry.get("id"), "passed": False, "reasons": [str(e)]})
     return {"entries": out, "total": len(out), "passed": sum(1 for r in out if r.get("passed"))}
+
+
+# ─── Real eval (Ragas + DeepEval) ────────────────────────────────────────────
+# In-memory cache of the latest run; survives until the api container restarts.
+_eval_cache: dict | None = None
+_eval_lock = asyncio.Lock()
+
+
+@router.post("/v1/eval/run")
+async def run_full_eval(request: Request):
+    """Run Ragas + DeepEval over the golden set. ~1-3 minutes on CPU."""
+    global _eval_cache
+    if _eval_lock.locked():
+        return JSONResponse({"error": "eval already running"}, status_code=409)
+    async with _eval_lock:
+        entries = _load_golden()
+        if not entries:
+            return JSONResponse({"error": "no golden set"}, status_code=404)
+
+        os_client = request.app.state.opensearch
+        redis_client = request.app.state.redis
+
+        from app.eval.ragas_runner import run_ragas
+        from app.eval.deepeval_runner import run_deepeval
+
+        log.info("eval_run_started", entries=len(entries))
+        t0 = time.time()
+        # Run sequentially — both call run_crag which hammers the LLM; parallel
+        # adds contention without meaningful speedup on a CPU-only stack.
+        try:
+            ragas_metrics = await run_ragas(entries, os_client, redis_client)
+        except Exception as e:
+            log.error("ragas_runner_failed", error=str(e))
+            ragas_metrics = {"error": str(e)}
+        try:
+            deepeval_metrics = await run_deepeval(entries, os_client, redis_client)
+        except Exception as e:
+            log.error("deepeval_runner_failed", error=str(e))
+            deepeval_metrics = {"error": str(e)}
+        total_s = round(time.time() - t0, 1)
+        _eval_cache = {
+            "ragas": ragas_metrics,
+            "deepeval": deepeval_metrics,
+            "ts": time.time(),
+            "golden_count": len(entries),
+            "total_duration_s": total_s,
+        }
+        log.info("eval_run_complete", total_s=total_s)
+        return JSONResponse(_eval_cache)
+
+
+@router.get("/v1/eval/latest")
+async def get_latest_eval():
+    """Returns the cached most-recent run, or 404 if no run yet."""
+    if _eval_cache is None:
+        return JSONResponse({"error": "no run yet"}, status_code=404)
+    return JSONResponse(_eval_cache)

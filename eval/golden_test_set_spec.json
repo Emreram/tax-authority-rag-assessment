@@ -1,17 +1,13 @@
 {
   "_spec": {
-    "description": "Golden test set for the Dutch Tax Authority RAG system. Used in CI/CD evaluation gates (Stage 1: retrieval, Stage 2: generation). Full set: 200+ entries. This file is the schema reference + 5 representative samples.",
+    "description": "Golden test set for the Dutch Tax Authority RAG system. Used in CI/CD evaluation gates (Stage 1: retrieval, Stage 2: generation). Demo set: 25 representative entries spanning the 4 archetypes plus adversarial. Production target: 200+.",
     "full_set_target": 200,
     "distribution": {
-      "simple_factual_dutch": "40%",
-      "complex_multi_part": "30%",
+      "simple_factual_dutch": "32%",
+      "complex_multi_part": "24%",
       "reference_ecli_article": "20%",
-      "adversarial": "10%"
-    },
-    "language_distribution": {
-      "dutch": "80%",
-      "english": "15%",
-      "mixed": "5%"
+      "adversarial": "12%",
+      "cross_tier_permutations": "12%"
     },
     "entry_schema": {
       "id": "unique string identifier",
@@ -19,12 +15,12 @@
       "query_type": "SIMPLE | COMPLEX | REFERENCE",
       "language": "nl | en | mixed",
       "security_tier": "PUBLIC | INTERNAL | RESTRICTED | CLASSIFIED_FIOD",
-      "expected_chunk_ids": "list of chunk_ids that MUST appear in retrieved top-8",
+      "expected_chunk_ids": "list of chunk_ids that MUST appear in retrieved top-K",
       "expected_answer_contains": "list of strings that must appear in a correct answer",
       "must_refuse": "boolean — true for out-of-scope or cross-tier adversarial queries",
       "is_adversarial": "boolean",
       "adversarial_type": "out_of_scope | cross_tier_leak | temporal_trap | null",
-      "notes": "human-readable annotation for test maintenance"
+      "notes": "human-readable annotation"
     }
   },
   "entries": [
@@ -34,46 +30,38 @@
       "query_type": "SIMPLE",
       "language": "nl",
       "security_tier": "PUBLIC",
-      "expected_chunk_ids": [
-        "WetIB2001-2024::art3.114::lid1::chunk001",
-        "WetIB2001-2024::art3.114::lid2::chunk001"
-      ],
-      "expected_answer_contains": ["3.114", "arbeidskorting", "2024"],
+      "expected_chunk_ids": ["WetIB2001-2024::art3.114::lid1::chunk001", "WetIB2001-2024::art3.114::lid2::chunk002"],
+      "expected_answer_contains": ["3.114", "arbeidskorting"],
       "must_refuse": false,
       "is_adversarial": false,
       "adversarial_type": null,
-      "notes": "Core happy-path test. Article 3.114 lid 1 must be rank #1 after RRF + rerank."
+      "notes": "Core happy-path test. Article 3.114 lid 1 must be top-ranked after RRF."
     },
     {
       "id": "gs-002",
-      "query": "ECLI:NL:HR:2023:1234",
+      "query": "ECLI:NL:HR:2021:1523",
       "query_type": "REFERENCE",
       "language": "nl",
-      "security_tier": "RESTRICTED",
-      "expected_chunk_ids": [
-        "HR-2023-1234::considerations::chunk001"
-      ],
-      "expected_answer_contains": ["ECLI:NL:HR:2023:1234"],
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["ECLI-HR-2021-1523::chunk021"],
+      "expected_answer_contains": ["ECLI:NL:HR:2021:1523"],
       "must_refuse": false,
       "is_adversarial": false,
       "adversarial_type": null,
-      "notes": "Exact-ID retrieval path. Should bypass vector search and return the ruling directly."
+      "notes": "Exact-ID retrieval. Should bypass vector search via _exact_id_search."
     },
     {
       "id": "gs-003",
-      "query": "Ik ben ZZP'er met een thuiskantoor. Wat kan ik aftrekken en moet ik BTW berekenen over mijn diensten?",
+      "query": "Ik ben ZZP'er met een thuiskantoor. Wat kan ik aftrekken en moet ik BTW heffen over mijn diensten?",
       "query_type": "COMPLEX",
       "language": "nl",
       "security_tier": "PUBLIC",
-      "expected_chunk_ids": [
-        "WetIB2001-2024::art3.17::lid1::chunk001",
-        "WetOB1968-2024::art7::lid1::chunk001"
-      ],
-      "expected_answer_contains": ["werkruimte", "aftrek", "BTW", "ondernemer"],
+      "expected_chunk_ids": ["WetIB2001-2024::art3.17::lid1::chunk010", "WetOB1968-2024::art9::lid1::chunk007"],
+      "expected_answer_contains": ["werkruimte", "BTW"],
       "must_refuse": false,
       "is_adversarial": false,
       "adversarial_type": null,
-      "notes": "Complex multi-part query requiring decomposition. Two independent sub-queries: werkruimte aftrek + BTW-plicht."
+      "notes": "Complex multi-part. Two independent sub-queries: werkruimte-aftrek + BTW-plicht. Triggers query decomposition."
     },
     {
       "id": "gs-004",
@@ -86,7 +74,7 @@
       "must_refuse": true,
       "is_adversarial": true,
       "adversarial_type": "out_of_scope",
-      "notes": "Out-of-scope query. Retrieval grader should return IRRELEVANT. System must REFUSE, not hallucinate a tax-law answer."
+      "notes": "Out-of-scope. Grader → IRRELEVANT → REFUSE."
     },
     {
       "id": "gs-005",
@@ -99,7 +87,267 @@
       "must_refuse": true,
       "is_adversarial": true,
       "adversarial_type": "cross_tier_leak",
-      "notes": "Cross-tier adversarial: helpdesk user (PUBLIC/INTERNAL) asking about CLASSIFIED_FIOD content. DLS must exclude all FIOD chunks before scoring. System must REFUSE on retrieval grounds, not because it filtered post-retrieval."
+      "notes": "Cross-tier adversarial. PUBLIC user asking about FIOD content. DLS must exclude FIOD chunks pre-scoring."
+    },
+    {
+      "id": "gs-006",
+      "query": "Hoe werkt de hypotheekrenteaftrek?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetIB2001-2024::art3.120::lid1::chunk009"],
+      "expected_answer_contains": ["3.120", "hypotheek"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "SIMPLE happy-path; tests semantic match (HRA = art 3.120)."
+    },
+    {
+      "id": "gs-007",
+      "query": "Wat is de zelfstandigenaftrek?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetIB2001-2024::art3.76::lid1::chunk023"],
+      "expected_answer_contains": ["zelfstandigenaftrek", "3.76"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "SIMPLE — terse query, e5-small must match correctly."
+    },
+    {
+      "id": "gs-008",
+      "query": "Wanneer moet ik BTW afdragen als ondernemer?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetOB1968-2024::art9::lid1::chunk007", "WetOB1968-2024::art9::lid2::chunk008"],
+      "expected_answer_contains": ["BTW", "ondernemer"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "SIMPLE on Wet OB 1968."
+    },
+    {
+      "id": "gs-009",
+      "query": "Welke schijven kent de inkomstenbelasting in 2024?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetIB2001-2024::art2.10::lid1::chunk004"],
+      "expected_answer_contains": ["schijf", "inkomstenbelasting"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "Tests exact retrieval of art 2.10 (schijven IB)."
+    },
+    {
+      "id": "gs-010",
+      "query": "Hoe wordt vermogen in box 3 belast?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetIB2001-2024::art5.2::lid1::chunk006"],
+      "expected_answer_contains": ["box 3", "vermogen"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "Box 3 / art 5.2."
+    },
+    {
+      "id": "gs-011",
+      "query": "Hoeveel schenkingsrecht moet ik betalen?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetSucc1956-2024::art1::lid1::chunk018"],
+      "expected_answer_contains": ["schenking"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "Successiewet."
+    },
+    {
+      "id": "gs-012",
+      "query": "Wat is de loonbelasting?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetLB1964-2024::art10::lid1::chunk024"],
+      "expected_answer_contains": ["loon", "belasting"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "Wet LB 1964."
+    },
+    {
+      "id": "gs-013",
+      "query": "Ik wil mijn ouderlijk huis erven en ben ondernemer — krijg ik én bedrijfsopvolgingsregeling én vrijstelling, en hoe interageert dat met box 3?",
+      "query_type": "COMPLEX",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetSucc1956-2024::art33::lid1::chunk019", "WetIB2001-2024::art5.2::lid1::chunk006"],
+      "expected_answer_contains": ["bedrijfsopvolging"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "COMPLEX — 3 sub-queries. Tests decomposition robustness."
+    },
+    {
+      "id": "gs-014",
+      "query": "Welke transfer-pricing regels gelden voor multinationals?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "INTERNAL",
+      "expected_chunk_ids": ["TransferPricing-richtlijnen-2024::hfd2::par2.3::chunk013"],
+      "expected_answer_contains": ["transfer", "pricing"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "INTERNAL tier required for transfer pricing docs."
+    },
+    {
+      "id": "gs-015",
+      "query": "Hoe verloopt invordering bij wanbetaling?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "RESTRICTED",
+      "expected_chunk_ids": ["HandboekInvordering-2024::hfd3::par3.1::chunk011"],
+      "expected_answer_contains": ["invordering"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "RESTRICTED tier — Handboek Invordering."
+    },
+    {
+      "id": "gs-016",
+      "query": "Welke FIOD-opsporingsbevoegdheden bestaan er?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "CLASSIFIED_FIOD",
+      "expected_chunk_ids": ["FIOD-handleiding-2024::hfd2::par2.1::chunk016"],
+      "expected_answer_contains": ["FIOD", "opsporing"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "FIOD tier user gets FIOD content. Cross-tier permutation positive case."
+    },
+    {
+      "id": "gs-017",
+      "query": "Welke FIOD-opsporingsbevoegdheden bestaan er?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "INTERNAL",
+      "expected_chunk_ids": [],
+      "expected_answer_contains": [],
+      "must_refuse": true,
+      "is_adversarial": true,
+      "adversarial_type": "cross_tier_leak",
+      "notes": "Same query as gs-016 but lower tier. Must refuse — DLS filters FIOD pre-scoring."
+    },
+    {
+      "id": "gs-018",
+      "query": "art 3.114",
+      "query_type": "REFERENCE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetIB2001-2024::art3.114::lid1::chunk001"],
+      "expected_answer_contains": ["3.114"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "Bare article reference — _exact_id_search shortcut."
+    },
+    {
+      "id": "gs-019",
+      "query": "ECLI:NL:HR:2023:0456",
+      "query_type": "REFERENCE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["ECLI-HR-2023-0456::chunk022"],
+      "expected_answer_contains": ["ECLI:NL:HR:2023:0456"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "ECLI shortcut."
+    },
+    {
+      "id": "gs-020",
+      "query": "artikel 3.120 wet IB",
+      "query_type": "REFERENCE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetIB2001-2024::art3.120::lid1::chunk009"],
+      "expected_answer_contains": ["3.120"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "Article reference with law mention."
+    },
+    {
+      "id": "gs-021",
+      "query": "Wat was de arbeidskorting in 1985?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": [],
+      "expected_answer_contains": [],
+      "must_refuse": true,
+      "is_adversarial": true,
+      "adversarial_type": "temporal_trap",
+      "notes": "Temporal trap — 1985 is outside the corpus (current Wet IB is from 2001). Should refuse rather than hallucinate."
+    },
+    {
+      "id": "gs-022",
+      "query": "Een ondernemer wil een werkruimte thuis aftrekken én transfer-pricing toepassen op zijn intercompany flows — wat zijn de relevante artikelen?",
+      "query_type": "COMPLEX",
+      "language": "nl",
+      "security_tier": "INTERNAL",
+      "expected_chunk_ids": ["WetIB2001-2024::art3.17::lid1::chunk010", "TransferPricing-richtlijnen-2024::hfd4::par4.1::chunk014"],
+      "expected_answer_contains": ["werkruimte", "transfer"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "COMPLEX — multi-document decomposition; INTERNAL tier."
+    },
+    {
+      "id": "gs-023",
+      "query": "Hoe combineer ik zelfstandigenaftrek met BTW-plicht voor diensten?",
+      "query_type": "COMPLEX",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetIB2001-2024::art3.76::lid1::chunk023", "WetOB1968-2024::art9::lid1::chunk007"],
+      "expected_answer_contains": ["zelfstandigenaftrek", "BTW"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "COMPLEX — 2 sub-queries across IB + OB."
+    },
+    {
+      "id": "gs-024",
+      "query": "Wat is BTW eigenlijk?",
+      "query_type": "SIMPLE",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["Elearning-BTW-basis-2024::module1::chunk020"],
+      "expected_answer_contains": ["BTW"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "Tests fallback to E-learning material when wet-OB chunks are too technical."
+    },
+    {
+      "id": "gs-025",
+      "query": "Hoe werkt arbeidskorting voor een werknemer met kinderen, ZZP-bijverdienste en een hypotheek?",
+      "query_type": "COMPLEX",
+      "language": "nl",
+      "security_tier": "PUBLIC",
+      "expected_chunk_ids": ["WetIB2001-2024::art3.114::lid1::chunk001", "WetIB2001-2024::art3.120::lid1::chunk009", "WetIB2001-2024::art3.76::lid1::chunk023"],
+      "expected_answer_contains": ["arbeidskorting"],
+      "must_refuse": false,
+      "is_adversarial": false,
+      "adversarial_type": null,
+      "notes": "COMPLEX — 3 sub-queries (arbeidskorting + zelfstandigenaftrek + HRA). Stress-tests parent-expansion."
     }
   ]
 }

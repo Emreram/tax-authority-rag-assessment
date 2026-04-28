@@ -80,7 +80,14 @@ async def retrieve(
     query_type: str,
     settings,
 ) -> list[dict]:
-    """Main retrieval entry point — returns up to top_k_rerank chunks."""
+    """Main retrieval entry point — returns up to top_k_rerank chunks.
+
+    Trace events emitted during execution (HyDE, rerank) are collected on
+    `retrieve.last_trace_events` (a contextvar would be cleaner but for the
+    demo a function attribute keeps the single-caller path simple). The chat
+    router reads + clears this list after the call.
+    """
+    retrieve.last_trace_events = []  # reset per call
     rbac_filter = build_rbac_filter(security_tier)
 
     # Exact-ID shortcut for REFERENCE queries
@@ -94,16 +101,25 @@ async def retrieve(
     query_embedding = await embed_query(query)
 
     # HyDE: for SIMPLE queries, draft a hypothetical passage and also embed that,
-    # then kNN with a blended vector. Disabled by default on CPU — adds an LLM call.
+    # then kNN with a blended vector. M4: emit trace event so the UI can show it.
     hyde_embedding = None
     if query_type == "SIMPLE" and getattr(settings, "enable_hyde", False):
         try:
+            import time as _time
             from app.pipeline.hyde import draft_hypothesis
             from app.pipeline.embedder import embed_document as _embed_passage
+            t0 = _time.time()
             hypothesis = await draft_hypothesis(query)
             if hypothesis:
                 hyde_embedding = await _embed_passage(hypothesis)
+                dur_ms = (_time.time() - t0) * 1000
                 log.info("hyde_drafted", chars=len(hypothesis))
+                retrieve.last_trace_events.append({
+                    "node": "hyde",
+                    "result": "drafted",
+                    "detail": hypothesis[:120],
+                    "duration_ms": round(dur_ms, 1),
+                })
         except Exception as e:
             log.warning("hyde_skipped", error=str(e))
 

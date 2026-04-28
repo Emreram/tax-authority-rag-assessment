@@ -36,8 +36,10 @@ class Settings(BaseSettings):
     max_conversation_turns: int = 6
 
     # Feature flags — defaults tuned for live-demo on CPU.
-    # Disable cascading LLM calls that triple latency without proportional UX value.
-    enable_hyde: bool = False
+    # HyDE is enabled by default (M4): adds one ~80-token LLM draft to lift
+    # recall on terse SIMPLE queries. LLM-rerank stays off — overlapping cost
+    # with the grader on a CPU-only stack.
+    enable_hyde: bool = True
     enable_llm_rerank: bool = False
 
     class Config:
