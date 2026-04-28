@@ -9,6 +9,20 @@ Supporting artifacts: [pseudocode/](../pseudocode/) · [schemas/](../schemas/) �
 
 ---
 
+> ## ⚠️ Lees dit eerst — verschil tussen dit document en de live demo
+>
+> Dit document beschrijft het **productie-ontwerp** voor een 20M-chunks corpus op een 3-node OpenSearch-cluster met GPU-LLM. De **live demo** in [`demo/`](../demo/) is een gereduceerde implementatie die op een normale laptop draait. De architectonische keuzes (RRF k=60, pre-retrieval RBAC, MAX_RETRIES=1, CRAG-grading, parent-expansion, semantic cache) zijn in beide identiek; de stack-keuzes verschillen op drie punten:
+>
+> | Onderdeel | Dit ontwerp (productie) | Live demo (laptop) | Reden |
+> |---|---|---|---|
+> | Orchestrator | LangGraph 9-state machine | Imperatieve Python-state machine | LangGraph voegt complexiteit toe zonder winst bij 9 states; imperatief is beter te auditen voor een toezichthouder |
+> | LLM | Mixtral 8x22B / Llama 3.1 70B via vLLM | `ai/gemma4:E2B` via Docker Model Runner | Productie heeft GPU-cluster; laptop heeft CPU + 8 GB RAM |
+> | Embeddings | `multilingual-e5-large` (1024-dim) + `bge-reranker-v2-m3` cross-encoder | `multilingual-e5-small` (384-dim) + LLM-as-reranker (zelfde Gemma-call) | Kleinere modellen passen op laptop; reranker-rol vervalt naar de Gemma-pass |
+>
+> Alle andere aspecten van dit document (HNSW-tuning, RBAC-model, CRAG-states, eval-gate, prompts, chunkstrategie, hiërarchische metadata) zijn 1-op-1 wat de demo doet. Voor een schoon overzicht van wat in deze repo v1-design is en wat v3-implementatie, zie [`OUTDATED_AUDIT.md`](../OUTDATED_AUDIT.md).
+
+---
+
 ## Executive Summary
 
 A Retrieval-Augmented Generation platform for the Dutch National Tax Authority. Three user personas (tax inspectors, legal counsel, helpdesk staff), ~500,000 legal documents, ~20 million chunks, hard **TTFT p95 < 1500 ms**, fail-closed hallucination prevention, and strict RBAC with a CLASSIFIED_FIOD tier that helpdesk users must never reach.

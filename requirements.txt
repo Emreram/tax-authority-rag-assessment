@@ -1,43 +1,15 @@
-# Enterprise RAG — Dutch Tax Authority
-# Python 3.11+
-
-# Search & Storage
-opensearch-py>=2.4.0
-redis[hiredis]>=5.0.0
-
-# Ingestion & Orchestration
-llama-index>=0.11.0
-llama-index-core>=0.11.0
-langchain-core>=0.3.0
-langgraph>=0.2.0
-
-# Embedding & Reranking (self-hosted)
-sentence-transformers>=3.0.0   # multilingual-e5-large + bge-reranker-v2-m3
-transformers>=4.42.0
-torch>=2.3.0
-accelerate>=0.30.0
-
-# LLM serving (vLLM for Mixtral 8x22B; swap for azure-openai if using Gov Cloud)
-vllm>=0.5.0
-
-# API Layer
-fastapi>=0.111.0
-uvicorn[standard]>=0.30.0
-pydantic>=2.7.0
-python-jose[cryptography]>=3.3.0  # JWT validation
-httpx>=0.27.0
-
-# Evaluation
-ragas>=0.2.0
-deepeval>=1.0.0
-
-# Observability
-opentelemetry-api>=1.25.0
-opentelemetry-sdk>=1.25.0
-opentelemetry-exporter-otlp>=1.25.0
-prometheus-client>=0.20.0
-
-# Utilities
-python-dotenv>=1.0.0
-structlog>=24.0.0
-tenacity>=8.3.0
+# Deze repo heeft twee dependency-lijsten met verschillende doelen:
+#
+#   demo/requirements-demo.txt   Wat de live Docker-stack daadwerkelijk gebruikt
+#                                (FastAPI, sentence-transformers, OpenSearch-client,
+#                                Redis, openai-client tegen Docker Model Runner).
+#                                Dit is wat je installeert om de demo te draaien.
+#
+#   slides/requirements.txt      Alleen `python-pptx` voor het regenereren
+#                                van de onderbouwingsslides.
+#
+# Het oorspronkelijke ontwerp-document (drafts/final_submission_v2.md) noemt
+# extra dependencies — LangGraph, vLLM, llama-index, bge-reranker, ragas — die
+# bedoeld zijn voor de productie-architectuur op 20M chunks. Die zitten bewust
+# NIET in de demo: de demo is een laptop-versie. Zie OUTDATED_AUDIT.md voor de
+# volledige uitleg van het verschil tussen v1-papier en v3-runtime.

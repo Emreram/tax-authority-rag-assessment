@@ -10,3 +10,8 @@ build_pptx*.py
 *.docx
 demo/.env
 demo/opensearch-data/
+
+# slide build artefacts
+slides/.venv/
+slides/__pycache__/
+slides/output/
