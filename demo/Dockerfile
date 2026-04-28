@@ -5,7 +5,9 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
 COPY requirements-demo.txt .
-RUN pip install --no-cache-dir -r requirements-demo.txt
+# Install CPU-only torch first so sentence-transformers doesn't pull the 4+ GB CUDA stack.
+RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu "torch>=2.2.0,<3" \
+ && pip install --no-cache-dir -r requirements-demo.txt
 
 COPY app/ ./app/
 

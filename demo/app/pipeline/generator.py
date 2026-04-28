@@ -1,35 +1,42 @@
 """
-Response generator — uses Gemini to generate a grounded answer with citations.
-Citation format: [Source: chunk_id | hierarchy_path]
+Response generator — uses the local LLM (Docker Model Runner) to produce a grounded
+answer with citations, then post-processes the output for human readability:
+  - Inline `[Source: chunk_id | path]` markers are collapsed to `[N]` refs.
+  - Any 'Bronnen:' footer the model adds is stripped (UI shows citation pills).
+  - Markdown formatting (bullets, tables, **bold**) is preserved verbatim.
 """
 
+from app.pipeline.citation_format import compact_citations
 from app.pipeline.llm import generate
 import structlog
 
 log = structlog.get_logger()
 
-GENERATOR_SYSTEM = """You are a Dutch Tax Authority legal information assistant.
+GENERATOR_SYSTEM = """Je bent de KennisAssistent van de Belastingdienst.
 
-CRITICAL RULES:
-1. ONLY use information from the provided context passages. Do NOT use prior knowledge.
-2. Every factual claim MUST be followed by a citation in this exact format:
-   [Source: <chunk_id> | <hierarchy_path>]
-3. If the context does not contain enough information, say so clearly.
-4. Answer in the same language as the question (Dutch or English).
-5. Be precise with numbers, percentages, and dates — these are legal facts.
-6. End your response with a "Bronnen:" (Sources) section listing all cited chunk_ids.
+INHOUDSREGELS:
+1. Gebruik UITSLUITEND informatie uit de meegegeven contextpassages. Geen externe kennis.
+2. Plaats na elke feitelijke claim één citatie in exact dit formaat: [Source: <chunk_id> | <hierarchy_path>]
+3. Als de context onvoldoende is, zeg dat eerlijk in één korte zin.
+4. Antwoord in dezelfde taal als de vraag (Nederlands of Engels).
+5. Wees precies met bedragen, percentages en data — dit zijn juridische feiten.
 
-Format example:
-De arbeidskorting bedraagt maximaal € 5.532 in 2024. [Source: WetIB2001-2024::art3.114::lid2::chunk002 | Wet IB 2001 > Hoofdstuk 3 > Art. 3.114 > Lid 2]
-
-Bronnen:
-- WetIB2001-2024::art3.114::lid2::chunk002"""
+OPMAAKREGELS (Markdown — voor leesbaarheid):
+- Korte vraag (ja/nee, één feit) → 1–2 zinnen, geen heading, geen lijst.
+- Numerieke schijven, tarieven of voorwaardenlijsten → gebruik een Markdown-tabel.
+- Meerdere losse voorwaarden of stappen → gebruik bullet points (`- `).
+- Bedragen, percentages en data: zet ze **vet** (`**€ 5.532**`, `**8,231%**`).
+- GEEN 'Bronnen:' sectie aan het einde — de inline citaten zijn voldoende, de UI toont de bronnen apart.
+- Geen H1. Optioneel één H2 (`## Onderwerp`) als de vraag dat verdient (>3 punten).
+- Houd de response compact — geen herhaling, geen disclaimer-tekst.
+"""
 
 
 async def generate_response(query: str, relevant_chunks: list[dict]) -> tuple[str, list[str]]:
     """
-    Generates an answer using Gemini.
-    Returns (response_text, list_of_cited_chunk_ids)
+    Generates an answer using the configured LLM, then post-processes for readability.
+    Returns (response_text_with_compact_refs, ordered_cited_chunk_ids).
+    The order of cited_ids matches the [N] indices in the response text.
     """
     context = []
     for chunk in relevant_chunks[:6]:  # max 6 chunks in context
@@ -39,21 +46,41 @@ async def generate_response(query: str, relevant_chunks: list[dict]) -> tuple[st
             f"{chunk['chunk_text']}"
         )
 
-    user_prompt = f"Question: {query}\n\nContext passages:\n\n" + "\n\n---\n\n".join(context)
+    user_prompt = f"Vraag: {query}\n\nContext:\n\n" + "\n\n---\n\n".join(context)
 
-    response_text = await generate(
+    raw_response = await generate(
         system_prompt=GENERATOR_SYSTEM,
         user_prompt=user_prompt,
         temperature=0.0,
+        max_tokens=900,
     )
 
-    # Extract cited chunk_ids from response
+    # Extract chunk_ids from the raw [Source: ...] markers BEFORE compacting,
+    # so validation and the ordered list are derived from the same source-of-truth.
     import re
-    cited_ids = re.findall(r"\[Source:\s*([^\|]+)\s*\|", response_text)
-    cited_ids = [cid.strip() for cid in cited_ids]
+    raw_cited = re.findall(r"\[Source:\s*([^\|\]]+)\s*[\|\]]", raw_response)
+    raw_cited = [cid.strip() for cid in raw_cited]
 
-    log.info("generation_complete", citations=len(cited_ids))
-    return response_text, cited_ids
+    known_ids = {c["chunk_id"] for c in relevant_chunks}
+    cleaned_text, ordered_cids = compact_citations(raw_response, known_ids)
+
+    # Build the final cited_ids list. Prefer the post-processed order (it matches [N]),
+    # then fall back through the same chain as before for small-model robustness.
+    cited_ids = list(ordered_cids)
+
+    if not cited_ids:
+        # Fallback 1: small models often skip the [Source:...] markup. Look for any
+        # known chunk_id appearing verbatim in the response.
+        cited_ids = [cid for cid in known_ids if cid in raw_response]
+
+    if not cited_ids and relevant_chunks:
+        # Fallback 2: still nothing → attribute the top 2 retrieved chunks as the
+        # implicit sources used to ground the answer.
+        cited_ids = [c["chunk_id"] for c in relevant_chunks[:2]]
+        log.info("citation_fallback_implicit", count=len(cited_ids))
+
+    log.info("generation_complete", citations=len(cited_ids), refs_in_text=len(ordered_cids))
+    return cleaned_text, cited_ids
 
 
 async def rewrite_query(query: str) -> str:

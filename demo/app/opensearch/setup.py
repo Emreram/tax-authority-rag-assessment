@@ -1,6 +1,6 @@
 """
 Creates the OpenSearch index with the correct mapping and seeds it with
-Dutch tax law chunks. Embeddings are generated at startup via Gemini.
+Dutch tax law chunks. Embeddings are generated at startup via sentence-transformers.
 """
 
 import json
@@ -11,7 +11,7 @@ from opensearchpy import OpenSearch
 from opensearchpy.helpers import bulk
 from app.config import get_settings
 from app.opensearch.client import get_opensearch_client
-from app.pipeline.llm import embed_document
+from app.pipeline.embedder import embed_document
 import structlog
 
 log = structlog.get_logger()
@@ -78,6 +78,9 @@ def get_index_mapping(settings) -> dict:
                     "analyzer": "dutch_legal_analyzer",
                     "fields": {"keyword": {"type": "keyword", "ignore_above": 256}}
                 },
+                "topic":    {"type": "keyword"},
+                "entities": {"type": "keyword"},
+                "summary":  {"type": "text", "analyzer": "dutch_legal_analyzer"},
                 "embedding": {
                     "type": "knn_vector",
                     "dimension": settings.embedding_dim,

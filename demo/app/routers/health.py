@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request
 from app.config import get_settings
+from app.pipeline.llm import ping as llm_ping
 import structlog
 
 log = structlog.get_logger()
@@ -7,8 +8,13 @@ router = APIRouter()
 
 
 @router.get("/health", summary="Simple health check")
-async def health():
-    return {"status": "healthy"}
+async def health(request: Request):
+    warmup_complete = bool(getattr(request.app.state, "warmup_complete", False))
+    return {
+        "status": "healthy" if warmup_complete else "warming",
+        "warmup_complete": warmup_complete,
+        "warmup_stage": getattr(request.app.state, "warmup_stage", "unknown"),
+    }
 
 
 @router.get("/health/detailed", summary="Detailed service status")
@@ -44,9 +50,25 @@ async def health_detailed(request: Request):
         status["services"]["redis"] = {"status": "error", "detail": str(e)}
         status["status"] = "degraded"
 
+    # LLM — Docker Model Runner
+    try:
+        if await llm_ping():
+            status["services"]["model_runner"] = {
+                "status": "connected",
+                "base_url": settings.llm_base_url,
+                "model": settings.llm_model,
+            }
+        else:
+            status["services"]["model_runner"] = {"status": "unreachable", "base_url": settings.llm_base_url}
+            status["status"] = "degraded"
+    except Exception as e:
+        status["services"]["model_runner"] = {"status": "error", "detail": str(e)}
+        status["status"] = "degraded"
+
     status["config"] = {
-        "llm_model": settings.gemini_llm_model,
-        "embedding_model": settings.gemini_embedding_model,
+        "llm_model": settings.llm_model,
+        "llm_base_url": settings.llm_base_url,
+        "embedding_model": settings.embedding_model,
         "embedding_dim": settings.embedding_dim,
         "cache_threshold": settings.cache_similarity_threshold,
         "max_retries": settings.max_retries,

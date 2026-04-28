@@ -7,7 +7,9 @@ from redis import Redis
 from app.config import get_settings
 from app.opensearch.client import get_opensearch_client
 from app.opensearch.setup import setup_opensearch
-from app.routers import query, health, cache
+from app.pipeline import embedder
+from app.pipeline.llm import ping as llm_ping
+from app.routers import query, health, cache, chat, ingest, eval_dashboard
 import structlog
 
 log = structlog.get_logger()
@@ -16,13 +18,27 @@ log = structlog.get_logger()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings = get_settings()
-    log.info("startup_begin", llm=settings.gemini_llm_model, embedding=settings.gemini_embedding_model)
+    app.state.warmup_complete = False
+    app.state.warmup_stage = "starting"
+    log.info("startup_begin", llm=settings.llm_model, embedding=settings.embedding_model)
+
+    # Preload embedder (downloads e5-small on first boot, then cached)
+    app.state.warmup_stage = "loading_embedder"
+    embedder.preload()
+    log.info("embedder_ready", dim=settings.embedding_dim)
+
+    # Verify LLM (Docker Model Runner) reachable
+    app.state.warmup_stage = "pinging_llm"
+    if not await llm_ping():
+        log.warning("llm_unreachable_at_startup", base_url=settings.llm_base_url)
 
     # Connect OpenSearch + seed data
+    app.state.warmup_stage = "opensearch_setup"
     app.state.opensearch = get_opensearch_client()
     await setup_opensearch()
 
     # Connect Redis
+    app.state.warmup_stage = "connecting_redis"
     app.state.redis = Redis(
         host=settings.redis_host,
         port=settings.redis_port,
@@ -31,6 +47,8 @@ async def lifespan(app: FastAPI):
     app.state.redis.ping()
     log.info("redis_connected")
 
+    app.state.warmup_complete = True
+    app.state.warmup_stage = "ready"
     log.info("startup_complete")
     yield
 
@@ -51,7 +69,8 @@ Dutch Tax Authority (Belastingdienst). Built as part of a Lead AI Engineer asses
 This demo runs a real pipeline with:
 - **OpenSearch 2.15** — hybrid BM25 + kNN search with Dutch legal analyzer (HNSW m=16)
 - **Redis** — semantic cache with security-tier partitioning
-- **Google Gemini** — query classification, retrieval grading, answer generation with citations
+- **Ollama (Gemma 3 / qwen2.5:3b on-device)** — query classification, retrieval grading, answer generation with citations
+- **sentence-transformers (intfloat/multilingual-e5-small, 384-dim)** — in-process Dutch embeddings
 - **RRF fusion** — Reciprocal Rank Fusion (k=60) combining sparse and dense retrieval
 - **CRAG state machine** — 8 states with grading gate before generation
 
@@ -97,12 +116,31 @@ The `source` field in the response shows `"cache"` vs `"pipeline"`.
 )
 
 app.include_router(query.router, prefix="/v1", tags=["Query"])
+app.include_router(chat.router, prefix="/v1", tags=["Chat"])
+app.include_router(ingest.router, prefix="/v1", tags=["Ingest"])
+app.include_router(eval_dashboard.router, tags=["Eval"])
 app.include_router(health.router, tags=["Health"])
 app.include_router(cache.router, prefix="/v1", tags=["Cache"])
 
 STATIC_DIR = Path(__file__).parent / "static"
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+NO_CACHE_HEADERS = {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    "Pragma": "no-cache",
+    "Expires": "0",
+}
 
 
 @app.get("/", include_in_schema=False)
 async def root():
-    return FileResponse(STATIC_DIR / "index.html")
+    return FileResponse(STATIC_DIR / "index.html", headers=NO_CACHE_HEADERS)
+
+
+@app.middleware("http")
+async def static_no_cache(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/static/"):
+        for k, v in NO_CACHE_HEADERS.items():
+            response.headers[k] = v
+    return response

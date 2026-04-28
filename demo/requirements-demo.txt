@@ -5,8 +5,14 @@ pydantic-settings>=2.3.0
 opensearch-py>=2.4.0,<3.0.0
 urllib3>=1.26.0,<2.0.0
 redis[hiredis]>=5.0.0
-google-genai>=0.8.0
+openai>=1.40.0
+sentence-transformers>=3.0.0
+# torch is installed separately in the Dockerfile with the CPU wheel index to avoid
+# pulling ~4 GB of CUDA libraries we can't use on this laptop.
 httpx>=0.27.0
 python-dotenv>=1.0.0
 numpy>=1.26.0
 structlog>=24.0.0
+python-multipart>=0.0.9
+sse-starlette>=2.1.0
+pypdf>=4.2.0

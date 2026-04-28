@@ -6,7 +6,7 @@ Pre-retrieval RBAC filter applied before scoring — mirrors OpenSearch DLS.
 import re
 from opensearchpy import OpenSearch
 from app.config import get_settings
-from app.pipeline.llm import embed_text
+from app.pipeline.embedder import embed_query
 from app.security.rbac import build_rbac_filter
 from app.models import SecurityTier
 import structlog
@@ -91,7 +91,27 @@ async def retrieve(
             return [h["_source"] for h in exact]
 
     # Embed the query
-    query_embedding = await embed_text(query, task_type="RETRIEVAL_QUERY")
+    query_embedding = await embed_query(query)
+
+    # HyDE: for SIMPLE queries, draft a hypothetical passage and also embed that,
+    # then kNN with a blended vector. Disabled by default on CPU — adds an LLM call.
+    hyde_embedding = None
+    if query_type == "SIMPLE" and getattr(settings, "enable_hyde", False):
+        try:
+            from app.pipeline.hyde import draft_hypothesis
+            from app.pipeline.embedder import embed_document as _embed_passage
+            hypothesis = await draft_hypothesis(query)
+            if hypothesis:
+                hyde_embedding = await _embed_passage(hypothesis)
+                log.info("hyde_drafted", chars=len(hypothesis))
+        except Exception as e:
+            log.warning("hyde_skipped", error=str(e))
+
+    # Blend: average of query + HyDE embeddings if HyDE ran, else raw query vector.
+    if hyde_embedding:
+        blended = [(a + b) / 2.0 for a, b in zip(query_embedding, hyde_embedding)]
+    else:
+        blended = query_embedding
 
     # BM25 search
     bm25_body = {
@@ -111,14 +131,14 @@ async def retrieve(
         "size": settings.top_k_bm25,
     }
 
-    # kNN search
+    # kNN search (vector = HyDE-blended when available)
     knn_body = {
         "query": {
             "bool": {
                 "must": [
                     {"knn": {
                         "embedding": {
-                            "vector": query_embedding,
+                            "vector": blended,
                             "k": settings.top_k_knn,
                         }
                     }}
@@ -141,4 +161,14 @@ async def retrieve(
         bm25_hits, knn_hits, k=settings.rrf_rank_constant
     )
 
-    return fused[:settings.top_k_rerank]
+    # LLM-as-reranker: top 20 from RRF → Ollama scored → top top_k_rerank.
+    # Disabled by default on CPU — RRF is already a strong baseline.
+    if getattr(settings, "enable_llm_rerank", False):
+        candidates = fused[: max(settings.top_k_rerank * 2, 20)]
+        try:
+            from app.pipeline.reranker import rerank as _llm_rerank
+            reranked = await _llm_rerank(query, candidates, top_k=settings.top_k_rerank)
+            return reranked
+        except Exception as e:
+            log.warning("rerank_fallback_to_rrf", error=str(e))
+    return fused[: settings.top_k_rerank]

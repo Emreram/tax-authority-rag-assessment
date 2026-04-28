@@ -210,16 +210,21 @@ async def run_crag(
         )
 
     # ── RESPOND ──────────────────────────────────────────────────────────────
+    # Order citations to match the [N] indices in the response text (cited_ids is already
+    # in [N] order from generate_response).
+    chunk_by_id = {c["chunk_id"]: c for c in state.graded_chunks}
     citations = []
-    for chunk in state.graded_chunks:
-        if chunk["chunk_id"] in state.cited_ids:
-            citations.append(Citation(
-                chunk_id=chunk["chunk_id"],
-                hierarchy_path=chunk.get("hierarchy_path", ""),
-                title=chunk.get("title", ""),
-                article_ref=chunk.get("article_num"),
-                effective_date=chunk.get("effective_date"),
-            ))
+    for cid in state.cited_ids:
+        chunk = chunk_by_id.get(cid)
+        if not chunk:
+            continue
+        citations.append(Citation(
+            chunk_id=chunk["chunk_id"],
+            hierarchy_path=chunk.get("hierarchy_path", ""),
+            title=chunk.get("title", ""),
+            article_ref=chunk.get("article_num"),
+            effective_date=chunk.get("effective_date"),
+        ))
 
     total_ms = (time.time() - t_total) * 1000
     state.add_step("respond", result="SUCCESS", detail=f"{len(citations)} sources", duration_ms=1.0)

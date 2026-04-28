@@ -39,7 +39,7 @@ async def grade_context(query: str, chunks: list[dict], settings) -> dict:
 
     passages = []
     for c in chunks:
-        passages.append(f'chunk_id: "{c["chunk_id"]}"\ntext: "{c["chunk_text"][:500]}"')
+        passages.append(f'chunk_id: "{c["chunk_id"]}"\ntext: "{c["chunk_text"][:160]}"')
 
     user_prompt = f"Question: {query}\n\nPassages:\n" + "\n---\n".join(passages)
 
