@@ -1,10 +1,10 @@
 .claude/
 __pycache__/
 *.pyc
-Lib/
-Scripts/
-share/
-pyvenv.cfg
+# Python venv artefacts (scoped — was 'Scripts/' which collided with demo/scripts/ on Windows)
+**/.venv/
+**/venv/
+**/pyvenv.cfg
 get-pip.py
 build_pptx*.py
 *.docx
@@ -15,3 +15,8 @@ demo/opensearch-data/
 slides/.venv/
 slides/__pycache__/
 slides/output/
+
+# screencasts (use external link / git-lfs)
+demo/recordings/*.mp4
+demo/recordings/*.mov
+demo/recordings/*.webm

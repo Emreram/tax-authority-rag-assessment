@@ -1,8 +1,8 @@
 # Demo Script — Belastingdienst KennisAssistent
 
-> **Voor de presentator, niet voor de assessor.** Tim's onderbouwingsvragen worden beantwoord met het deck (zie `slides/operations_justification.md`); dit document houdt jou op het juiste tabblad.
+> **Voor de presentator, niet voor de assessor.** De onderbouwingsvragen worden beantwoord met het deck (zie [`slides/operations_justification.md`](../slides/operations_justification.md) en [`slides/output/operations_justification.pptx`](../slides/output/operations_justification.pptx)); dit document houdt jou op het juiste tabblad.
 >
-> **Doel:** ~8 minuten live demonstratie op je eigen laptop die aan Tim's vier criteria voldoet — werkend, wezenlijk, onderbouwd, live.
+> **Doel:** ~9 minuten live demonstratie op je eigen laptop die aan Tim's vier criteria voldoet — werkend, wezenlijk, onderbouwd, live.
 
 ---
 
@@ -10,18 +10,23 @@
 
 - [ ] Laptop aan netstroom, batterij >60%.
 - [ ] Slack / Teams / zware apps gesloten (memory budget ~8 GB).
-- [ ] Externe monitor **mirrored**, niet extended (tab-switches gaan mis op extended).
-- [ ] `docker compose up -d` in `demo/` — laat 30s warmup gebeuren.
-- [ ] Open http://localhost:8000 — wacht tot de splash verdwijnt.
+- [ ] Externe monitor **mirrored**, niet extended.
+- [ ] `docker compose down -v && docker compose up -d --build` voor schone state. (Anders: alleen `up -d`.)
+- [ ] Wacht tot alle 6 splash-stages groen zijn (~30-60s, plus model-pull bij eerste run).
 - [ ] `curl localhost:8000/health` → `"warmup_complete":true`.
-- [ ] Hard refresh (Ctrl+Shift+R) zodat asset-versies `?v=15` actief zijn.
-- [ ] Stel één throwaway-vraag voor de demo zodat het model warm is en de eerste echte query niet 60s duurt.
+- [ ] Hard refresh (Ctrl+Shift+R) zodat asset-versies `?v=16` actief zijn.
+- [ ] **Pre-warm:** stel deze 4 throwaway-queries voor de demo zodat het model warm is en de cache vol staat:
+  - "Wat is de arbeidskorting in 2024?"
+  - "ECLI:NL:HR:2021:1523"
+  - "arbeidskorting" *(triggert HyDE)*
+  - "Ik ben ZZP'er met thuiskantoor wat aftrekken en hoe BTW?" *(triggert decompose)*
+- [ ] **Run Ragas:** klik "Run" op Operations → Kwaliteit en wacht tot het klaar is (~1-3 min). Noteer wat de cijfers zijn.
 - [ ] Browser op 100% zoom, incognito (geen extensies).
 - [ ] WiFi uit op het moment van presenteren — bewijst on-device.
 
 ---
 
-## Sidebar-routekaart (ken deze blind)
+## Sidebar-routekaart
 
 ```
 WERKRUIMTE          (= eindgebruikers-product)
@@ -40,87 +45,119 @@ Rol-switch zit linksboven: Publiek · Juridisch medewerker · Inspecteur · FIOD
 
 ---
 
-## 6 acts, ~80 sec elk
+## 8 acts, ~70 sec elk
 
-### Act 1 — Opening: chat als product (0:00 – 1:20)
+### Act 1 — Cache-hit + TTFT bewijs (0:00 – 1:00)
 
-**Trigger:** sneltoets `1` of klik **Werkruimte → Gesprek**. Klik de eerste suggested prompt, of typ: *"Wat is de arbeidskorting in 2024?"*.
+**Trigger:** sneltoets `1`, klik de eerste suggested prompt — *"Wat is de arbeidskorting in 2024?"*. Deze zit al in cache (uit pre-warm), dus de TTFT pill verschijnt op groen.
 
-**Wat er gebeurt:** SSE streamt tokens live. Onder het bubble verschijnt de progress-strip die door `Voorbereiden → Retrieval → Grading → Generatie → Validatie` loopt, eindigend met groene check. Citation pills onder het antwoord linken naar de exacte chunk.
+**Wat er gebeurt:**
+- Bovenaan de bubble verschijnt **TTFT XX ms · drempel 1500 ms · via cache** (groen).
+- Antwoord verschijnt vrijwel instant.
+- Pipeline-trace: `cache_lookup → HIT`.
 
-**Talking point (1 zin):** "Dit is de productkant — een gebruiker bij de Belastingdienst stelt een vraag, ziet het antwoord groeien terwijl het wordt gevormd, en kan elke claim terugvolgen naar het brondocument."
-
-**Recovery:** als de eerste generation > 15s voelt, na 8s verschijnt automatisch de hint "eerste query is traag op CPU; daarna <200ms via cache". Lees die voor.
-
----
-
-### Act 2 — Follow-up met conversation memory (1:20 – 2:30)
-
-**Trigger:** zonder iets te wissen, typ: *"En voor zelfstandigen?"*.
-
-**Wat er gebeurt:** de classifier herkent een follow-up; de query wordt herschreven tegen de vorige turn ("Wat is de arbeidskorting in 2024 voor zelfstandigen?") voordat retrieval opnieuw fired.
-
-**Talking point:** "Korte vervolgvragen werken zoals je verwacht — het systeem onthoudt de context van de laatste zes turns in Redis en herschrijft kortgesloten queries voordat het opnieuw zoekt."
-
-**Recovery:** als de rewrite niet goed valt, zeg: "in productie zou hier ook query-decompositie spelen — die is in de pipeline aanwezig maar staat hier op `alleen COMPLEX`."
+**Talking point (1 zin):** *"Het TTFT-budget uit de assessment is 1500 ms. Cache-hit zit hier op enkele tientallen milliseconden — semantisch gematcht via 384-dim e5-small embeddings boven cosine 0.97."*
 
 ---
 
-### Act 3 — Live upload, chunking en hiërarchische tree (2:30 – 4:30)
+### Act 2 — Live generatie + HyDE (1:00 – 2:30)
 
-Dit is de kern van Tim's *"chunking pipeline + metadata voor hiërarchische relaties"*. Drie sub-stappen, geen pauze ertussen.
+**Trigger:** typ in chat: *"arbeidskorting"* (terse query — triggert HyDE).
 
-**3a — Upload.** Sleep een PDF naar de **Ingestie-stream**-sidebar rechts in Gesprek (of klik "+ Upload"). De ingest-status loopt mee: parser → structurele markers → chunker → AI-metadata → embeddings → indexering. Per chunk verschijnt een kaart met een gekleurde `doc::artikel::lid::seq`-id en pills voor topic / entity / 384-dim / ✓ geïndexeerd.
+**Wat er gebeurt:**
+- Pipeline-trace toont expliciet `🎭 HyDE hypothese-passage` met de hypothetische passage als preview.
+- Tokens streamen.
+- TTFT pill verschijnt (warm cache: amber/groen, koude eerste call: rood — gebruik dat als talking-point).
 
-**Talking point:** "Hier zie je 'chunken door AI' letterlijk: regex op juridische structuur waar die voorspelbaar is, AI op uitspraken en beleidsmemo's waar die niet voorspelbaar is."
-
-**3b — Hiërarchie.** Sneltoets `3` of klik **Operations → Ingestie**. Kies in de selector het zojuist geüploade document. De boom klapt open — Hoofdstuk → Artikel → Lid → Sub.
-
-**Talking point:** "Dit is Tim's letterlijke vraag: metadata voor hiërarchische relaties. Elk chunk weet wie zijn parent is, en die kennis zit in het indexrecord, niet afgeleid uit de tekst."
-
-**3c — Retrieval lichten op.** Spring terug naar **Werkruimte → Gesprek** (`1`), stel een vraag over het zojuist geüploade artikel. Spring na het antwoord weer naar **Ingestie**: de tree-nodes pulsen blauw waar retrieval ze raakte, krijgen groen waar de grader ze RELEVANT vond, en oranje 🎯 waar de generator ze citeerde. Als parent-expansion fired, krijgt de Artikel-node een oranje pulse met label `added as parent context`.
-
-**Talking point:** "De boom is niet decoratief — wanneer een paragraaf-chunk wordt geciteerd, haalt de retriever automatisch het bovenliggende artikel erbij voor context. Dat is wat hiërarchische metadata waardevol maakt."
-
-**Recovery:** als upload mid-demo faalt, schakel naar **Werkruimte → Documenten**, kies een seed-document, en demonstreer 3b en 3c daarop ("dit is een document dat we eerder geïndexeerd hebben").
+**Talking point:** *"Bij korte queries faalt vector-search vaak omdat het query-embedding ver staat van de document-vocabulaire. HyDE laat de LLM eerst een hypothetisch antwoord genereren, embedt dat, en gebruikt die vector voor kNN. Dit is een live optimalisatie van de retrieval-recall."*
 
 ---
 
-### Act 4 — Tier-switch en RBAC (4:30 – 5:45)
+### Act 3 — Query decompositie + parallel retrieval (2:30 – 4:00)
 
-**Trigger:** sta op **Publiek** in de role-selector linksboven. Vraag: *"Welke bevoegdheden heeft de FIOD bij huiszoeking?"*.
+**Trigger:** typ: *"Ik ben ZZP'er met een thuiskantoor — wat kan ik aftrekken en hoe zit het met BTW?"*
 
-**Wat er gebeurt:** retrieval vindt geen toegankelijke FIOD-chunks → grade IRRELEVANT → nette refuse, géén FIOD-citaten zichtbaar.
+**Wat er gebeurt:**
+- Pipeline-trace toont `🪓 Vraag splitsen` met 2-3 sub-queries als detail.
+- Retrieve trace zegt expliciet `tier=PUBLIC · sub-RRF merged`.
+- Antwoord raakt zowel werkruimte-aftrek als BTW-plicht.
+
+**Talking point:** *"Voor multi-aspect vragen wordt de query gesplitst in onafhankelijke sub-vragen, parallel opgehaald, en gemerged via RRF over de sub-resultaten. Dat voorkomt dat één sterk-scorend chunk over één aspect het andere aspect verdringt."*
+
+---
+
+### Act 4 — Live ingestie + hiërarchie + retrieval-highlight (4:00 – 5:30)
+
+**Trigger:** sleep een PDF/TXT naar de **Ingestie-stream** sidebar in Gesprek (of klik "+ Upload"). Suggestie: gebruik [`demo/seed_data/pdfs/wet_ib_2001_hfd4_arbeidskorting_uitgebreid.txt`](seed_data/pdfs/wet_ib_2001_hfd4_arbeidskorting_uitgebreid.txt) — toont 15 boundaries.
+
+**Wat er gebeurt:**
+- Per chunk verschijnt een kaart: `chunk_id`, hierarchy_path, topic, entities, ✓ geïndexeerd.
+
+**Vervolg:** sneltoets `3` (Operations → Ingestie). Kies in dropdown het zojuist geüploade document.
+- Hiërarchische tree opent: Hoofdstuk → Artikel → Lid → Sub.
+- Onder de tree: **Vector quantization-widget** — 4 kaarten (fp32 / fp16 / int8 / pq8) met huidig corpus + projectie naar 20M chunks.
+
+**Vervolg 2:** spring terug naar Gesprek (`1`), stel een vraag over het zojuist ingelezen artikel. Spring weer naar Ingestie (`3`): tree-nodes pulsen blauw (retrieved), groen (relevant), 🎯 oranje (cited).
+
+**Talking point:** *"Tim's letterlijke punt — metadata voor hiërarchische relaties — gebouwd in 30 seconden. De boom is niet decoratief: parent-expansion fired automatisch wanneer een paragraaf wordt geciteerd. En de kwantisering-widget rechts toont waarom we 384-dim e5-small kozen — bij 20M chunks past int8-quantization in 14GB i.p.v. 56GB."*
+
+---
+
+### Act 5 — Tier-switch en pre-retrieval RBAC (5:30 – 6:45)
+
+**Trigger:** sta op **Publiek** linksboven. Vraag: *"Welke FIOD-opsporingsbevoegdheden bestaan er?"*.
+
+**Wat er gebeurt:**
+- Refuse-bubble verschijnt met **amber border + 🛡 "Gefilterd antwoord"** label.
+- Tekst noemt expliciet de tier (`PUBLIC`) en geeft constructieve vervolgstappen.
 
 **Trigger 2:** klik **FIOD-rechercheur**. Stel exact dezelfde vraag.
+- Antwoord komt nu wel met FIOD-citaten.
 
-**Wat er gebeurt:** zelfde query, andere `terms`-filter → FIOD-chunks zijn nu kandidaat, BM25+kNN scoren ze, antwoord citeert ze.
+**Vervolg:** sneltoets `6` (Operations → Toegang). Wissel rollen — de "Zichtbaar voor jou / Niet toegankelijk"-pills verspringen live.
+- Onderaan: **Audit-trail tabel** toont laatste queries met tier, grade, TTFT.
 
-Spring naar **Operations → Toegang** (`6`). Wissel daar live tussen rollen — de "Zichtbaar voor jou" en "Niet toegankelijk" pills verspringen mee. Onder in het Cache-blok zie je entries met label `blocked` voor een hogere tier dan jouw rol.
-
-**Talking point:** "De tier-filter zit vóór de scoring, niet erna. Dat betekent dat een geclassificeerd document letterlijk geen ranking-signaal kan geven aan een lagere tier — niet via TF-IDF, niet via vector-buurschap, niet via cache."
-
----
-
-### Act 5 — Adversarial refuse (5:45 – 6:45)
-
-**Trigger:** typ in Gesprek: *"Who built the Eiffel Tower?"*.
-
-**Wat er gebeurt:** retrieval vindt 0 relevante chunks → grader geeft IRRELEVANT → CRAG slaat naar `refuse` → nette Nederlandstalige weigering, geen hallucinatie.
-
-Spring naar **Operations → CRAG-pipeline** (`5`), kies de zojuist gefailede turn in de selector. Het diagram lijst af waar de pipeline doorheen liep, eindigend op de rode `refuse`-state.
-
-**Talking point:** "Voor een belastingautoriteit is een fout antwoord duurder dan een eerlijk 'ik weet het niet'. Het CRAG-refuse-pad is het hardcore antwoord op die afweging: geen context, geen antwoord."
+**Talking point:** *"Het tier-filter zit vóór de scoring, niet erna. Een geclassificeerd document kan letterlijk geen ranking-signaal geven — niet via TF-IDF, niet via vector-buurschap, niet via cache. De audit-trail logt elke query met grading-uitkomst en TTFT, retentie 7 dagen — vereist voor productie."*
 
 ---
 
-### Act 6 — Cache-hit re-ask (6:45 – 7:45)
+### Act 6 — Adversarial refuse + CRAG fail-closed (6:45 – 7:45)
 
-**Trigger:** scroll terug en herhaal de eerste vraag (*"Wat is de arbeidskorting in 2024?"*) — of een paraphrase ervan.
+**Trigger:** typ: *"Who built the Eiffel Tower?"*
 
-**Wat er gebeurt:** progress-strip toont `Cache doorzoeken → HIT`, antwoord verschijnt in <200ms.
+**Wat er gebeurt:**
+- Retrieval levert geen relevante chunks → grader IRRELEVANT → CRAG slaat naar `refuse`.
+- Amber refuse-bubble met "Gefilterd antwoord" label.
 
-**Talking point:** "De cache-key is een embedding, geen hash. Drempel staat op cosine ≥ 0.97 — niet 0.95 (dan klontert *arbeidskorting* met *werknemerskorting*) en niet 0.99 (dan dekt-ie niets meer). En de cache is per tier gepartitioneerd, dus geen cross-tier leak."
+**Spring naar CRAG (`5`):** kies de zojuist gefailede turn in de selector. Diagram licht het pad op, eindigend op de rode `refuse`-state.
+
+**Talking point:** *"Voor een belastingautoriteit is een fout antwoord duurder dan een eerlijk 'ik weet het niet'. CRAG's refuse-pad is daar het hardcore antwoord op: geen geverifieerde context, geen antwoord — gegenereerd uit de pipeline, niet door een hard-coded blocklist."*
+
+---
+
+### Act 7 — Live Ragas-run / eval-gate (7:45 – 8:45)
+
+**Trigger:** sneltoets `7` (Operations → Kwaliteit). Klik "Run" als de cijfers nog niet zichtbaar zijn (of toon de cijfers van de pre-warm-run).
+
+**Wat er gebeurt:**
+- 6 metric-cards: Faithfulness, Context Recall, Answer Relevancy, Hallucination, Bias, Toxicity — allemaal echte Ragas/DeepEval cijfers.
+- Ship/Hold gate-pills: groen of rood per drempel.
+- Footer: "Laatste run: <timestamp> · 25 queries · <duration>s · judge `ai/gemma4:E2B`".
+
+**Talking point:** *"Dit is wat een CI/CD eval-gate is. Bij elke nieuwe model-versie of pipeline-wijziging draait deze test op de golden-set van 25 queries. De drempels zijn vooraf vastgelegd: faithfulness ≥ 0.90, context-recall ≥ 0.85, hallucination ≤ 0.10. Falt een metric, dan blokkeert de PR-merge in productie."*
+
+**Eerlijkheid:** de metrics op een laptop-Gemma als judge zijn lager dan met GPT-4 als external judge. *Vertel dat zelf voordat Tim er om vraagt.*
+
+---
+
+### Act 8 — Onderbouwingsslides + reliability (8:45 – 9:30)
+
+**Trigger:** open `slides/output/operations_justification.pptx` op tweede scherm.
+
+Per Operations-tab is er één slide met **Keuze · Afgewezen · Trade-off**. Laat Tim kiezen welke hij wil onderbouwd zien — open de bijbehorende slide.
+
+**Optionele closer:** laat de circuit-breaker zien als Tim doorvraagt over reliability:
+- *"De circuit-breaker rond Model Runner gaat OPEN na 3 failures binnen 30s, met 20s cooldown voor automatisch herstel. Dat voorkomt dat een gestresste backend de hele frontend stuk maakt — productie-pattern."*
 
 ---
 
@@ -128,25 +165,32 @@ Spring naar **Operations → CRAG-pipeline** (`5`), kies de zojuist gefailede tu
 
 | Probleem | Actie | Talking point |
 |---|---|---|
-| Eerste generatie voelt langzaam | Wacht; na 8s verschijnt de hint vanzelf | "eerste model-warmup is eenmalig; cache vangt herhalingen op" |
-| Upload faalt mid-demo | Naar Werkruimte → Documenten, klik seed-document | "dit is een eerder geïndexeerd document — zelfde flow" |
-| WiFi per ongeluk aan | Schakel uit | "dit is juist het punt — data blijft on-device" |
-| API antwoord lijkt corrupt | `docker compose restart api` | "5 sec — pipeline onveranderd" |
-| LLM te traag op deze laptop | `LLM_MODEL=ai/qwen2.5:1.5b docker compose up -d api` | "één env var — zelfde product" |
-| OpenSearch yellow → red | `docker compose logs opensearch`; re-index zo nodig | "niet ideaal, wel recoverable" |
-| UI toont oude content | Hard refresh (Ctrl+Shift+R) | "browser-cache; assets zijn versie-gebonden via `?v=15`" |
-| Metadata-modal toont leeg | Klik andere chunk; bulk werkt | "edge case op dit ene chunk; valt buiten happy path" |
+| Eerste generatie voelt langzaam | Wacht; na 8s verschijnt hint vanzelf | *"eerste model-warmup is eenmalig; cache vangt herhalingen op"* |
+| Upload faalt mid-demo | Naar Werkruimte → Documenten, klik bestaand seed-doc | *"dit is een eerder geïngest document — zelfde flow"* |
+| WiFi per ongeluk aan | Schakel uit | *"dit is juist het punt — data blijft on-device"* |
+| API antwoord lijkt corrupt | `docker compose restart api` | *"5 sec — pipeline onveranderd"* |
+| Ragas-run is nog niet gerund | Klik "Run", praat ondertussen door bij Act 5/6 | *"draait op de achtergrond — dit is de live workload"* |
+| Ragas-getallen zijn onverwacht laag | Open slide, leg framing uit | *"strenge drempels gekozen; lage waarde is informatie, geen falen"* |
+| Circuit-breaker triggered tijdens demo (zou niet moeten) | Wacht 20s, breaker resette automatisch | *"productie-pattern werkt — dit is precies waarom hij er is"* |
+| OpenSearch yellow → red | `docker compose logs opensearch`; re-index zo nodig | *"niet ideaal, wel recoverable"* |
+| UI toont oude content | Hard refresh (Ctrl+Shift+R) | *"browser-cache; assets zijn versie-gebonden via `?v=16`"* |
+| Decompose splitst niet (1 sub-query) | Geen probleem — fallback naar single-query path | *"de classifier is conservatief — niet alles wordt geforceerd gesplitst"* |
 
 ---
 
 ## Wanneer Tim doorvraagt op het waarom
 
-Open je deck (`slides/operations_justification.md` → `slides/output/operations_justification.pptx`). Per Operations-tab is er één slide met keuze, afgewezen alternatief en trade-off. **Praat daar uit, niet uit de UI** — de UI is bewust gestript van uitleg.
+Open je deck. Per Operations-tab is er één slide. **Praat daar uit, niet uit de UI** — de UI is bewust gestript van uitleg.
+
+Belangrijke ondersteunende artefacten:
+- [`slides/operations_justification.md`](../slides/operations_justification.md) — bron-tekst per slide
+- [`drafts/final_submission_v2.md`](../drafts/final_submission_v2.md) — productie-architectuur (met afwijkings-banner)
+- [`SENIOR_REVIEW_AND_PLAN.md`](../SENIOR_REVIEW_AND_PLAN.md) — eigen meta-review op deze inzending
 
 ---
 
 ## Post-demo
 
-- [ ] Screen-record van een succesvolle run als backup (vóór de demo, met cache koud → warm).
+- [ ] Screen-record (achteraf, of vooraf als backup) van een succesvolle run.
 - [ ] Deck open op tweede scherm tijdens Q&A.
-- [ ] [TIM_FEEDBACK.md](../TIM_FEEDBACK.md) en [SENIOR_LEVEL_PLAN.md](../SENIOR_LEVEL_PLAN.md) klaar om te delen op aanvraag.
+- [ ] [TIM_FEEDBACK.md](../TIM_FEEDBACK.md), [SENIOR_REVIEW_AND_PLAN.md](../SENIOR_REVIEW_AND_PLAN.md), [EXECUTION_PLAN.md](../EXECUTION_PLAN.md) klaar om te delen op aanvraag.
