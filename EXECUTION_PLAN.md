@@ -1227,7 +1227,7 @@ Totaal: **~21.5 uur**, één werkweek.
 - [ ] Quantization-widget toont 4 kaarten op Ingestie-tab
 - [ ] Refuse-flow heeft amber border + "Gefilterd antwoord" label
 - [ ] Dress-rehearsal mp4 op 2e device beschikbaar
-- [ ] Slide-deck `assessment_AI_USE_emresemerci.pptx` + `slides/output/operations_justification.pptx` integreerd
+- [x] Slide-deck geconsolideerd in `assessment_AI_USE_emresemerci_v2.pptx` (19 slides). Onderbouwingsnotities per Operations-tab: `slides/operations_justification.md` (.pptx kan op verzoek via `python slides/build_slides.py`)
 - [ ] WiFi uit; demo werkt offline
 - [ ] [DEMO_SCRIPT.md](demo/DEMO_SCRIPT.md) is bijgewerkt met de nieuwe acts (HyDE, decompose, Ragas-run)
 
@@ -1253,6 +1253,6 @@ Plus uit dit concrete plan **óók niet**:
 
 Na PR-4 zie je het volgende verschil:
 
-**Tim opent http://localhost:8000.** Hij stelt zijn eerste vraag. Onder het antwoord staat **"TTFT 287ms ✓"** — letterlijke beantwoording van de assessment-eis. Hij klikt door naar Operations → Kwaliteit en ziet **echte Ragas-getallen**: faithfulness 0.91, context_recall 0.84. Hij klikt "Run" — 90 seconden later updaten ze live, ship/hold-pills springen op groen. Hij switcht naar Toegang en ziet **een audit-trail-tabel** met zijn eigen queries van de afgelopen 3 minuten. Hij switcht naar Ingestie en ziet **8 echte Dutch-tax PDFs** in de structuur, plus een quantization-widget die toont dat dit corpus 64.8 KB is en op 20M chunks ~51 GB zou worden bij fp32.
+**de assessor opent http://localhost:8000.** Hij stelt zijn eerste vraag. Onder het antwoord staat **"TTFT 287ms ✓"** — letterlijke beantwoording van de assessment-eis. Hij klikt door naar Operations → Kwaliteit en ziet **echte Ragas-getallen**: faithfulness 0.91, context_recall 0.84. Hij klikt "Run" — 90 seconden later updaten ze live, ship/hold-pills springen op groen. Hij switcht naar Toegang en ziet **een audit-trail-tabel** met zijn eigen queries van de afgelopen 3 minuten. Hij switcht naar Ingestie en ziet **8 echte Dutch-tax PDFs** in de structuur, plus een quantization-widget die toont dat dit corpus 64.8 KB is en op 20M chunks ~51 GB zou worden bij fp32.
 
 Dit is het verschil tussen "leuk prototype" en "ja, die heeft het begrepen". 21 uur werk, in één werkweek doenbaar.

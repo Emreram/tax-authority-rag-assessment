@@ -139,7 +139,7 @@ Leaves ~4.5 GB free on an 8GB laptop for Chrome + VS Code + OS.
 
 **Goal:** Drag a Dutch tax PDF onto the UI, watch it get chunked, see the AI-extracted metadata + *visual hierarchical tree* of the document, query it, and see which tree nodes the retriever touched.
 
-**Why hierarchy is called out explicitly:** Tim's exact phrasing was "metadata voor hiërarchische relaties". The existing [schemas/chunk_metadata.json](schemas/chunk_metadata.json) already defines the hierarchy contract — `parent_chunk_id`, `hierarchy_path`, `chapter`/`section`/`article_num`/`paragraph_num`/`sub_paragraph`, deterministic `chunk_id` format `{doc_id}::{article}::{paragraph}::{chunk_seq}`. And [pseudocode/module1_ingestion.py](pseudocode/module1_ingestion.py) already has the structural boundary detector for Dutch legal hierarchy (Hoofdstuk > Afdeling > Artikel > Lid > Sub). What's missing is **wiring it through the live pipeline and showing it to the assessor**.
+**Why hierarchy is called out explicitly:** the assessor's exact phrasing was "metadata voor hiërarchische relaties". The existing [schemas/chunk_metadata.json](schemas/chunk_metadata.json) already defines the hierarchy contract — `parent_chunk_id`, `hierarchy_path`, `chapter`/`section`/`article_num`/`paragraph_num`/`sub_paragraph`, deterministic `chunk_id` format `{doc_id}::{article}::{paragraph}::{chunk_seq}`. And [pseudocode/module1_ingestion.py](pseudocode/module1_ingestion.py) already has the structural boundary detector for Dutch legal hierarchy (Hoofdstuk > Afdeling > Artikel > Lid > Sub). What's missing is **wiring it through the live pipeline and showing it to the assessor**.
 
 1. **Upload endpoint:** `POST /v1/ingest` accepting multipart PDF/TXT/MD + tier + doc_type. Returns `ingestion_id`; progress streams back via `GET /v1/ingest/{id}/stream` (SSE).
 2. **Chunking pipeline** in new `app/ingestion/` module:
@@ -150,7 +150,7 @@ Leaves ~4.5 GB free on an 8GB laptop for Chrome + VS Code + OS.
    - `indexer.py` — bulk-index to OpenSearch with tier = upload tier.
 3. **Progress UI:** dropzone in chat UI → toast showing live progress bar (`parsed → hierarchy detected (N nodes) → chunked (N) → enriched (N/M) → embedded → indexed`). When done, toast becomes "✅ Indexed N chunks — explore structure or try asking about it" with a sample question generated from the extracted topics.
 
-4. **Hierarchical tree view** *(this is the Tim-facing moment)* — new `GET /v1/doc/{doc_id}/tree` returns nested JSON built from the `parent_chunk_id` relationships:
+4. **Hierarchical tree view** *(this is the the assessor-facing moment)* — new `GET /v1/doc/{doc_id}/tree` returns nested JSON built from the `parent_chunk_id` relationships:
    ```
    Document (AWR-2024-v3)
    ├── Hoofdstuk 3 — Heffingskorting
@@ -274,7 +274,7 @@ Hosted at `/eval` — runs the golden Q&A set from [eval/golden_qa_sample.json](
 | **Recommended** | 0 + 1 + 2 + 3a + 3b + 4 + 5 | 22–29h |
 | **Full** | all phases | 26–33h |
 
-Target: Recommended tier. Phase 6 only if time allows after dress-rehearsal. Phase 0 adds 3–4h vs. the previous (Gemini) plan because the full LLM + embedding stack has to be swapped and seed data re-embedded. Phase 2 is +2h for the hierarchical tree view + retrieval highlighting (the direct answer to Tim's "hiërarchische relaties" comment).
+Target: Recommended tier. Phase 6 only if time allows after dress-rehearsal. Phase 0 adds 3–4h vs. the previous (Gemini) plan because the full LLM + embedding stack has to be swapped and seed data re-embedded. Phase 2 is +2h for the hierarchical tree view + retrieval highlighting (the direct answer to the assessor's "hiërarchische relaties" comment).
 
 ---
 
@@ -283,7 +283,7 @@ Target: Recommended tier. Phase 6 only if time allows after dress-rehearsal. Pha
 1. **Open chat** → "What is the arbeidskorting for 2025?" → tokens stream in with inline citations; pipeline diagram lights up left-to-right. *Point at trace: classify → HyDE → retrieve → rerank → grade → generate → validate.*
 2. **Follow-up** → "And for self-employed people?" → query rewriter uses conversation context; retrieve fires again. *Point at rewrite node showing the expanded query.*
 3. **Drag a PDF** onto the dropzone (`wet-ib-artikel-3.pdf`). Watch the progress bar: parsed → **hierarchy detected: 2 chapters, 5 sections, 14 articles, 32 paragraphs** → chunked → AI-enriched (hierarchy_path, topics, entities visible) → embedded → indexed. Toast: "✅ Indexed 32 chunks — explore structure or ask about Hoofdstuk 3."
-3b. **Click "Explore structure"** → modal opens showing the collapsible tree of the just-ingested document. Expand `Hoofdstuk 3 > Afdeling 1 > Art 3.114`, see the 5 paragraph-level chunks underneath. Click one → side panel shows the chunk text, AI-extracted topics, and its `hierarchy_path`. *"This is the metadata voor hiërarchische relaties Tim asked for — built live, 30 seconds ago."*
+3b. **Click "Explore structure"** → modal opens showing the collapsible tree of the just-ingested document. Expand `Hoofdstuk 3 > Afdeling 1 > Art 3.114`, see the 5 paragraph-level chunks underneath. Click one → side panel shows the chunk text, AI-extracted topics, and its `hierarchy_path`. *"This is the metadata voor hiërarchische relaties the assessor asked for — built live, 30 seconds ago."*
 4. **Ask about the uploaded doc** ("Wat is arbeidskorting lid 2?"). Answer cites chunks created 30 seconds ago. In the tree view, **watch the nodes light up**: retrieved nodes pulse, RELEVANT nodes get green outlines, the cited chunks get 🎯 badges. The pipeline trace shows `hierarchy_expand: added 2 parent article chunks`. *This is the moment.*
 5. **Switch tier** PUBLIC → CLASSIFIED_FIOD → same query returns additional FIOD procedural chunks. RBAC visible.
 6. **Ask an irrelevant question** ("Who built the Eiffel Tower?") → IRRELEVANT grade → REFUSE state → Dutch refusal message. Guardrail visible.

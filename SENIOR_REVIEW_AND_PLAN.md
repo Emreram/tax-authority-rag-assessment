@@ -78,10 +78,10 @@ Datum: 2026-04-28 — peer-review op de huidige state na de UI-strip, slide-deck
 ### Zwak
 
 - **Embedding model is e5-small (384-dim)** — terwijl de papieren architectuur e5-large (1024-dim) noemt. Voor Nederlandse juridische tekst is e5-small **niet uitvoerig gevalideerd**. Geen recall@k cijfers in de repo.
-- **HyDE bestaat als file maar fired niet zichtbaar** in de demo. Tim heeft hier expliciet om gevraagd in §Module 3.
-- **Query decompositie ontbreekt volledig** — de classifier herkent `COMPLEX` maar splitst niet. Tim heeft hier ook om gevraagd.
+- **HyDE bestaat als file maar fired niet zichtbaar** in de demo. de assessor heeft hier expliciet om gevraagd in §Module 3.
+- **Query decompositie ontbreekt volledig** — de classifier herkent `COMPLEX` maar splitst niet. de assessor heeft hier ook om gevraagd.
 - **LLM-as-reranker is functioneel identiek aan de grader** — beide zijn één Gemma-call op de top-K met JSON-mode. De "rerank"-stap voegt latency toe zonder duidelijke meerwaarde. Een echte cross-encoder (bge-reranker-v2-m3) zou een ander signaal geven; LLM-as-reranker is een **goede laptop-keuze** maar moet als zodanig worden onderbouwd.
-- **Geen recall@k of MRR-cijfers** op de golden set. Geen bewijs dat RRF k=60 beter is dan alpha-blending of pure vector. **Tim verwacht meten.**
+- **Geen recall@k of MRR-cijfers** op de golden set. Geen bewijs dat RRF k=60 beter is dan alpha-blending of pure vector. **de assessor verwacht meten.**
 - **Cache-threshold 0.97 is niet empirisch onderbouwd in deze repo** (alleen in de slides). Je hebt geen "we hebben getest met 0.95 / 0.97 / 0.99 en dit zijn de false-positive rates"-tabel.
 
 ## 1.5 Lokale / offline inference
@@ -110,11 +110,11 @@ Datum: 2026-04-28 — peer-review op de huidige state na de UI-strip, slide-deck
 
 ### Zwak
 
-- **Demo-corpus = 24 chunks.** Bij een live demo voelt dat als "speelgoed". Tim noemt 500K docs / 20M chunks — schaalafwijking is letterlijk 6 orders van grootte.
+- **Demo-corpus = 24 chunks.** Bij een live demo voelt dat als "speelgoed". de assessor noemt 500K docs / 20M chunks — schaalafwijking is letterlijk 6 orders van grootte.
 - **Geen deduplication** op content-hash. Twee keer dezelfde PDF uploaden = twee chunk-sets.
 - **Geen graceful failure mid-ingest.** Als chunk 17 van 50 faalt op embedder-call, wat gebeurt er met chunks 18-50? Geen idee — er is geen integration-test.
 - **Geen ingest-throughput cijfer.** "30 chunks in 12s" zou vertrouwen geven. Niets in de UI toont dit.
-- **Geen quantization toegepast** op de embeddings (fp32 i.p.v. int8/SQ8). Bij 24 chunks irrelevant, bij 20M chunks essentieel — en Tim heeft er naar gevraagd.
+- **Geen quantization toegepast** op de embeddings (fp32 i.p.v. int8/SQ8). Bij 24 chunks irrelevant, bij 20M chunks essentieel — en de assessor heeft er naar gevraagd.
 
 ## 1.7 Retrieval / generation pipeline
 
@@ -126,7 +126,7 @@ Datum: 2026-04-28 — peer-review op de huidige state na de UI-strip, slide-deck
 
 ### Zwak
 
-- **Geen vergelijkende numbers**: "BM25 alone recall@5 = X, kNN alone = Y, RRF = Z". Tim's hele Module 2-vraag gaat hierover.
+- **Geen vergelijkende numbers**: "BM25 alone recall@5 = X, kNN alone = Y, RRF = Z". de assessor zijn hele Module 2-vraag gaat hierover.
 - **Geen ECLI-shortcut**: een query met "ECLI:NL:HR:..." zou direct via keyword-filter moeten gaan, niet via embedding. Pseudocode noemt dit; runtime niet.
 - **Generation prompt wordt nergens getoond in de UI** — de assessor kan niet zien hoe je hallucinaties tegenwerkt op prompt-niveau.
 
@@ -171,7 +171,7 @@ Datum: 2026-04-28 — peer-review op de huidige state na de UI-strip, slide-deck
 
 - **Geen dress-rehearsal gedaan.** Niemand heeft de nieuwe DEMO_SCRIPT zelf doorgelopen vanuit cold-start. Risico: laatste commit ergens een UI-pad gebroken zonder dat we het weten.
 - **Geen backup-screencast.** Als Docker tijdens de demo dood gaat, is er niets om naar te switchen.
-- **Geen "live numbers"-pagina**. Als Tim doorvraagt "hoe weet je dat je TTFT haalt?", is er geen visuele dashboard om naartoe te wijzen.
+- **Geen "live numbers"-pagina**. Als de assessor doorvraagt "hoe weet je dat je TTFT haalt?", is er geen visuele dashboard om naartoe te wijzen.
 
 ## 1.11 Hoe goed bewijst de implementatie de assessment-eisen?
 
@@ -221,7 +221,7 @@ Dit is de belangrijkste vraag. Punt-voor-punt:
 - Refuse-boodschap leest als een fout, niet als een feature
 
 ### Q3. Welke onderdelen zijn technisch impressief genoeg voor senior-niveau?
-- **Pre-retrieval RBAC met `P(leak)=0` argument** — dit is het soort detail dat Tim onmiddellijk herkent als senior-thinking
+- **Pre-retrieval RBAC met `P(leak)=0` argument** — dit is het soort detail dat de assessor onmiddellijk herkent als senior-thinking
 - **Hierarchical metadata-design met deterministische chunk_id** — `{doc}::{art}::{lid}::{seq}` maakt re-indexing idempotent en parent-expansion O(1)
 - **Tier-partitioned semantic cache** — voorkomt subtiele cross-tier leaks die de meeste candidates missen
 - **Werkruimte/Operations split** — voor een "RAG-techie" niet voor de hand liggend; meer "product-architect" denken
@@ -245,7 +245,7 @@ Dit is de belangrijkste vraag. Punt-voor-punt:
 8. *"Hoe is jouw cosine 0.97 cache-threshold gevalideerd?"* (claim, geen tabel)
 
 ### Q6. Welke verbeteringen creëren het grootste "wow"-effect in een live demo?
-1. **Live Ragas-run** in de Kwaliteit-tab — context_recall, faithfulness, citation_correctness updaten voor Tim's ogen op een corpus van 50 golden-queries. Eén knop, 60 seconden, echte cijfers.
+1. **Live Ragas-run** in de Kwaliteit-tab — context_recall, faithfulness, citation_correctness updaten voor de assessor zijn ogen op een corpus van 50 golden-queries. Eén knop, 60 seconden, echte cijfers.
 2. **TTFT-badge per assistant-turn** — "TTFT 287ms ✓ < 1500ms drempel" zichtbaar onder elk antwoord. Direct antwoord op de assessment-eis.
 3. **Hallucination-catch demo** — een zorgvuldig geprepareerde query waar de eerste retrieval-pass zwak is en de grader hem terecht naar AMBIGUOUS stuurt → query-rewrite → tweede pass haalt hem. *"Dit is wat fail-closed betekent."*
 4. **Quantization-toggle in Operations → Ingestie** — knop "Vector quantization: fp32 / int8" → memory-math update live. Niet enkel papier.
@@ -287,9 +287,9 @@ We hebben een werkende v3-demo: streaming chat, document upload met live chunkin
 
 **3 rode kruisen, 3 grijze, 6 groene.** Het rode kwadrant is je werkprogramma.
 
-## 3.3 Gap-analyse vs. Tim's feedback ([TIM_FEEDBACK.md](TIM_FEEDBACK.md))
+## 3.3 Gap-analyse vs. de assessor zijn feedback ([ASSESSMENT_REVIEW_FEEDBACK.md](ASSESSMENT_REVIEW_FEEDBACK.md))
 
-| Tim's punt | Status | Toelichting |
+| de assessor zijn punt | Status | Toelichting |
 |---|---|---|
 | Werkend product | ✅ | Demo draait |
 | Wezenlijk eindproduct (geen dev-tool) | ✅ | Werkruimte/Operations split |
@@ -298,7 +298,7 @@ We hebben een werkende v3-demo: streaming chat, document upload met live chunkin
 | Chunking pipeline + AI-metadata + hiërarchie | ✅ | Sterkste pijler |
 | End-to-end RAG met chat | ✅ | Sterkste pijler |
 
-Tim's twee gele vinkjes lossen op zodra je één dress-rehearsal doet. Dat is een organisatie-issue, geen code-issue.
+de assessor zijn twee gele vinkjes lossen op zodra je één dress-rehearsal doet. Dat is een organisatie-issue, geen code-issue.
 
 ## 3.4 Must-have verbeteringen voor senior-niveau
 
@@ -307,7 +307,7 @@ Hieronder per item: **wat**, **waarom**, **welke files**, **geschatte tijd**.
 ### M1. Echte Ragas-eval pipeline ⏱ 4-6 uur
 **Wat:** Vervang de gestubde metrics in `app.js` (regel 1276-1280) door echte Ragas-runs.
 
-**Waarom:** Tim's #1 vraag in §Module 4 is letterlijk *"hoe evalueer je automatisch?"*. Gestubde cijfers zijn het zwaarste senior-killer-signaal in de demo.
+**Waarom:** de assessor zijn #1 vraag in §Module 4 is letterlijk *"hoe evalueer je automatisch?"*. Gestubde cijfers zijn het zwaarste senior-killer-signaal in de demo.
 
 **Files:**
 - nieuwe file `demo/app/eval/ragas_runner.py` — wrapt `ragas` library, draait `context_recall`, `faithfulness`, `answer_relevancy` op de golden set
@@ -334,7 +334,7 @@ Hieronder per item: **wat**, **waarom**, **welke files**, **geschatte tijd**.
 ### M3. Bigger seed corpus (5-10 echte Dutch tax PDFs) ⏱ 1-2 uur
 **Wat:** Pre-ingest een handvol echte (publiek beschikbare) Dutch tax-documenten zodat retrieval bij demo-tijd op echte diversiteit reageert.
 
-**Waarom:** 24 chunks voelen als speelgoed. Tim noemt 500K docs. Een gat van 6 orden is te groot om in een demo te overbruggen; een gat van 4 orden (10 docs × 30 chunks ≈ 300 chunks) is overtuigender.
+**Waarom:** 24 chunks voelen als speelgoed. de assessor noemt 500K docs. Een gat van 6 orden is te groot om in een demo te overbruggen; een gat van 4 orden (10 docs × 30 chunks ≈ 300 chunks) is overtuigender.
 
 **Files:**
 - maak `demo/seed_data/pdfs/` met 5-10 publieke documenten (Wet IB 2001 hoofdstukken, recente ECLI-uitspraken, fiscale beleidsmemo's, FIOD-procedurehandleidingen)
@@ -346,7 +346,7 @@ Hieronder per item: **wat**, **waarom**, **welke files**, **geschatte tijd**.
 ### M4. HyDE actief in demo ⏱ 2 uur
 **Wat:** Voor `SIMPLE` queries met lage retrieval-confidence: HyDE-pad inschakelen en zichtbaar in pipeline-trace.
 
-**Waarom:** Tim's §Module 3 vraag.
+**Waarom:** de assessor zijn §Module 3 vraag.
 
 **Files:**
 - update [demo/app/pipeline/retriever.py](demo/app/pipeline/retriever.py): als BM25-top1 score < threshold OF kNN-top1 cosine < 0.55, roep HyDE aan via [demo/app/pipeline/hyde.py](demo/app/pipeline/hyde.py) en gebruik die embedding als kNN-query
@@ -356,7 +356,7 @@ Hieronder per item: **wat**, **waarom**, **welke files**, **geschatte tijd**.
 ### M5. Query decompositie actief in demo ⏱ 3-4 uur
 **Wat:** Voor `COMPLEX` queries: splits in 2-3 sub-queries, retrieve elk, merge resultaten.
 
-**Waarom:** Tim's §Module 3 vraag.
+**Waarom:** de assessor zijn §Module 3 vraag.
 
 **Files:**
 - update [demo/app/pipeline/classifier.py](demo/app/pipeline/classifier.py): bij `COMPLEX` ook een lijst sub-queries teruggeven
@@ -367,7 +367,7 @@ Hieronder per item: **wat**, **waarom**, **welke files**, **geschatte tijd**.
 ### M6. Quantization-toggle of -bewijs in Ingestie ⏱ 2-3 uur
 **Wat:** Op de Ingestie-pagina een widget die memory-impact toont voor fp32 / fp16 / int8 quantization op het huidige corpus, plus optie om actief te re-quantiseren via OpenSearch reindex.
 
-**Waarom:** Tim's §Module 1 noemt expliciet *"Quantization to prevent OOM"*. De papieren versie heeft dit; de demo niet.
+**Waarom:** de assessor zijn §Module 1 noemt expliciet *"Quantization to prevent OOM"*. De papieren versie heeft dit; de demo niet.
 
 **Files:**
 - nieuwe component in [demo/app/static/index.html](demo/app/static/index.html): `<section data-workspace="ingest">` voeg quantization-widget toe (3 cards met memory-getallen, lid-toggle voor active mode)
@@ -377,7 +377,7 @@ Hieronder per item: **wat**, **waarom**, **welke files**, **geschatte tijd**.
 ### M7. Reliability: graceful degradation op Model Runner failure ⏱ 3-4 uur
 **Wat:** Circuit-breaker rond Ollama-calls; als 3 consecutive failures, stuur "inferentie tijdelijk onbereikbaar — refuse" naar de gebruiker i.p.v. 500.
 
-**Waarom:** Senior signal. Tim verwacht productiedenken.
+**Waarom:** Senior signal. de assessor verwacht productiedenken.
 
 **Files:**
 - nieuwe file `demo/app/pipeline/breaker.py` — eenvoudige circuit-breaker (open/half-open/closed states, threshold 3 failures / 30 sec)
@@ -399,7 +399,7 @@ toegang. Deze vraag is gelogd in de audit-trail."
 - update [demo/app/static/app.js](demo/app/static/app.js): style refuse-bubbles met amber border ipv error-rood, label "Gefilterd antwoord" bovenaan
 
 ### M9. Top-K config terug in Retrieval-tab ⏱ 1 uur
-**Wat:** De CONFIG-pill (top_k_bm25, top_k_knn, rrf_k, top_k_rerank) is in de strip-down weggehaald. Dat was een fout — Tim vraagt hier expliciet naar in §Module 2.
+**Wat:** De CONFIG-pill (top_k_bm25, top_k_knn, rrf_k, top_k_rerank) is in de strip-down weggehaald. Dat was een fout — de assessor vraagt hier expliciet naar in §Module 2.
 
 **Files:**
 - update [demo/app/static/index.html](demo/app/static/index.html) Retrieval-section: kleine pill-row "BM25 top-20 · kNN top-20 · RRF k=60 · Rerank top-5"
@@ -410,7 +410,7 @@ Geen formules, geen "waarom"-tekst — pure params, één regel hoog. Past bij d
 ### M10. Audit-trail per query ⏱ 2-3 uur
 **Wat:** Elke query → log-record in Redis sorted set met `{ts, session_id, tier, query, grade, citations, ttft_ms}`. Toegankelijk via Operations → Toegang.
 
-**Waarom:** Senior signal voor een tax-authority-tool. Tim weet dat audit-trail een productie-vereiste is voor RBAC-systemen.
+**Waarom:** Senior signal voor een tax-authority-tool. de assessor weet dat audit-trail een productie-vereiste is voor RBAC-systemen.
 
 **Files:**
 - nieuwe file `demo/app/audit.py` — `log_query()` helper, redis sorted set per dag
@@ -420,7 +420,7 @@ Geen formules, geen "waarom"-tekst — pure params, één regel hoog. Past bij d
 ### M11. Dress-rehearsal + screencast ⏱ 1.5 uur
 **Wat:** Loop de DEMO_SCRIPT.md één keer cold-start door, neem op (OBS / Loom), commit naar `demo/recordings/dress_rehearsal_v3.mp4` (en update `.gitignore` als file >100MB → gebruik git-lfs of verwijs naar externe link).
 
-**Waarom:** Tim's punt 4 — "live demonstratie". Geen verzekering = roulette.
+**Waarom:** de assessor zijn punt 4 — "live demonstratie". Geen verzekering = roulette.
 
 ## 3.5 Nice-to-have
 
@@ -440,7 +440,7 @@ Geen formules, geen "waarom"-tekst — pure params, één regel hoog. Past bij d
 ## 3.6 Technische roadmap (volgorde)
 
 **Sprint 1 — Bewijs (8-12 uur):** M1, M2, M3 — Ragas-eval, TTFT-meting, bigger corpus.
-*Outcome: drie van Tim's harde vragen hebben kwantitatieve antwoorden.*
+*Outcome: drie van de assessor zijn harde vragen hebben kwantitatieve antwoorden.*
 
 **Sprint 2 — Compleetheid (6-8 uur):** M4, M5, M9 — HyDE actief, decomposition actief, Top-K config zichtbaar.
 *Outcome: drie ontbrekende §Module 2/3 features zichtbaar firende.*
@@ -508,7 +508,7 @@ Stel een SIMPLE-maar-paraphrase query waar BM25 het niet redt. Pipeline-trace to
 
 **Act 4 — Live ingestie + hiërarchie + retrieval-highlight (3:30-5:30)**
 PDF slepen, chunks streamen, tree opent, vraag stellen, tree-nodes pulsen.
-*Talking point: "Dit is Tim's letterlijke punt — metadata voor hiërarchische relaties — gebouwd in 30 seconden, parent-expansion zichtbaar."*
+*Talking point: "Dit is de assessor zijn letterlijke punt — metadata voor hiërarchische relaties — gebouwd in 30 seconden, parent-expansion zichtbaar."*
 
 **Act 5 — RBAC tier-switch (5:30-6:30)**
 Publiek → vraag → refuse. FIOD-rechercheur → zelfde vraag → antwoord met FIOD-citaten. Toegang-tab: `bool.filter` is niet meer rauw maar visueel. Onder in audit-trail-tabel verschijnt het query-record (uit M10).
@@ -523,7 +523,7 @@ Eerste vraag herhalen. **TTFT-badge: "TTFT 12ms ✓"**.
 *Talking point: "Cache-key is een embedding, niet een hash. Tier-gepartitioneerd zoals net getoond."*
 
 **Act 8 — Onderbouwingsslides (8:30-9:00)**
-Spring naar het deck (`slides/output/operations_justification.pptx`). Tim mag kiezen welke Operations-tab hij wil onderbouwd zien — ik open de bijbehorende slide.
+Spring naar de onderbouwingsnotities (`slides/operations_justification.md` of een vooraf gegenereerde `.pptx` via `build_slides.py`). De assessor mag kiezen welke Operations-tab hij wil onderbouwd zien — ik open de bijbehorende sectie.
 *Talking point: "Het product zelf is gestript van uitleg. De onderbouwing leeft hier. Vraag erop door."*
 
 ## 3.9 Risico's en mitigaties
@@ -535,9 +535,9 @@ Spring naar het deck (`slides/output/operations_justification.pptx`). Tim mag ki
 | Bigger corpus PDFs hebben copyright-issues | Laag | Hoog | Alleen wetten.overheid.nl + uitspraken.rechtspraak.nl |
 | HyDE/decompositie produceert slechtere resultaten dan baseline op 24-chunk corpus | Middel | Middel | Test op golden set, valideer dat metrics niet zakken; toggle uitschakelbaar |
 | Demo-laptop crasht / Docker freezes mid-demo | Laag | Catastrofaal | Backup-screencast (M11); secondary laptop met dezelfde stack klaar |
-| Tim graaft door in `drafts/final_submission_v2.md` en wijst op LangGraph-divergentie | Middel | Middel | Banner in v2 staat al; aan het begin zelf benoemen ("dit is productie-design vs laptop-implementatie, bewust gekozen") |
+| de assessor graaft door in `drafts/final_submission_v2.md` en wijst op LangGraph-divergentie | Middel | Middel | Banner in v2 staat al; aan het begin zelf benoemen ("dit is productie-design vs laptop-implementatie, bewust gekozen") |
 | Grader-prompt produceert inconsistente verdicts | Middel | Middel | Pin op temperature=0; toon prompt in slides; eval-runner valideert consistency |
-| Eval-getallen zijn onverwacht laag bij Tim's demo (b.v. faithfulness 0.72) | Middel | Hoog | Run vooraf, weet wat de getallen zijn, kalibreer drempels accordingly; framing: "we hebben strenge drempels gekozen, een lager getal is informatie, niet een falen" |
+| Eval-getallen zijn onverwacht laag bij de assessor zijn demo (b.v. faithfulness 0.72) | Middel | Hoog | Run vooraf, weet wat de getallen zijn, kalibreer drempels accordingly; framing: "we hebben strenge drempels gekozen, een lager getal is informatie, niet een falen" |
 
 ## 3.10 Final pre-demo checklist (1 dag voor)
 
@@ -549,14 +549,14 @@ Spring naar het deck (`slides/output/operations_justification.pptx`). Tim mag ki
 - [ ] Pre-warm cache met 8 demo-queries (één per archetype)
 - [ ] Pre-ingest 5-10 echte Dutch tax PDFs in seed corpus
 - [ ] Ragas-run draaien; expected metrics genoteerd (faithfulness, context_recall, citation_correctness)
-- [ ] Slide-deck `assessment_AI_USE_emresemerci.pptx` met `slides/output/operations_justification.pptx` integreerd
+- [x] Slide-deck geconsolideerd in `assessment_AI_USE_emresemerci_v2.pptx` (19 slides, één unified design). Onderbouwingsnotities in `slides/operations_justification.md`.
 - [ ] WiFi uit; alle externe URL's in browser-tabs vooraf geladen
 - [ ] Externe monitor mirrored, niet extended
 - [ ] Slack / Teams / IDE / heavy apps gesloten
 - [ ] Browser op 100% zoom, incognito
 - [ ] Hard refresh (Ctrl+Shift+R) op localhost:8000 — assets `?v=15` actief
 - [ ] [DEMO_SCRIPT.md](demo/DEMO_SCRIPT.md) geprint of open op tweede device
-- [ ] [TIM_FEEDBACK.md](TIM_FEEDBACK.md) en [SENIOR_REVIEW_AND_PLAN.md](SENIOR_REVIEW_AND_PLAN.md) klaar om te delen op verzoek
+- [ ] [ASSESSMENT_REVIEW_FEEDBACK.md](ASSESSMENT_REVIEW_FEEDBACK.md) en [SENIOR_REVIEW_AND_PLAN.md](SENIOR_REVIEW_AND_PLAN.md) klaar om te delen op verzoek
 - [ ] Stack één keer restart-test: `docker compose down && up -d` → werkt nog steeds binnen 60 sec
 
 ## 3.11 Wat hier niet in staat

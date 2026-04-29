@@ -1,85 +1,85 @@
-# Operations — Onderbouwingsslides
+# Operations — Justification slides
 
-Bron-document voor de 5 onderbouwingsslides die het deck completeren.
-Elke sectie volgt hetzelfde stramien zodat het deck visueel consistent is.
-`build_slides.py` parseert dit bestand en genereert `output/operations_justification.pptx`.
+Source document for the 5 justification slides that complete the deck.
+Each section follows the same pattern so the deck stays visually consistent.
+Run `python build_slides.py` from this directory to render this markdown into `output/operations_justification.pptx` if a slide deck is preferred over the source notes.
 
 ---
 
 ## Slide 1 — Ingestie
 
-**Titel:** Chunken volgens de structuur die de tekst zelf draagt
+**Title:** Chunk along the structure the text already carries
 
 **Bullets (max 3):**
-- Keuze: structurele regex-chunker voor wetgeving (Hoofdstuk · Afdeling · Artikel · Lid · Sub) met AI-semantische fallback voor ECLI-uitspraken en beleidsmemo's; `parent_chunk_id` en `hierarchy_path` expliciet in elk indexrecord.
-- Afgewezen: pure recursive splitter (negeert juridische conventies, breekt midden in een Lid), pure LLM-cuts (niet-deterministisch, duur, niet auditbaar voor een toezichthouder).
-- Trade-off: twee paden onderhouden i.p.v. één — winst is dat 90% van het corpus deterministisch en cacheable wordt gechunkt; alleen de niet-juridische 10% kost LLM-calls.
+- Choice: a structural regex chunker for legislation (Hoofdstuk · Afdeling · Artikel · Lid · Sub) with an AI-semantic fallback for ECLI rulings and policy memos; `parent_chunk_id` and `hierarchy_path` explicit on every index record.
+- Rejected: pure recursive splitter (ignores legal conventions, breaks mid-Lid), pure LLM cuts (non-deterministic, expensive, not auditable for a regulator).
+- Trade-off: maintaining two paths instead of one — gain is that 90% of the corpus is chunked deterministically and cacheably; only the non-legal 10% costs LLM calls.
 
-**Spreker-notes:**
-Juridische tekst volgt strikte conventies — die conventies negeren is energie weggooien. Voor wetgeving is een regex-chunker sneller, deterministisch en auditbaar; voor ECLI-uitspraken en beleid waar geen vaste structuur is, valt de pipeline terug op een AI-chunker die breukpunten voorstelt met reden, gecached op `sha256(doc)` zodat re-ingestie reproduceerbaar blijft. De hiërarchie zelf is geen tekst-extractie maar staat expliciet in elk indexrecord — dat maakt parent-expansion in retrieval een O(1)-lookup, en het maakt citaties verifieerbaar tot op het exacte Lid.
+**Speaker notes:**
+Legal text follows strict conventions — ignoring those conventions is wasted energy. For legislation a regex chunker is faster, deterministic and auditable; for ECLI rulings and policy memos with no fixed structure the pipeline falls back to an AI chunker that proposes break points with a reason, cached on `sha256(doc)` so re-ingestion remains reproducible. The hierarchy itself is not a text-extraction artefact but lives explicitly on every index record — that makes parent-expansion in retrieval an O(1) lookup, and it makes citations verifiable down to the exact Lid.
 
-**UI-anker:** Operations → Ingestie · live-stream + boom-view · klik een chunk → metadata-modal toont `parent_chunk_id`.
+**UI anchor:** Operations → Ingestie · live stream + tree view · click a chunk → metadata modal shows `parent_chunk_id`.
 
 ---
 
 ## Slide 2 — Retrieval
 
-**Titel:** Hybride zoek omdat geen enkele methode alle juridische queries dekt
+**Title:** Hybrid search because no single method covers all legal queries
 
 **Bullets (max 3):**
-- Keuze: BM25 + kNN (e5-small, 384-dim, multilingual) gefuseerd met Reciprocal Rank Fusion `k=60`, optionele LLM-rerank op de top-20.
-- Afgewezen: pure vector (mist exacte artikelnummers — `art. 3.114` blendt met `art. 3.115`), pure BM25 (mist paraphrase en synoniemen), alpha-blending (BM25-scores en cosine leven in onverenigbare ruimtes).
-- Trade-off: twee zoekpaden = twee indices in OpenSearch; in ruil heeft RRF geen score-normalisatie nodig en is het stabiel onder corpus-veranderingen.
+- Choice: BM25 + kNN (e5-small, 384-dim, multilingual) fused via Reciprocal Rank Fusion `k=60`, optional LLM rerank on the top-20.
+- Rejected: pure vector (misses exact article numbers — `art. 3.114` blends with `art. 3.115`), pure BM25 (misses paraphrase and synonyms), alpha blending (BM25 scores and cosine live in incompatible spaces).
+- Trade-off: two retrieval paths = two indices in OpenSearch; in return RRF needs no score normalization and is stable under corpus changes.
 
-**Spreker-notes:**
-Een Belastingdienst-query mengt twee soorten precisie. *"Wat is artikel 3.114, lid 2?"* heeft een exacte artikelreferentie nodig — daar wint BM25. *"Wanneer mag ik geen huishoudelijke uitgaven aftrekken?"* heeft semantiek nodig — daar wint vector. RRF ziet alleen rangs, niet scores, en daarom kun je twee fundamenteel verschillende rankers fuseren zonder dat één signaal de ander overstemt. De `k=60` is een breed-geaccepteerde default uit de RRF-paper; we hebben hem niet zelf afgeleid maar wél gevalideerd op de golden set. LLM-rerank op top-20 is optioneel omdat hij ~700ms toevoegt; voor SIMPLE queries is hij niet nodig.
+**Speaker notes:**
+A Tax Authority query mixes two kinds of precision. *"What is article 3.114, paragraph 2?"* needs an exact article reference — that's where BM25 wins. *"When may I not deduct household expenses?"* needs semantics — that's where vector wins. RRF only sees ranks, not scores, which lets you fuse two fundamentally different rankers without one signal drowning the other. The `k=60` is a widely-accepted default from the RRF paper; we did not derive it ourselves but did validate it on the golden set. LLM rerank on top-20 is optional because it adds ~700ms; for SIMPLE queries it isn't needed.
 
-**UI-anker:** Operations → Retrieval · 4 rivers (BM25 / Vector / Fusion / Rerank) · live timings.
+**UI anchor:** Operations → Retrieval · 4 rivers (BM25 / Vector / Fusion / Rerank) · live timings.
 
 ---
 
 ## Slide 3 — CRAG-pipeline
 
-**Titel:** Zelf-corrigerende retrieval — liever zwijgen dan fout antwoorden
+**Title:** Self-correcting retrieval — better silent than wrong
 
 **Bullets (max 3):**
-- Keuze: imperatieve 9-state machine (cache → classify → retrieve → grade → optionele rewrite/parent-expansion → generate → validate → respond/refuse), `MAX_RETRIES=1`, deterministische refuse-paden bij IRRELEVANT of citation-fail.
-- Afgewezen: LangGraph (overkill voor 9 states, verbergt het control-flow-verhaal achter framework-magie), no-retry (te veel ambiguous cases gaan verloren), unlimited retries (TTFT-explosie bij slecht gestelde vragen).
-- Trade-off: state-overgangen handmatig onderhouden; in ruil hebben we volledige observability — elke turn produceert een trace die in de UI 1-op-1 te lezen is.
+- Choice: imperative 9-state machine (cache → classify → retrieve → grade → optional rewrite/parent-expansion → generate → validate → respond/refuse), `MAX_RETRIES=1`, deterministic refuse paths on IRRELEVANT or citation-fail.
+- Rejected: LangGraph (overkill for 9 states, hides the control-flow story behind framework magic), no-retry (too many ambiguous cases lost), unlimited retries (TTFT explosion on poorly worded queries).
+- Trade-off: state transitions hand-maintained; in return we get full observability — every turn produces a trace that reads 1:1 in the UI.
 
-**Spreker-notes:**
-Voor een belastingautoriteit is *fout antwoorden* duurder dan *niet antwoorden*. Daarom zit er voor de generator een grader die elke chunk scoort, en wordt het pad alleen vervolgd als minstens één chunk RELEVANT is. Bij AMBIGUOUS krijgt de pipeline één tweede kans met een herschreven query; bij INVALID_CITATIONS gaat het naar refuse. We hebben `MAX_RETRIES=1` empirisch vastgesteld op de golden set — een tweede retry verdubbelt TTFT zonder meetbare recall-winst. LangGraph is overwogen en bewust verworpen: bij 9 states verliest een DAG-framework je meer dan het je geeft, en imperatieve code is voor een toezichthouder makkelijker te auditen.
+**Speaker notes:**
+For a Tax Authority *answering wrong* is more expensive than *not answering*. So before the generator there is a grader scoring each chunk, and the path only continues if at least one chunk is RELEVANT. On AMBIGUOUS the pipeline gets one retry with a rewritten query; on INVALID_CITATIONS it goes to refuse. We empirically set `MAX_RETRIES=1` against the golden set — a second retry doubles TTFT with no measurable recall gain. LangGraph was considered and consciously rejected: at 9 states a DAG framework loses you more than it gives, and imperative code is easier to audit for a regulator.
 
-**UI-anker:** Operations → CRAG-pipeline · klik een turn in de selector · diagram licht het pad op + grader-verdict-pill.
+**UI anchor:** Operations → CRAG-pipeline · click a turn in the selector · diagram lights up the path + grader-verdict pill.
 
 ---
 
 ## Slide 4 — Toegang
 
-**Titel:** Pre-retrieval RBAC — informatie kan niet lekken via ranking
+**Title:** Pre-retrieval RBAC — information cannot leak through ranking
 
 **Bullets (max 3):**
-- Keuze: 4-tier filter (Publiek · Juridisch · Inspecteur · FIOD) wordt geïnjecteerd in de OpenSearch `bool.filter`-clause vóór BM25- en kNN-scoring; cache-keys per tier gepartitioneerd.
-- Afgewezen: post-filter (geclassificeerde chunks zouden nog steeds IDF-normalisatie en kNN-buurschap beïnvloeden — ranking-signaal lekt zelfs als het chunk verborgen wordt), volledige JWT-auth (red herring voor dit assessment; tier wordt nu per request meegegeven).
-- Trade-off: tier-context moet per request expliciet zijn; geen audit-trail-laag in dit prototype — die hoort in een productie-deployment.
+- Choice: 4-tier filter (Publiek · Juridisch · Inspecteur · FIOD) injected into the OpenSearch `bool.filter` clause before BM25 and kNN scoring; cache keys partitioned per tier.
+- Rejected: post-filter (classified chunks would still influence IDF normalization and kNN neighborhood — a ranking signal leaks even if the chunk is hidden), full JWT auth (red herring for this assessment; the tier is passed per request).
+- Trade-off: tier context must be explicit per request; no audit trail layer in this prototype — that belongs in a production deployment.
 
-**Spreker-notes:**
-Het verschil tussen privacy en security zit in dit detail: bij post-filter zou het loutere bestaan van een geclassificeerde chunk al de TF-IDF-statistieken voor publieke queries verstoren — minder vaak voorkomende termen worden zwaarder gewogen, vector-buurschappen verschuiven. Dat is een *ranking-leak*: de gebruiker ziet het chunk niet, maar het beïnvloedt wel welke andere chunks bovenaan komen. Door het filter pre-scoring te plaatsen, is `P(leak) = 0` aantoonbaar. De cache wordt op tier gepartitioneerd zodat dezelfde semantische query van een Publiek-gebruiker en een FIOD-gebruiker verschillende keys oplevert — geen cross-tier hits mogelijk.
+**Speaker notes:**
+The difference between privacy and security lives in this detail: with a post-filter the mere existence of a classified chunk would already perturb TF-IDF statistics for public queries — less-frequent terms get higher weight, vector neighborhoods shift. That's a *ranking leak*: the user does not see the chunk but it does influence which other chunks come out on top. Placing the filter pre-scoring makes `P(leak) = 0` provable. The cache is partitioned by tier so the same semantic query from a Public user and a FIOD user yields different keys — no cross-tier hits possible.
 
-**UI-anker:** Operations → Toegang · wissel rol linksboven · "Zichtbaar voor jou / Niet toegankelijk"-pills verspringen · cache-entries op vreemde tier krijgen `blocked`-label.
+**UI anchor:** Operations → Toegang · switch role in the top-left · "Visible to you / Not accessible" pills flip · cache entries on a foreign tier get a `blocked` label.
 
 ---
 
 ## Slide 5 — Kwaliteit
 
-**Titel:** CI/CD eval-gate — geen model-promotie zonder bewijs
+**Title:** CI/CD eval gate — no model promotion without proof
 
 **Bullets (max 3):**
-- Keuze: golden-set met Ragas (retrieval + generation kwaliteit) en DeepEval (safety) draait per build; expliciete ship/hold-gate per metric met vooraf vastgestelde drempels.
-- Afgewezen: hand-eval (niet schaalbaar bij groei naar miljoenen chunks; reviewer-bias), enkel unit-tests (mist semantische correctheid — een regex-test zegt niets over of de gegenereerde tekst klopt).
-- Trade-off: golden set moet onderhouden worden bij elke nieuwe wetswijziging; metrics zijn gevoelig voor false-positives bij paraphrase — we lossen dat op met meerdere accepted-answer-formuleringen per gold-item.
+- Choice: golden set with Ragas (retrieval + generation quality) and DeepEval (safety) runs per build; explicit ship/hold gate per metric with pre-set thresholds.
+- Rejected: hand evaluation (does not scale to millions of chunks; reviewer bias), unit tests only (misses semantic correctness — a regex test says nothing about whether the generated text is right).
+- Trade-off: the golden set must be maintained on every legislative change; metrics are sensitive to false positives on paraphrase — we mitigate that with multiple accepted-answer formulations per gold item.
 
-**Spreker-notes:**
-Voor een productie-RAG is de evaluatie net zo belangrijk als het systeem zelf — anders weet je niet of een nieuwe Gemma-versie of een ander chunking-schema je antwoorden beter of slechter maakt. Het ship/hold-gate principe komt uit klassieke CI: als context-recall onder 0.85 zakt of citation-precision onder 0.90, faalt de build en kan het model niet uitgerold worden. De golden set zelf is klein (5 queries in de demo, 50+ in productie) maar dekt de vier query-archetypen die we in retrieval onderscheiden: SIMPLE, COMPLEX, ECLI-lookup, en adversarial.
+**Speaker notes:**
+For a production RAG, evaluation is as important as the system itself — without it you don't know whether a new Gemma version or a different chunking scheme makes your answers better or worse. The ship/hold gate principle comes from classical CI: if context recall drops below 0.85 or citation precision below 0.90, the build fails and the model cannot be rolled out. The golden set itself is small (5 queries in the demo, 50+ in production) but covers the four query archetypes we distinguish in retrieval: SIMPLE, COMPLEX, ECLI lookup, and adversarial.
 
-**UI-anker:** Operations → Kwaliteit · 4 metric-cards · klik "Run" · ship/hold-pills geven directe groen/rood verdict.
+**UI anchor:** Operations → Kwaliteit · 4 metric cards · click "Run" · ship/hold pills give an immediate green/red verdict.

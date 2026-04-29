@@ -30,17 +30,24 @@ MUTED = RGBColor(0x55, 0x5F, 0x6D)
 SURFACE = RGBColor(0xF4, 0xF6, 0xF8)
 
 
+# Field labels: tries each candidate in order. Keeps NL labels working
+# for backwards-compatibility with older slide-md revisions.
+TITLE_LABELS = ("Title", "Titel")
+NOTES_LABELS = ("Speaker notes", "Spreker-notes")
+ANCHOR_LABELS = ("UI anchor", "UI-anker")
+
+
 def parse_slides(md_text: str) -> list[dict]:
     """Split the markdown into slide dicts.
 
-    Recognised sections per slide:
+    Recognised sections per slide (EN labels preferred, NL accepted as fallback):
       ## Slide N — <Tab>
-      **Titel:** ...
+      **Title:** ...
       **Bullets (max 3):**
       - ...
-      **Spreker-notes:**
+      **Speaker notes:**
       <prose>
-      **UI-anker:** ...
+      **UI anchor:** ...
     """
     slide_blocks = re.split(r"^## Slide \d+ — ", md_text, flags=re.MULTILINE)[1:]
     slides: list[dict] = []
@@ -48,10 +55,10 @@ def parse_slides(md_text: str) -> list[dict]:
         first_line, rest = block.split("\n", 1)
         tab_name = first_line.strip()
 
-        title = _extract_field(rest, "Titel")
+        title = _extract_first_field(rest, TITLE_LABELS)
         bullets = _extract_bullets(rest)
-        notes = _extract_field(rest, "Spreker-notes", multiline=True)
-        anchor = _extract_field(rest, "UI-anker")
+        notes = _extract_first_field(rest, NOTES_LABELS, multiline=True)
+        anchor = _extract_first_field(rest, ANCHOR_LABELS)
 
         slides.append(
             {
@@ -63,6 +70,15 @@ def parse_slides(md_text: str) -> list[dict]:
             }
         )
     return slides
+
+
+def _extract_first_field(text: str, labels: tuple[str, ...], multiline: bool = False) -> str:
+    """Try each label until one matches. First non-empty value wins."""
+    for label in labels:
+        value = _extract_field(text, label, multiline=multiline)
+        if value:
+            return value
+    return ""
 
 
 def _extract_field(text: str, label: str, multiline: bool = False) -> str:
@@ -181,7 +197,7 @@ def _add_anchor_footer(slide, anchor_text: str) -> None:
     tf.word_wrap = True
     p = tf.paragraphs[0]
     run = p.add_run()
-    run.text = f"UI-anker: {anchor_text}"
+    run.text = f"UI anchor: {anchor_text}"
     run.font.size = Pt(11)
     run.font.italic = True
     run.font.color.rgb = MUTED
@@ -196,17 +212,17 @@ def _add_speaker_notes(slide, notes_text: str) -> None:
 
 def main() -> None:
     if not SOURCE_MD.exists():
-        raise SystemExit(f"Bron-bestand niet gevonden: {SOURCE_MD}")
+        raise SystemExit(f"Source file not found: {SOURCE_MD}")
     md_text = SOURCE_MD.read_text(encoding="utf-8")
     slides = parse_slides(md_text)
     if len(slides) != 5:
         raise SystemExit(
-            f"Verwachtte 5 slide-secties in {SOURCE_MD.name}, vond er {len(slides)}."
+            f"Expected 5 slide sections in {SOURCE_MD.name}, found {len(slides)}."
         )
     prs = build_presentation(slides)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     prs.save(OUT_PPTX)
-    print(f"OK — {len(slides)} slides geschreven naar {OUT_PPTX.relative_to(HERE.parent)}")
+    print(f"OK — {len(slides)} slides written to {OUT_PPTX.relative_to(HERE.parent)}")
 
 
 if __name__ == "__main__":

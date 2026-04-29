@@ -8,20 +8,20 @@ De repo bevat drie chronologische lagen die door elkaar staan:
 2. **v2 demo (Apr 13):** een eerste live Docker-prototype met Gemini API, Module-tags in de UI, Rondleiding-tour, Beslissingen-tabblad. Deze laag bestaat in commits maar is grotendeels overschreven.
 3. **v3 huidig (Apr 17–28):** post-feedback refactor — Docker Model Runner met Gemma 4 / Qwen 2.5, 384-dim e5-small, Werkruimte/Operations-sidebar, geen Beslissingen-tab, geen Rondleiding, geen module-tags. De huidige `demo/`-stack draait hier op.
 
-De v3 laag matcht de live UI; v1 en v2 verwijzen naar features en stack-keuzes die niet meer kloppen met wat Tim in de browser zal zien.
+De v3 laag matcht de live UI; v1 en v2 verwijzen naar features en stack-keuzes die niet meer kloppen met wat de assessor in de browser zal zien.
 
 ---
 
-## 🔴 KRITIEK — actief misleidend, fix of verwijder vóór Tim
+## 🔴 KRITIEK — actief misleidend, fix of verwijder vóór de assessor
 
 ### 1. `requirements.txt` (root)
-Claimt `langgraph`, `vllm`, `llama-index`, `bge-reranker`, `multilingual-e5-large`, `ragas`, `deepeval`, `python-jose`. **De demo gebruikt geen van deze.** Als Tim `pip install -r requirements.txt` doet voor reproductie, krijgt hij ~5 GB aan dependencies die niet matchen met `demo/requirements-demo.txt` (`opensearch-py`, `redis`, `sentence-transformers`, `openai`, `fastapi`, `pdfplumber`).
+Claimt `langgraph`, `vllm`, `llama-index`, `bge-reranker`, `multilingual-e5-large`, `ragas`, `deepeval`, `python-jose`. **De demo gebruikt geen van deze.** Als de assessor `pip install -r requirements.txt` doet voor reproductie, krijgt hij ~5 GB aan dependencies die niet matchen met `demo/requirements-demo.txt` (`opensearch-py`, `redis`, `sentence-transformers`, `openai`, `fastapi`, `pdfplumber`).
 - **Actie:** vervang door één regel pointer (`# Zie demo/requirements-demo.txt voor de runtime-deps`) of verwijder helemaal.
 
 ### 2. `README.txt` (root)
 - Bevat: *"cd demo && cp .env.example .env # add your Gemini API key"*. Er is **geen** Gemini API meer; alles draait op Docker Model Runner met `ai/gemma4:E2B`.
 - Verwijst naar `demo video.mp4` als "ready to use environment example", maar die video toont de oude UI.
-- Verwijst naar `assessment_AI_USE_emresemerci.pptx` (klopt) als hoofd-deck, maar mist `slides/output/operations_justification.pptx` (de nieuwe onderbouwingsslides).
+- Verwijst naar `assessment_AI_USE_emresemerci_v2.pptx` als hoofd-deck (19 slides). Onderbouwing per Operations-tab leeft als markdown-source in `slides/operations_justification.md`; .pptx-render is on-demand via `python slides/build_slides.py`.
 - **Actie:** herschrijven naar de huidige stack (Docker Model Runner, `localhost:8000`, hard-refresh tip), of converteren naar `README.md` met de nieuwe inhoud.
 
 ### 3. `demo video.mp4` (133 MB)
@@ -33,7 +33,7 @@ Datum 2026-04-13. Toont:
 - HNSW parametertabel + Memory Math (verwijderd)
 - "MODULE 1 · Ingestion & Knowledge Structuring" hero (vervangen door rustige header)
 
-**Niets** in deze video matcht meer met wat Tim live ziet. Pointing-to is contraproductief.
+**Niets** in deze video matcht meer met wat de assessor live ziet. Pointing-to is contraproductief.
 - **Actie:** ofwel opnieuw opnemen ná dress-rehearsal van de nieuwe DEMO_SCRIPT, ofwel verwijderen + uit README schrappen. Geen middenweg.
 
 ### 4. `assessment_presentation_final (2) (1).pptx`
@@ -68,7 +68,7 @@ Voorgangers van `final_submission_v2.md`. Inhoud is opgenomen in de definitieve 
 
 ### 7. `pseudocode/*.py` (5 bestanden, ~170 KB)
 Design-pseudocode voor v1. Sommige modules zijn nog 1-op-1 herkenbaar in de demo (CRAG state machine, structurele chunker met hiërarchie); andere zijn divergent (`LegalDocumentChunker` gebruikt Mixtral-promptcalls; demo gebruikt regex + Gemma).
-- **Actie:** behouden — Tim kan ernaar willen kijken voor "hoe zou dit op productieschaal eruitzien". Wel duidelijk maken in `README` dat dit geen runtime-code is.
+- **Actie:** behouden — de assessor kan ernaar willen kijken voor "hoe zou dit op productieschaal eruitzien". Wel duidelijk maken in `README` dat dit geen runtime-code is.
 
 ### 8. `schemas/opensearch_index_mapping.json` (11 KB)
 - Index-naam `tax_authority_rag_chunks` (demo gebruikt `tax_authority_rag_chunks_e5` voor de e5-small dim)
@@ -92,7 +92,7 @@ v1 eval-spec. De Kwaliteit-pagina in de demo gebruikt een eigen `/v1/eval/*` end
 - **Actie:** controleren of deze nog accuraat zijn voor wat de Kwaliteit-tab toont; zo niet, korte toelichting toevoegen.
 
 ### 12. `performance/resource_allocation.md` (26 KB)
-Sizing-analyse voor 20M chunks met multi-node OpenSearch + GPU-LLM. Niet wat draait, wel wat Tim wil zien als "hoe zou je dit naar productie schalen".
+Sizing-analyse voor 20M chunks met multi-node OpenSearch + GPU-LLM. Niet wat draait, wel wat de assessor wil zien als "hoe zou je dit naar productie schalen".
 - **Actie:** behouden, het is een sterk onderbouwingsdocument.
 
 ### 13. `reference/tools_and_technologies.txt` (24 KB) + `assumptions.md` (7 KB)
@@ -107,8 +107,8 @@ v1 tech-inventaris en aannamelijst (A1–A18). De assumptions zijn nog steeds re
 |---|---|
 | `demo/` | Live product, draait nu op localhost:8000 |
 | `slides/` | Net gegenereerd, matcht UI |
-| `assessment_AI_USE_emresemerci.pptx` | Huidige presentatie-deck |
-| `TIM_FEEDBACK.md` | Net gemaakt, letterlijke feedback |
+| `assessment_AI_USE_emresemerci_v2.pptx` | Huidige presentatie-deck (19 slides, unified design — gegenereerd via `build_updated_deck.py`) |
+| `ASSESSMENT_REVIEW_FEEDBACK.md` | Net gemaakt, letterlijke feedback |
 | `SENIOR_LEVEL_PLAN.md` | Plan dat naar v3 leidde — historisch waardevol |
 | `CLAUDE.md` | Behavioural guidelines, niet stack-gevoelig |
 | `assesment.txt` | De originele opdracht — onveranderlijk |
@@ -118,8 +118,8 @@ v1 tech-inventaris en aannamelijst (A1–A18). De assumptions zijn nog steeds re
 ## 🛠 HOUSEKEEPING — git-hygiëne
 
 ### 14. Veel ongecommitte v3-code
-`git status` toont 18 modified + 18 untracked bestanden in `demo/app/`, plus `slides/`, `TIM_FEEDBACK.md`, `SENIOR_LEVEL_PLAN.md`, `CLAUDE.md`, `DEMO_SCRIPT.md`. **Alles wat de strip-down + slide-creatie heeft opgeleverd staat alleen lokaal.**
-- **Actie:** committen in logische chunks: (a) v3 demo-code, (b) UI-strip + nieuwe sidebar, (c) slides + DEMO_SCRIPT + TIM_FEEDBACK + SENIOR_LEVEL_PLAN. Anders ben je één laptop-fout verwijderd van alles kwijt.
+`git status` toont 18 modified + 18 untracked bestanden in `demo/app/`, plus `slides/`, `ASSESSMENT_REVIEW_FEEDBACK.md`, `SENIOR_LEVEL_PLAN.md`, `CLAUDE.md`, `DEMO_SCRIPT.md`. **Alles wat de strip-down + slide-creatie heeft opgeleverd staat alleen lokaal.**
+- **Actie:** committen in logische chunks: (a) v3 demo-code, (b) UI-strip + nieuwe sidebar, (c) slides + DEMO_SCRIPT + ASSESSMENT_REVIEW_FEEDBACK + SENIOR_LEVEL_PLAN. Anders ben je één laptop-fout verwijderd van alles kwijt.
 
 ### 15. `.gitignore` mist nieuwe build-artefacten
 Niet uitgesloten:
@@ -151,6 +151,6 @@ v1 CI-workflow voor een architectuur die niet draait. Onbekend of hij überhaupt
 
 ## Wat je kunt doen tijdens je dress-rehearsal
 
-Loop **alleen langs de groene en de gele rij** — accepteer dat ze er niet 100% bij elkaar passen, en *vertel dat tegen Tim als hij ernaar vraagt*: **"De papieren architectuur in `drafts/` beschrijft de productieversie; de live demo is een gereduceerde implementatie die op een laptop draait. Het verschil is bewust en gedocumenteerd."** Dat is een sterker antwoord dan proberen alles in lijn te brengen.
+Loop **alleen langs de groene en de gele rij** — accepteer dat ze er niet 100% bij elkaar passen, en *vertel dat tegen de assessor als hij ernaar vraagt*: **"De papieren architectuur in `drafts/` beschrijft de productieversie; de live demo is een gereduceerde implementatie die op een laptop draait. Het verschil is bewust en gedocumenteerd."** Dat is een sterker antwoord dan proberen alles in lijn te brengen.
 
-De rode rij moet weg of bijgewerkt vóórdat Tim de repo opent. Anders krijg je *"waarom werkt `pip install -r requirements.txt` niet?"* en is het gesprek begonnen op een verkeerde noot.
+De rode rij moet weg of bijgewerkt vóórdat de assessor de repo opent. Anders krijg je *"waarom werkt `pip install -r requirements.txt` niet?"* en is het gesprek begonnen op een verkeerde noot.
