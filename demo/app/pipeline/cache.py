@@ -80,7 +80,13 @@ async def check_cache_semantic(
     threshold = settings.cache_similarity_threshold
 
     # Fast path: exact-hash hit in own tier (saves an embedding call).
-    raw = redis_client.get(_primary_key(security_tier, query))
+    # Cache is on the hot path of every chat-query — fail-soft on Redis errors so a
+    # transient hiccup degrades to a cache MISS rather than a 500.
+    try:
+        raw = redis_client.get(_primary_key(security_tier, query))
+    except Exception as e:
+        log.warning("cache_get_failed", error=str(e))
+        return None
     if raw:
         entry = _deserialize(raw)
         if entry:
@@ -97,20 +103,23 @@ async def check_cache_semantic(
 
     best: tuple[float, dict] | None = None
     accessible = TIER_ACCESS.get(security_tier, ["PUBLIC"])
-    for tier_name in accessible:
-        tier = SecurityTier(tier_name)
-        # Iterate all keys for this tier via SCAN (cheap; cache cardinality is small).
-        for key in redis_client.scan_iter(match=f"cache:{tier.value}:*", count=100):
-            raw = redis_client.get(key)
-            if not raw:
-                continue
-            entry = _deserialize(raw)
-            emb = entry.get("query_embedding") or []
-            if not emb:
-                continue
-            score = _cosine(query_emb, emb)
-            if score >= threshold and (best is None or score > best[0]):
-                best = (score, entry)
+    try:
+        for tier_name in accessible:
+            tier = SecurityTier(tier_name)
+            for key in redis_client.scan_iter(match=f"cache:{tier.value}:*", count=100):
+                raw = redis_client.get(key)
+                if not raw:
+                    continue
+                entry = _deserialize(raw)
+                emb = entry.get("query_embedding") or []
+                if not emb:
+                    continue
+                score = _cosine(query_emb, emb)
+                if score >= threshold and (best is None or score > best[0]):
+                    best = (score, entry)
+    except Exception as e:
+        log.warning("cache_scan_failed", error=str(e))
+        return None
     if best:
         score, entry = best
         entry["_match"] = "semantic"
@@ -167,7 +176,10 @@ async def store_cache_semantic(
     procedural_keywords = ["procedure", "aanvraag", "formulier", "indienen", "termijn", "bezwaar"]
     ttl = settings.cache_ttl_procedural if any(k in query.lower() for k in procedural_keywords) else settings.cache_ttl_default
 
-    redis_client.setex(_primary_key(security_tier, query), ttl, _serialize(entry))
+    try:
+        redis_client.setex(_primary_key(security_tier, query), ttl, _serialize(entry))
+    except Exception as e:
+        log.warning("cache_setex_failed", error=str(e))
 
 
 # Legacy sync wrapper (hash-only).
@@ -188,9 +200,12 @@ def store_cache(redis_client, query, security_tier, response, citations, doc_ids
 
 def get_cache_stats(redis_client: Redis) -> dict:
     stats = {"total_entries": 0, "entries_by_tier": {}, "keys": []}
-    for tier in SecurityTier:
-        pattern = f"cache:{tier.value}:*"
-        keys = list(redis_client.scan_iter(match=pattern))
-        stats["entries_by_tier"][tier.value] = len(keys)
-        stats["total_entries"] += len(keys)
+    try:
+        for tier in SecurityTier:
+            pattern = f"cache:{tier.value}:*"
+            keys = list(redis_client.scan_iter(match=pattern))
+            stats["entries_by_tier"][tier.value] = len(keys)
+            stats["total_entries"] += len(keys)
+    except Exception as e:
+        log.warning("cache_stats_failed", error=str(e))
     return stats

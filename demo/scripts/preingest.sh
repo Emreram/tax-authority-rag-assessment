@@ -11,7 +11,7 @@ set -e
 
 API_HOST="${API_HOST:-http://api:8000}"
 DOC_DIR="${DOC_DIR:-/seed_data/pdfs}"
-EXPECTED_DOCS=6   # threshold; we ship 6 demo files. Skip preingest if >= this many docs already.
+EXPECTED_DOCS=28  # threshold; corpus extended in 2026-04 with 18 new PUBLIC documents. Skip preingest if >= this many docs already.
 
 if [ ! -d "$DOC_DIR" ]; then
   echo "preingest: $DOC_DIR not found, skipping"

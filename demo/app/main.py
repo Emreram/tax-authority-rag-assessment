@@ -1,15 +1,17 @@
+import asyncio
+import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from redis import Redis
 from app.config import get_settings
 from app.opensearch.client import get_opensearch_client
 from app.opensearch.setup import setup_opensearch
 from app.pipeline import embedder
 from app.pipeline.llm import ping as llm_ping
-from app.routers import query, health, cache, chat, ingest, eval_dashboard
+from app.routers import query, health, cache, chat, ingest, eval_dashboard, chaos
 import structlog
 
 log = structlog.get_logger()
@@ -27,29 +29,64 @@ async def lifespan(app: FastAPI):
     embedder.preload()
     log.info("embedder_ready", dim=settings.embedding_dim)
 
-    # Verify LLM (Docker Model Runner) reachable
-    app.state.warmup_stage = "pinging_llm"
-    if not await llm_ping():
-        log.warning("llm_unreachable_at_startup", base_url=settings.llm_base_url)
-
-    # Connect OpenSearch + seed data
+    # Connect OpenSearch + seed data (with retry-with-backoff)
     app.state.warmup_stage = "opensearch_setup"
     app.state.opensearch = get_opensearch_client()
-    await setup_opensearch()
+    for attempt in range(5):
+        try:
+            await setup_opensearch()
+            break
+        except Exception as e:
+            log.warning("opensearch_setup_retry", attempt=attempt + 1, error=str(e))
+            await asyncio.sleep(min(2 ** attempt, 10))
+    else:
+        log.error("opensearch_setup_failed_after_retries")
 
-    # Connect Redis
+    # Connect Redis (retry)
     app.state.warmup_stage = "connecting_redis"
     app.state.redis = Redis(
         host=settings.redis_host,
         port=settings.redis_port,
         decode_responses=True,
     )
-    app.state.redis.ping()
-    log.info("redis_connected")
+    for attempt in range(3):
+        try:
+            app.state.redis.ping()
+            log.info("redis_connected")
+            break
+        except Exception as e:
+            log.warning("redis_ping_retry", attempt=attempt + 1, error=str(e))
+            await asyncio.sleep(0.5 * (attempt + 1))
 
-    app.state.warmup_complete = True
-    app.state.warmup_stage = "ready"
-    log.info("startup_complete")
+    # Verify LLM reachable — gate warmup_complete on this. If the LLM is down,
+    # we keep warmup_complete=False and start a background poller that flips it
+    # to True once the LLM responds. Splash polls /readyz and stays up until then.
+    app.state.warmup_stage = "pinging_llm"
+    app.state.llm_ready = False
+    if await llm_ping():
+        app.state.llm_ready = True
+        app.state.warmup_complete = True
+        app.state.warmup_stage = "ready"
+        log.info("startup_complete")
+    else:
+        log.warning("llm_unreachable_at_startup", base_url=settings.llm_base_url)
+        app.state.warmup_stage = "waiting_for_llm"
+
+        async def _llm_poller():
+            while not app.state.llm_ready:
+                await asyncio.sleep(5)
+                try:
+                    if await llm_ping():
+                        app.state.llm_ready = True
+                        app.state.warmup_complete = True
+                        app.state.warmup_stage = "ready"
+                        log.info("llm_became_ready_via_poll")
+                        return
+                except Exception:
+                    pass
+
+        asyncio.create_task(_llm_poller())
+
     yield
 
     log.info("shutdown")
@@ -121,6 +158,7 @@ app.include_router(ingest.router, prefix="/v1", tags=["Ingest"])
 app.include_router(eval_dashboard.router, tags=["Eval"])
 app.include_router(health.router, tags=["Health"])
 app.include_router(cache.router, prefix="/v1", tags=["Cache"])
+app.include_router(chaos.router, prefix="/v1", tags=["Chaos"])
 
 STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -144,3 +182,17 @@ async def static_no_cache(request, call_next):
         for k, v in NO_CACHE_HEADERS.items():
             response.headers[k] = v
     return response
+
+
+@app.middleware("http")
+async def request_id_middleware(request, call_next):
+    """Attach a UUID to every request — propagated to logs, SSE error events, and response headers."""
+    req_id = request.headers.get("x-request-id") or uuid.uuid4().hex[:12]
+    request.state.request_id = req_id
+    structlog.contextvars.bind_contextvars(request_id=req_id)
+    try:
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = req_id
+        return response
+    finally:
+        structlog.contextvars.clear_contextvars()

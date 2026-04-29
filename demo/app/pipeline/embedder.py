@@ -8,6 +8,7 @@ Output dim = 384. Runs on CPU.
 from __future__ import annotations
 
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from typing import Iterable
 
@@ -20,6 +21,10 @@ from app.config import get_settings
 log = structlog.get_logger()
 
 _model: SentenceTransformer | None = None
+_load_lock = asyncio.Lock()
+# Dedicated pool — keeps embedding work off the default executor so the main
+# event loop isn't starved under concurrent ingest/query load.
+_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="embed")
 
 
 def _load() -> SentenceTransformer:
@@ -29,6 +34,14 @@ def _load() -> SentenceTransformer:
         log.info("embedder_loading", model=settings.embedding_model)
         _model = SentenceTransformer(settings.embedding_model, device="cpu")
         log.info("embedder_loaded", dim=_model.get_sentence_embedding_dimension())
+    return _model
+
+
+async def _aload() -> SentenceTransformer:
+    if _model is None:
+        async with _load_lock:
+            if _model is None:
+                _load()
     return _model
 
 
@@ -47,11 +60,11 @@ async def embed_document(text: str) -> list[float]:
 
 
 async def embed_batch(texts: Iterable[str], kind: str = "passage") -> list[list[float]]:
-    model = _load()
+    model = await _aload()
     prefixed = [_prefix(t, kind) for t in texts]
     loop = asyncio.get_event_loop()
     vectors = await loop.run_in_executor(
-        None,
+        _executor,
         lambda: model.encode(prefixed, normalize_embeddings=True, show_progress_bar=False),
     )
     return [v.tolist() for v in vectors]

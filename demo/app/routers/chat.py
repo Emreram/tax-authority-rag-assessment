@@ -28,12 +28,14 @@ from app.models import SecurityTier
 from app.pipeline import memory
 from app.pipeline import embedder as _embedder
 from app.audit import log_query as audit_log_query
+from app.metrics import incr as metric_incr
 from app.pipeline.cache import check_cache_semantic, store_cache_semantic
 from app.pipeline.citation_format import compact_citations
 from app.pipeline.classifier import classify_query, decompose_complex
 from app.pipeline.generator import rewrite_query
 from app.pipeline.grader import grade_context
 from app.pipeline.llm import generate_stream, BreakerOpenError
+from app.pipeline.breaker import breaker as _breaker
 from app.pipeline.retriever import retrieve
 from app.pipeline.validator import validate_citations
 
@@ -51,6 +53,63 @@ class ChatRequest(BaseModel):
 
 def _sse(event: str, data) -> dict:
     return {"event": event, "data": json.dumps(data, default=str)}
+
+
+def _build_refuse_text(diag: dict, tier) -> str:
+    """Map refuse-classifier output → user-facing refuse text. Compact, scannable."""
+    cat = diag.get("category", "SEMANTIC_MISMATCH")
+    if cat == "CORPUS_GAP":
+        return (
+            "Geen onderbouwd antwoord beschikbaar — **dit onderwerp zit nog niet in het corpus**.\n\n"
+            "Meld de vraag aan de corpus-eigenaar (Operations → Documenten) "
+            "zodat de relevante bron geïngest kan worden."
+        )
+    if cat == "TIER_GAP":
+        higher = diag.get("higher_tier_needed") or "een hogere classificatie"
+        return (
+            f"Geen onderbouwd antwoord op jouw tier (**{tier.value}**) — "
+            f"de relevante content staat op **{higher}**.\n\n"
+            f"Vraag toegang tot {higher} aan, of leg de vraag voor aan een collega "
+            f"met die classificatie."
+        )
+    return (
+        "Geen onderbouwd antwoord — er zijn mogelijk gerelateerde documenten, "
+        "maar geen die de vraag direct beantwoorden.\n\n"
+        "Probeer een specifiekere formulering met wetsartikel of begrip "
+        "(bijv. *art 3.14 Wet IB 2001*)."
+    )
+
+
+def _maybe_breaker_trace() -> dict | None:
+    """If the breaker just transitioned, return an SSE-trace dict to surface it in the UI."""
+    t = _breaker.consume_transition()
+    if not t:
+        return None
+    old, new, _ts = t
+    label = f"{old.value} → {new.value}"
+    if new.value == "HALF_OPEN":
+        detail = "trial request — breaker is testing recovery"
+    elif new.value == "CLOSED" and old.value == "HALF_OPEN":
+        detail = "RECOVERED — circuit closed after successful trial"
+    elif new.value == "OPEN":
+        detail = f"OPENED — {_breaker.threshold} failures in {_breaker.window_s:.0f}s"
+    else:
+        detail = label
+    return _sse("trace", {"node": "breaker_state", "result": new.value, "detail": detail, "duration_ms": 0})
+
+
+def _categorize_error(exc: Exception) -> tuple[str, str]:
+    """Map exception → (category, friendly NL message). Never leak str(e) to client."""
+    name = type(exc).__name__.lower()
+    if "breakeropen" in name:
+        return "LLM_UNAVAILABLE", "Inferentie tijdelijk overbelast — probeer het over enkele minuten opnieuw."
+    if "timeout" in name or "readtimeout" in name:
+        return "TIMEOUT", "De verwerking duurde te lang. Probeer het opnieuw of stel een specifiekere vraag."
+    if "connection" in name or "connecterror" in name:
+        return "INFRA_ERROR", "Een achterliggend systeem is tijdelijk niet bereikbaar."
+    if "validation" in name or "pydantic" in name:
+        return "VALIDATION_FAILED", "De vraag voldoet niet aan het verwachte formaat."
+    return "INTERNAL", "Er ging intern iets mis. De fout is gelogd voor onderzoek."
 
 
 GENERATOR_SYSTEM = """Je bent de KennisAssistent van de Belastingdienst.
@@ -120,14 +179,21 @@ async def _streaming_pipeline(
             grade="CACHE_HIT", citations=[c.get("chunk_id", "") for c in cached.get("citations", [])],
             ttft_ms=ttft_ms, source="cache",
         )
+        metric_incr(redis_client, "cache_hits")
         yield _sse("done", {"session_id": session_id, "source": "cache", "total_ms": (time.time() - t_total) * 1000})
         return
+    metric_incr(redis_client, "cache_misses")
     yield _sse("trace", {"node": "cache_lookup", "result": "MISS", "duration_ms": cache_ms})
 
     # ─── classify ───
     t0 = time.time()
     query_type = await classify_query(query)
     yield _sse("trace", {"node": "classify_query", "result": query_type, "duration_ms": (time.time() - t0) * 1000})
+    # Surface any breaker transition the classify-call may have caused (e.g. OPEN→HALF_OPEN
+    # because cooldown elapsed and this was the trial request).
+    bt = _maybe_breaker_trace()
+    if bt:
+        yield bt
 
     # ─── decompose (M5) — only for COMPLEX queries ───
     sub_queries: list[str] = []
@@ -156,9 +222,14 @@ async def _streaming_pipeline(
         if sub_queries and current_query == query:  # only on first pass; retries use rewrite
             sub_results = await asyncio.gather(*[
                 retrieve(os_client, sq, tier, "SIMPLE", settings) for sq in sub_queries
-            ])
+            ], return_exceptions=True)
             seen: dict[str, tuple[float, dict]] = {}
+            failed = 0
             for sub_hits in sub_results:
+                if isinstance(sub_hits, Exception):
+                    failed += 1
+                    log.warning("subquery_failed", error=str(sub_hits))
+                    continue
                 for rank, h in enumerate(sub_hits):
                     cid = h["chunk_id"]
                     score = 1.0 / (60 + rank + 1)
@@ -166,8 +237,13 @@ async def _streaming_pipeline(
                     seen[cid] = ((prev[0] if prev else 0.0) + score, h)
             merged = sorted(seen.values(), key=lambda x: -x[0])[: settings.top_k_rerank]
             retrieved = [m[1] for m in merged]
+            if failed:
+                yield _sse("trace", {"node": "decompose_partial", "result": f"{failed} sub-query failed", "detail": "merged remaining results", "duration_ms": 0})
         else:
-            retrieved = await retrieve(os_client, current_query, tier, query_type, settings)
+            # Force HyDE on retry passes — gives an extra recall lift on the rewrite query
+            # (knob 4: HyDE was SIMPLE-only by default; on a retry we always want it).
+            retrieved = await retrieve(os_client, current_query, tier, query_type, settings,
+                                       force_hyde=(retries > 0))
         dt = (time.time() - t0) * 1000
         retrieve_ms += dt
         # M4/M5: surface any trace-events the retriever collected (HyDE, rerank, …)
@@ -189,21 +265,53 @@ async def _streaming_pipeline(
 
         if grading_result == "RELEVANT":
             break
-        if grading_result == "AMBIGUOUS" and retries < settings.max_retries:
+
+        # Knob 2: also retry on IRRELEVANT (was: instant refuse). Many "IRRELEVANT"
+        # results are query-formulation issues that survive a rewrite.
+        if grading_result in ("AMBIGUOUS", "IRRELEVANT") and retries < settings.max_retries:
             retries += 1
             current_query = await rewrite_query(query)
-            yield _sse("trace", {"node": "rewrite_and_retry", "result": f"retry {retries}/{settings.max_retries}", "detail": current_query[:80], "duration_ms": 0})
+            yield _sse("trace", {"node": "rewrite_and_retry",
+                                 "result": f"retry {retries}/{settings.max_retries} ({grading_result})",
+                                 "detail": current_query[:80], "duration_ms": 0})
             continue
 
-        # refuse — M8: tier-aware, framed as a feature (not an error).
-        refuse_text = (
-            f"Ik heb geen geverifieerd antwoord op deze vraag binnen jouw toegangsniveau "
-            f"(**{tier.value}**). Mogelijke vervolgstappen:\n\n"
-            "- Probeer een specifiekere formulering met een wetsartikel of begrip.\n"
-            "- Overleg met een collega die toegang heeft tot een hogere classificatie.\n"
-            "- Stel de vraag aan een fiscaal jurist als verificatie nodig is.\n\n"
-            "Deze interactie is gelogd voor audit-doeleinden."
-        )
+        # Knob 3: last-chance AMBIGUOUS-promotion. After exhausted retries, if grading
+        # is AMBIGUOUS with ≥1 ambiguous chunk, promote the top-2 to context. The
+        # citation-validator stays strict — if the generator can't ground its claims,
+        # it still produces an INVALID_CITATIONS refuse. So this is *not* a hallucination
+        # weakening, only a "give the model one more chance" affordance.
+        if grading_result == "AMBIGUOUS":
+            ambiguous_ids = [g["chunk_id"] for g in grading["grades"]
+                             if g.get("grade") == "AMBIGUOUS"]
+            ambiguous_chunks = [c for c in retrieved if c["chunk_id"] in ambiguous_ids][:2]
+            if ambiguous_chunks:
+                graded = ambiguous_chunks
+                grading_result = "AMBIGUOUS_PROMOTED"
+                yield _sse("trace", {
+                    "node": "ambiguous_promote",
+                    "result": f"{len(ambiguous_chunks)} AMBIGUOUS chunk(s) promoted",
+                    "detail": "citation-validator blijft strict; ongegronde antwoorden refusen alsnog",
+                    "duration_ms": 0,
+                })
+                for c in graded:
+                    yield _sse("chunk", {"chunk_id": c["chunk_id"],
+                                         "hierarchy_path": c.get("hierarchy_path", ""),
+                                         "status": "relevant"})
+                break
+
+        # ── Diagnose WHY we're refusing — drives the refuse-text and a trace event.
+        from app.pipeline.refuse_classifier import classify_refuse
+        try:
+            diag_emb = await _embedder.embed_query(query)
+        except Exception:
+            diag_emb = []
+        diag = await classify_refuse(os_client, query, diag_emb, tier, settings)
+        refuse_category = diag["category"]
+        yield _sse("trace", {"node": "refuse_classify", "result": refuse_category,
+                             "detail": diag["detail"], "duration_ms": 0})
+
+        refuse_text = _build_refuse_text(diag, tier)
         # M2: emit TTFT for refuse path
         ttft_ms = (time.time() - t_total) * 1000
         yield _sse("ttft", {"ms": round(ttft_ms, 1), "source": "refuse"})
@@ -215,9 +323,14 @@ async def _streaming_pipeline(
         # M10: audit log — refuse path
         audit_log_query(
             redis_client, session_id=session_id, tier=tier.value, query=body.query,
-            grade=grading_result, citations=[], ttft_ms=ttft_ms, source="refuse",
+            grade=f"{grading_result}|{refuse_category}", citations=[], ttft_ms=ttft_ms, source="refuse",
         )
-        yield _sse("done", {"session_id": session_id, "source": "pipeline", "grading_result": grading_result, "total_ms": (time.time() - t_total) * 1000})
+        metric_incr(redis_client, f"refuse_{grading_result}")
+        metric_incr(redis_client, f"refuse_cat_{refuse_category}")
+        yield _sse("done", {"session_id": session_id, "source": "pipeline",
+                            "grading_result": grading_result, "refuse_category": refuse_category,
+                            "higher_tier_needed": diag.get("higher_tier_needed"),
+                            "total_ms": (time.time() - t_total) * 1000})
         return
 
     # ─── parent expansion (§E in plan) ───
@@ -275,6 +388,10 @@ async def _streaming_pipeline(
         yield _sse("token", token)
     gen_ms = (time.time() - t0) * 1000
     yield _sse("trace", {"node": "generate", "result": "complete", "duration_ms": gen_ms})
+    # Recovery transition: HALF_OPEN → CLOSED after successful generate.
+    bt = _maybe_breaker_trace()
+    if bt:
+        yield bt
 
     if not full_text.strip():
         yield _sse("error", {"detail": "LLM leverde geen content — controleer serverlogs"})
@@ -297,11 +414,37 @@ async def _streaming_pipeline(
                 cited_ids.append(candidates[0])
     cited_ids = list(dict.fromkeys(cited_ids))  # de-dup, preserve order
     if not cited_ids:
+        # Last-resort: scan for any known chunk_id literal in the text. If still empty,
+        # we will NOT inject `graded[:2]` — that would publish unverified citations.
         cited_ids = [cid for cid in known_ids if cid in full_text]
-    if not cited_ids and graded:
-        cited_ids = [c["chunk_id"] for c in graded[:2]]
     validation = validate_citations(full_text, cited_ids, graded)
+    if not cited_ids:
+        validation = {"valid": False, "reason": "INVALID_CITATIONS — generator produced no verifiable [Source:...] markers"}
     yield _sse("trace", {"node": "validate_output", "result": "PASSED" if validation["valid"] else "FAILED", "detail": validation["reason"], "duration_ms": 1})
+
+    # Fail-CLOSED: if validation failed, refuse with INVALID_CITATIONS reason rather than
+    # publish an unverified answer. Replaces the previous fail-OPEN graded[:2] fallback.
+    if not validation["valid"]:
+        refuse_text = (
+            "Ik kon het antwoord niet verifiëren tegen de teruggehaalde bronnen "
+            "(citaten ontbraken of pasten niet bij de context). Liever zwijgen dan onjuist "
+            "antwoorden. Probeer de vraag specifieker te formuleren of vraag een collega om verificatie."
+        )
+        yield _sse("text_replace", {"text": refuse_text, "ref_order": []})
+        memory.append_turn(redis_client, session_id, body.query, refuse_text)
+        metric_incr(redis_client, "refuse_INVALID_CITATIONS")
+        audit_log_query(
+            redis_client, session_id=session_id, tier=tier.value, query=body.query,
+            grade="INVALID_CITATIONS", citations=[],
+            ttft_ms=(t_first_token - t_total) * 1000 if t_first_token else None,
+            source="refuse",
+        )
+        yield _sse("done", {
+            "session_id": session_id, "source": "pipeline",
+            "grading_result": "INVALID_CITATIONS", "query_type": query_type,
+            "total_ms": (time.time() - t_total) * 1000,
+        })
+        return
 
     # ─── post-process: collapse [Source:…] markers into [N] refs, strip Bronnen footer ───
     # Order the cleaned text in the order chunks were *cited* so [N] aligns with the bubble's
@@ -378,8 +521,9 @@ async def chat_stream(request: Request, body: ChatRequest):
             async for evt in _streaming_pipeline(request, body):
                 yield evt
         except BreakerOpenError as e:
-            log.warning("chat_stream_breaker_open", detail=str(e))
-            yield _sse("trace", {"node": "refuse", "result": "BREAKER_OPEN", "detail": str(e), "duration_ms": 0})
+            req_id = getattr(request.state, "request_id", "n/a")
+            log.warning("chat_stream_breaker_open", detail=str(e), request_id=req_id)
+            yield _sse("trace", {"node": "refuse", "result": "BREAKER_OPEN", "detail": "circuit_breaker_open", "duration_ms": 0})
             yield _sse("ttft", {"ms": 0.0, "source": "refuse"})
             msg = (
                 "Het inferentie-systeem is tijdelijk overbelast en accepteert geen nieuwe "
@@ -391,7 +535,9 @@ async def chat_stream(request: Request, body: ChatRequest):
                 await asyncio.sleep(0.005)
             yield _sse("done", {"source": "breaker", "total_ms": 0})
         except Exception as e:
-            log.error("chat_stream_error", error=str(e))
-            yield {"event": "error", "data": json.dumps({"detail": str(e)})}
+            req_id = getattr(request.state, "request_id", "n/a")
+            category, friendly = _categorize_error(e)
+            log.error("chat_stream_error", error=str(e), error_type=type(e).__name__, request_id=req_id, category=category)
+            yield _sse("error", {"category": category, "message": friendly, "request_id": req_id})
 
     return EventSourceResponse(event_gen())

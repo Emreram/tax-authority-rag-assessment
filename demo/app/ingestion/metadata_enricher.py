@@ -32,8 +32,10 @@ Voorbeeld:
 async def enrich(chunk_text: str, hierarchy_path: str) -> dict:
     preview = chunk_text if len(chunk_text) <= 1500 else chunk_text[:1500]
     user = f"Hiërarchie: {hierarchy_path}\n\nFragment:\n{preview}"
+    from app.config import get_settings
     try:
-        raw = await generate_json(SYSTEM_PROMPT, user, temperature=0.0, max_tokens=220)
+        raw = await generate_json(SYSTEM_PROMPT, user, temperature=0.0, max_tokens=220,
+                                  timeout=get_settings().llm_timeout_enrich_s)
     except Exception as e:
         log.warning("enrichment_failed", error=str(e))
         raw = {}

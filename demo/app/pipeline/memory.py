@@ -11,9 +11,12 @@ import json
 import time
 from typing import Optional
 
+import structlog
 from redis import Redis
 
 from app.config import get_settings
+
+log = structlog.get_logger()
 
 
 def _key(session_id: str) -> str:
@@ -26,21 +29,29 @@ def append_turn(
     user_query: str,
     assistant_response: str,
 ) -> None:
+    """Best-effort. Memory is a nice-to-have — never let a Redis hiccup crash a chat turn."""
     settings = get_settings()
     key = _key(session_id)
     entry = json.dumps(
         {"q": user_query, "a": assistant_response[:800], "t": int(time.time())}
     )
-    pipe = redis_client.pipeline()
-    pipe.rpush(key, entry)
-    pipe.ltrim(key, -settings.max_conversation_turns, -1)
-    pipe.expire(key, 3600)
-    pipe.execute()
+    try:
+        pipe = redis_client.pipeline()
+        pipe.rpush(key, entry)
+        pipe.ltrim(key, -settings.max_conversation_turns, -1)
+        pipe.expire(key, 3600)
+        pipe.execute()
+    except Exception as e:
+        log.warning("memory_append_failed", error=str(e), session_id=session_id)
 
 
 def load_history(redis_client: Redis, session_id: str) -> list[dict]:
-    raw = redis_client.lrange(_key(session_id), 0, -1)
-    return [json.loads(x) for x in raw]
+    try:
+        raw = redis_client.lrange(_key(session_id), 0, -1)
+        return [json.loads(x) for x in raw]
+    except Exception as e:
+        log.warning("memory_load_failed", error=str(e), session_id=session_id)
+        return []
 
 
 def format_history_for_prompt(history: list[dict], max_chars: int = 1200) -> str:

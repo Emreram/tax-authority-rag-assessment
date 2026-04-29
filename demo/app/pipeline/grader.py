@@ -48,6 +48,7 @@ async def grade_context(query: str, chunks: list[dict], settings) -> dict:
             system_prompt=GRADER_SYSTEM,
             user_prompt=user_prompt,
             temperature=0.0,
+            timeout=get_settings().llm_timeout_grade_s,
         )
         # Strip markdown code fences if present
         raw = raw.strip()
@@ -57,10 +58,9 @@ async def grade_context(query: str, chunks: list[dict], settings) -> dict:
                 raw = raw[4:]
         grades = json.loads(raw.strip())
     except Exception as e:
-        log.warning("grader_parse_error", error=str(e))
-        # On parse error, assume top chunks are relevant so the pipeline continues to generate
-        grades = [{"chunk_id": c["chunk_id"], "grade": "RELEVANT", "confidence": 0.6, "reason": "grader fallback"} for c in chunks[:4]]
-        grades += [{"chunk_id": c["chunk_id"], "grade": "AMBIGUOUS", "confidence": 0.3, "reason": "grader fallback"} for c in chunks[4:]]
+        log.warning("grader_parse_error_fail_closed", error=str(e))
+        # Fail-CLOSED: on grader failure, mark everything IRRELEVANT so we refuse rather than hallucinate.
+        grades = [{"chunk_id": c["chunk_id"], "grade": "IRRELEVANT", "confidence": 0.0, "reason": "grader_fallback_fail_closed"} for c in chunks]
 
     relevant_ids = {g["chunk_id"] for g in grades if g.get("grade") == "RELEVANT"}
     relevant_chunks = [c for c in chunks if c["chunk_id"] in relevant_ids]

@@ -13,7 +13,7 @@ import re
 from datetime import date
 from pathlib import Path
 
-from fastapi import APIRouter, Form, Request, UploadFile, File
+from fastapi import APIRouter, Form, Request, UploadFile, File, HTTPException
 from sse_starlette.sse import EventSourceResponse
 import structlog
 
@@ -45,15 +45,24 @@ def _extract_text_from_pdf(data: bytes) -> str:
     return "\n\n".join(pages)
 
 
+_MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB cap — prevents accidental huge-file ingest
+
+
 @router.post("/ingest", summary="Upload a document and stream per-chunk ingestion (SSE)")
 async def ingest(
     request: Request,
     file: UploadFile = File(...),
-    title: str | None = Form(None),
-    security_classification: str = Form("PUBLIC"),
+    title: str | None = Form(None, max_length=200),
+    security_classification: str = Form("PUBLIC", max_length=32),
 ):
     data = await file.read()
-    raw_title = title or Path(file.filename or "document").stem
+    if not data:
+        raise HTTPException(status_code=422, detail="Empty file upload")
+    if len(data) > _MAX_UPLOAD_BYTES:
+        raise HTTPException(status_code=413, detail=f"File too large (>{_MAX_UPLOAD_BYTES // 1024 // 1024} MB)")
+    raw_title = (title or Path(file.filename or "document").stem).strip()
+    if not raw_title:
+        raise HTTPException(status_code=422, detail="Title cannot be empty")
     doc_id = _safe_doc_id(raw_title) + f"-v{date.today().year}"
 
     # text extraction
@@ -65,6 +74,17 @@ async def ingest(
             return {"error": f"PDF-extractie mislukt: {e}"}
     else:
         text = data.decode("utf-8", errors="replace")
+
+    # S3.3 — PDF leegheid-check: scan-only PDFs yield ~0 extractable text.
+    # Block early rather than ingest a single empty chunk that pretends to succeed.
+    if len(text.strip()) < 100:
+        async def _empty_stream():
+            yield {"event": "error", "data": json.dumps({
+                "error": "no_text_extracted",
+                "hint": "Deze PDF bevat geen extraheerbare tekst (waarschijnlijk een scan). Probeer een tekst-PDF of gebruik OCR.",
+                "extracted_chars": len(text.strip()),
+            })}
+        return EventSourceResponse(_empty_stream())
 
     try:
         tier = SecurityTier(security_classification)

@@ -651,33 +651,119 @@ function scrollChat() { const s = $("#chat-scroll"); s.scrollTop = s.scrollHeigh
 
 async function streamChat(query, asst) {
   asst.query = query;
-  const resp = await fetch("/v1/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
-    body: JSON.stringify({ query, security_tier: state.tier, session_id: state.sessionId }),
-  });
-  if (!resp.ok || !resp.body) throw new Error(`HTTP ${resp.status}`);
-  const reader = resp.body.getReader();
-  const dec = new TextDecoder("utf-8");
-  let buf = "";
-  while (true) {
-    const { value, done } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true }).replace(/\r\n/g, "\n");
-    let idx;
-    while ((idx = buf.indexOf("\n\n")) >= 0) {
-      const block = buf.slice(0, idx); buf = buf.slice(idx + 2);
-      let ev = "message", line = "";
-      for (const l of block.split("\n")) {
-        if (l.startsWith("event:")) ev = l.slice(6).trim();
-        else if (l.startsWith("data:")) line += l.slice(5).trim();
-      }
-      if (!line) continue;
-      let data; try { data = JSON.parse(line); } catch { data = line; }
-      handleChatEvent(ev, data, asst);
+  // S4.2 — cold-start warmup-tekst: na 8s zonder eerste token, plaats inline uitleg.
+  let warmupNote = null;
+  const warmupTimer = setTimeout(() => {
+    if (asst.firstTokenReceived) return;
+    warmupNote = document.createElement("div");
+    warmupNote.className = "warmup-note";
+    warmupNote.textContent = "Model warmt op (eerste call kan ~25s duren — daarna < 2s via cache).";
+    if (asst.content) {
+      asst.content.hidden = false;
+      asst.content.appendChild(warmupNote);
     }
+  }, 8000);
+  const clearWarmup = () => {
+    clearTimeout(warmupTimer);
+    if (warmupNote && warmupNote.parentNode) warmupNote.parentNode.removeChild(warmupNote);
+  };
+
+  let sawDoneEvent = false;
+  try {
+    const resp = await fetch("/v1/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "text/event-stream" },
+      body: JSON.stringify({ query, security_tier: state.tier, session_id: state.sessionId }),
+    });
+    if (!resp.ok || !resp.body) throw new Error(`HTTP ${resp.status}`);
+    const reader = resp.body.getReader();
+    const dec = new TextDecoder("utf-8");
+    let buf = "";
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      buf += dec.decode(value, { stream: true }).replace(/\r\n/g, "\n");
+      let idx;
+      while ((idx = buf.indexOf("\n\n")) >= 0) {
+        const block = buf.slice(0, idx); buf = buf.slice(idx + 2);
+        let ev = "message", line = "";
+        for (const l of block.split("\n")) {
+          if (l.startsWith("event:")) ev = l.slice(6).trim();
+          else if (l.startsWith("data:")) line += l.slice(5).trim();
+        }
+        if (!line) continue;
+        let data; try { data = JSON.parse(line); } catch { data = line; }
+        if (ev === "token" || ev === "text_replace") { asst.firstTokenReceived = true; clearWarmup(); }
+        if (ev === "done") sawDoneEvent = true;
+        handleChatEvent(ev, data, asst);
+      }
+    }
+    // S4.3 — disconnect-banner: stream ended without a `done` event = mid-stream cut
+    if (!sawDoneEvent) {
+      showDisconnectBanner(asst, query);
+    }
+  } catch (e) {
+    // S4.3 — fetch error or reader exception → show disconnect banner with retry
+    showDisconnectBanner(asst, query);
+  } finally {
+    clearWarmup();
+    finalizeAsst(asst);
   }
-  finalizeAsst(asst);
+}
+
+// ─── Refuse-category UX (Sprint 2 B4) ───
+function renderRefuseCategoryBadge(asst, category, detail) {
+  if (!asst?.content || asst.refuseBadge) return;
+  asst.content.hidden = false;
+  const badge = document.createElement("div");
+  badge.className = `refuse-cat-badge refuse-cat-${category}`;
+  const labels = {
+    CORPUS_GAP: "Corpus-gat",
+    TIER_GAP: "Tier-blokkade",
+    SEMANTIC_MISMATCH: "Geen match",
+  };
+  badge.textContent = labels[category] || category;
+  // Technical detail goes to tooltip, not inline — keeps the bubble clean.
+  if (detail) badge.title = detail;
+  asst.content.insertBefore(badge, asst.content.firstChild);
+  asst.refuseBadge = badge;
+}
+
+let _corpusVersionCache = null;
+async function attachCorpusVersionStrip(asst) {
+  if (!asst?.content || asst.corpusStrip) return;
+  if (!_corpusVersionCache) {
+    try {
+      const r = await fetch("/v1/corpus/version", { cache: "no-store" });
+      if (r.ok) _corpusVersionCache = await r.json();
+    } catch {}
+  }
+  const v = _corpusVersionCache || {};
+  const tier = state?.tier || "?";
+  const strip = document.createElement("div");
+  strip.className = "corpus-version-strip";
+  strip.textContent = `Corpus v${v.corpus_version || "?"} · ${v.doc_count ?? "?"} docs · ${v.chunk_count ?? "?"} chunks · jouw tier: ${tier}`;
+  asst.content.appendChild(strip);
+  asst.corpusStrip = strip;
+}
+
+function showDisconnectBanner(asst, originalQuery) {
+  if (asst.errorShown) return;
+  asst.errorShown = true;
+  if (asst.content?.hidden) asst.content.hidden = false;
+  const cur = asst.content?.querySelector(".cursor");
+  if (cur) cur.remove();
+  const banner = document.createElement("div");
+  banner.className = "disconnect-banner";
+  banner.innerHTML = `
+    <div class="disconnect-msg">Verbinding verbroken — antwoord niet voltooid.</div>
+    <button type="button" class="disconnect-retry">Stuur opnieuw</button>
+  `;
+  banner.querySelector(".disconnect-retry").addEventListener("click", () => {
+    const input = document.querySelector("#chat-input");
+    if (input) { input.value = originalQuery; input.focus(); }
+  });
+  asst.content?.appendChild(banner);
 }
 
 function handleChatEvent(ev, data, asst) {
@@ -685,6 +771,9 @@ function handleChatEvent(ev, data, asst) {
     case "trace":
       // M8: refuse-frame — visually flag the bubble before the tokens stream in
       if (data?.node === "refuse") asst.root.classList.add("msg-refuse");
+      // Sprint-2 B4: refuse-category badge — render before tokens land so the
+      // user sees WHY immediately.
+      if (data?.node === "refuse_classify") renderRefuseCategoryBadge(asst, data.result, data.detail);
       addTrace(asst, data);
       break;
     case "ttft":     renderTtftBadge(asst, data); break;
@@ -706,8 +795,26 @@ function handleChatEvent(ev, data, asst) {
         renderParentBadge(asst);
       }
       break;
-    case "done":    finalizeAsst(asst); break;
-    case "error":   asst.errorShown = true; showInlineError(asst, data?.detail || "Fout bij generatie"); toast(data?.detail || "Fout bij generatie", "err"); break;
+    case "done":
+      if (data?.refuse_category) attachCorpusVersionStrip(asst);
+      finalizeAsst(asst);
+      break;
+    case "error": {
+      asst.errorShown = true;
+      const cat = data?.category || "INTERNAL";
+      const msg = data?.message || data?.detail || "Er ging iets mis.";
+      const reqId = data?.request_id ? ` (req: ${data.request_id})` : "";
+      const friendly = {
+        LLM_UNAVAILABLE: "Inferentie tijdelijk weg — probeer over enkele minuten opnieuw.",
+        TIMEOUT: "De verwerking duurde te lang. Probeer het opnieuw.",
+        VALIDATION_FAILED: "De vraag voldoet niet aan het verwachte formaat.",
+        INFRA_ERROR: "Een achterliggend systeem reageert niet.",
+        INTERNAL: "Er ging intern iets mis.",
+      }[cat] || msg;
+      showInlineError(asst, friendly + reqId);
+      toast(friendly, "err");
+      break;
+    }
   }
 }
 
@@ -1118,6 +1225,13 @@ function wireRetrieval() {
     const q = $("#retrieval-query").value.trim();
     if (q && state._retrievalRanOnce) runRetrievalTrace(q);
   });
+  // Click-to-run example
+  const ex = $("#retrieval-example");
+  if (ex) ex.addEventListener("click", () => {
+    const q = ex.textContent.trim();
+    $("#retrieval-query").value = q;
+    runRetrievalTrace(q);
+  });
 }
 
 async function runRetrievalTrace(query) {
@@ -1479,7 +1593,13 @@ function renderGate(d) {
     </p>`;
 }
 
-function wireEval() { $("#eval-run-btn").addEventListener("click", runGoldenSet); }
+function wireEval() {
+  $("#eval-run-btn").addEventListener("click", runGoldenSet);
+  const tourBtn = document.getElementById("tour-launch-btn");
+  if (tourBtn) tourBtn.addEventListener("click", () => {
+    if (typeof window.startTour === "function") window.startTour();
+  });
+}
 
 // ═══════════════════════════════════════════════════════════════
 //  DOCUMENTS
@@ -1528,9 +1648,56 @@ function onAppReady() {
   wireKeyboard();
   renderSuggestedPrompts();
   ensureTierBanners();
+  startReadyzPoller();
   const initial = parseHash() || "chat";
   history.replaceState({ view: initial, depth: 0 }, "", "#" + initial);
   setView(initial, { silent: true });
+  // First-visit nudge — points the user at the Tour button on Kwaliteit.
+  // Only fires if the tour has never been completed/skipped.
+  try {
+    if (!localStorage.getItem("tour_completed_v1")) {
+      setTimeout(() => {
+        toast("First time? Open Operations → Kwaliteit and click 'Take the tour'.", "");
+      }, 3500);
+    }
+  } catch (e) { /* localStorage blocked — silently skip */ }
+}
+
+// S4.4 — poll /readyz every 30s. Show a topbar banner whenever any dep is down.
+function startReadyzPoller() {
+  const check = async () => {
+    try {
+      const r = await fetch("/readyz", { cache: "no-store" });
+      if (r.status === 503) {
+        const j = await r.json().catch(() => ({}));
+        const downs = Object.entries(j.deps || {}).filter(([, v]) => v !== "ready").map(([k]) => k);
+        showReadyzBanner(`Achterliggende systemen herstellen — ${downs.join(", ") || "onbekend"}. Sommige features tijdelijk uit.`);
+      } else {
+        hideReadyzBanner();
+      }
+    } catch {
+      showReadyzBanner("API niet bereikbaar — controleer de docker-compose stack.");
+    }
+  };
+  check();
+  setInterval(check, 30000);
+}
+
+function showReadyzBanner(text) {
+  let el = document.getElementById("readyz-banner");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "readyz-banner";
+    el.className = "readyz-banner";
+    document.body.prepend(el);
+  }
+  el.textContent = text;
+  el.hidden = false;
+}
+
+function hideReadyzBanner() {
+  const el = document.getElementById("readyz-banner");
+  if (el) el.hidden = true;
 }
 
 waitForWarmup();

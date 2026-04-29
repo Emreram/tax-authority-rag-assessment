@@ -44,10 +44,12 @@ async def classify_query(query: str) -> str:
     if ARTICLE_PATTERN.search(query) and len(query.split()) < 10:
         return "REFERENCE"
 
+    from app.config import get_settings
     result = await generate(
         system_prompt=CLASSIFICATION_SYSTEM,
         user_prompt=query,
         temperature=0.0,
+        timeout=get_settings().llm_timeout_classify_s,
     )
     classification = result.strip().upper()
     if classification not in ("SIMPLE", "COMPLEX"):

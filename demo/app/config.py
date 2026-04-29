@@ -6,7 +6,14 @@ class Settings(BaseSettings):
     # LLM — Docker Model Runner (OpenAI-compatible).
     llm_base_url: str = "http://model-runner.docker.internal:12434/engines/llama.cpp/v1"
     llm_model: str = "ai/gemma4:E2B"
-    llm_timeout_s: int = 300
+    llm_timeout_s: int = 300  # Legacy global ceiling (HTTP client timeout)
+    # Per-call timeouts — short for fast classify/grade, longer for streaming generate.
+    # Each LLM helper accepts an explicit `timeout` arg; these are the call-site defaults.
+    llm_timeout_classify_s: int = 15
+    llm_timeout_grade_s: int = 15
+    llm_timeout_hyde_s: int = 15
+    llm_timeout_enrich_s: int = 30
+    llm_timeout_generate_s: int = 60
 
     # Embedder (in-process sentence-transformers)
     embedding_model: str = "intfloat/multilingual-e5-small"
@@ -25,8 +32,8 @@ class Settings(BaseSettings):
     cache_ttl_procedural: int = 604800
 
     # Pipeline
-    top_k_bm25: int = 6
-    top_k_knn: int = 6
+    top_k_bm25: int = 10  # was 6 — wider candidate pool reduces false-refuses (grader has more to choose from)
+    top_k_knn: int = 10   # was 6
     top_k_rerank: int = 5
     rrf_rank_constant: int = 60
     max_retries: int = 1

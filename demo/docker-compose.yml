@@ -32,8 +32,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
+    # .env is optional — defaults below cover a fresh clone with Docker Model Runner.
+    # Create demo/.env (or copy demo/.env.example) only if you want to override.
     env_file:
-      - .env
+      - path: .env
+        required: false
     environment:
       - OPENSEARCH_HOST=opensearch
       - OPENSEARCH_PORT=9200

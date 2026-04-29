@@ -808,3 +808,235 @@
   font-size: var(--fs-sm);
   cursor: pointer;
 }
+
+/* ─── S4.2 cold-start warmup note ─── */
+.warmup-note {
+  font-size: var(--fs-sm);
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 8px 12px;
+  margin: 6px 0;
+  border-left: 3px solid var(--bd-navy);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* ─── S4.3 disconnect banner inside chat bubble ─── */
+.disconnect-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 10px 12px;
+  margin-top: 8px;
+  border: 1px solid #d97706;
+  background: #fef3c7;
+  border-radius: var(--r-md);
+}
+.disconnect-banner .disconnect-msg { flex: 1; font-size: var(--fs-sm); color: #92400e; }
+.disconnect-banner .disconnect-retry {
+  background: #d97706; color: #fff; border: none;
+  padding: 6px 12px; border-radius: var(--r-pill);
+  font-size: var(--fs-sm); cursor: pointer;
+}
+.disconnect-banner .disconnect-retry:hover { background: #b45309; }
+
+/* ─── S4.4 /readyz topbar banner ─── */
+.readyz-banner {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  background: #fef3c7;
+  color: #92400e;
+  text-align: center;
+  padding: 8px 16px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  border-bottom: 2px solid #d97706;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.readyz-banner[hidden] { display: none; }
+
+/* ─── Sprint 2 B4: refuse-category badge + corpus-version strip ─── */
+.refuse-cat-badge {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 5px 14px;
+  margin: 0 0 14px 0;
+  border-radius: var(--r-pill);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: help;
+}
+.refuse-cat-badge::before {
+  content: "■";
+  margin-right: 8px;
+  font-size: 0.85em;
+  vertical-align: 1px;
+  opacity: 0.6;
+}
+.refuse-cat-CORPUS_GAP {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #dc2626;
+}
+.refuse-cat-TIER_GAP {
+  background: #fed7aa;
+  color: #9a3412;
+  border: 1px solid #ea580c;
+}
+.refuse-cat-SEMANTIC_MISMATCH {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #2563eb;
+}
+.corpus-version-strip {
+  margin-top: 14px;
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  background: rgba(0, 0, 0, 0.025);
+  border-radius: var(--r-sm);
+  border-left: 2px solid var(--border);
+  letter-spacing: 0.01em;
+  opacity: 0.85;
+}
+
+/* ─── Guided Tour overlay + tooltip + pulse (v=21) ─── */
+#tour-overlay {
+  position: fixed; inset: 0;
+  background: rgba(8, 13, 22, 0.78);
+  z-index: 200;
+  pointer-events: auto;
+  /* clip-path is set inline by JS to cut the spotlight hole */
+  transition: clip-path 320ms cubic-bezier(.2,.7,.2,1);
+}
+
+#tour-tooltip {
+  position: fixed; z-index: 210;
+  width: min(440px, calc(100vw - 32px));
+  background: var(--surface, #fff);
+  color: var(--ink, #101828);
+  border: 1px solid var(--bd-navy, #01689B);
+  border-radius: 14px;
+  padding: 18px 20px 16px;
+  box-shadow: 0 14px 40px -8px rgba(8, 13, 22, 0.45);
+  animation: tourTooltipIn 280ms cubic-bezier(.2,.7,.2,1);
+}
+@keyframes tourTooltipIn {
+  from { opacity: 0; transform: translateY(8px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);   }
+}
+#tour-tooltip .tour-eyebrow {
+  font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--bd-orange, #E17000);
+  margin-bottom: 6px;
+}
+#tour-tooltip h3 {
+  font-size: 18px; font-weight: 700; line-height: 1.25;
+  color: var(--ink, #101828); margin-bottom: 8px;
+  font-family: inherit;
+}
+#tour-tooltip p {
+  font-size: 14px; line-height: 1.55; color: var(--text-muted, #475467);
+  margin-bottom: 14px;
+}
+#tour-tooltip p code {
+  background: rgba(225, 112, 0, 0.10);
+  color: var(--bd-orange, #E17000);
+  padding: 1px 5px; border-radius: 4px;
+  font-size: 12.5px;
+}
+#tour-tooltip p em {
+  font-style: italic; color: var(--ink, #101828); font-weight: 500;
+}
+#tour-tooltip p strong {
+  color: var(--ink, #101828); font-weight: 700;
+}
+#tour-tooltip .tour-progress {
+  height: 3px; background: rgba(0,0,0,0.06); border-radius: 2px;
+  overflow: hidden; margin: 14px 0 12px;
+}
+#tour-tooltip .tour-progress-bar {
+  height: 100%; background: var(--bd-orange, #E17000);
+  transition: width 320ms cubic-bezier(.2,.7,.2,1);
+}
+#tour-tooltip .tour-controls {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+}
+#tour-tooltip .tour-step-counter {
+  font-size: 11px; color: var(--text-muted, #6B7280);
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono, ui-monospace, monospace);
+}
+#tour-tooltip .tour-actions {
+  display: flex; gap: 6px;
+}
+#tour-tooltip button.tour-btn {
+  padding: 6px 14px; border-radius: 999px;
+  font-size: 13px; font-weight: 600;
+  border: 1px solid transparent; cursor: pointer;
+  transition: all 150ms cubic-bezier(.2,.7,.2,1);
+  font-family: inherit;
+}
+#tour-tooltip button.tour-btn-primary {
+  background: var(--bd-orange, #E17000); color: white;
+}
+#tour-tooltip button.tour-btn-primary:hover {
+  background: #b85a00; transform: translateY(-1px);
+  box-shadow: 0 6px 14px -4px rgba(225, 112, 0, 0.45);
+}
+#tour-tooltip button.tour-btn-ghost {
+  background: transparent; color: var(--text-muted, #475467);
+}
+#tour-tooltip button.tour-btn-ghost:hover {
+  color: var(--ink, #101828); background: rgba(0,0,0,0.04);
+}
+
+/* Pulse on highlighted element */
+.tour-pulse {
+  animation: tourPulse 1.6s ease-in-out infinite;
+  position: relative; z-index: 205;
+  border-radius: 8px;
+}
+@keyframes tourPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 0 rgba(225, 112, 0, 0.55),
+      0 0 0 0 rgba(225, 112, 0, 0);
+  }
+  50% {
+    box-shadow:
+      0 0 0 4px rgba(225, 112, 0, 0.30),
+      0 0 28px 8px rgba(225, 112, 0, 0.18);
+  }
+}
+
+/* Tour launch button */
+#tour-launch-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; border-radius: 10px;
+  background: rgba(225, 112, 0, 0.10);
+  border: 1px solid var(--bd-orange, #E17000);
+  color: var(--bd-orange, #E17000);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(.2,.7,.2,1);
+  font-family: inherit;
+}
+#tour-launch-btn:hover {
+  background: var(--bd-orange, #E17000); color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px -4px rgba(225, 112, 0, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #tour-overlay, #tour-tooltip, .tour-pulse, #tour-launch-btn {
+    animation: none !important; transition: none !important;
+  }
+  #tour-tooltip button.tour-btn-primary:hover,
+  #tour-launch-btn:hover { transform: none; }
+}

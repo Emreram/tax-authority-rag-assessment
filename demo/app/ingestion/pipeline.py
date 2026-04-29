@@ -127,6 +127,8 @@ async def ingest_document(
                "reason": "geen bruikbare grenzen — document als één chunk", "boundaries": 1}
 
     total = len(boundaries)
+    succeeded_count = 0
+    failed_count = 0
 
     # ─── chunk + enrich + embed + index loop ───
     for seq, b in enumerate(boundaries):
@@ -172,12 +174,21 @@ async def ingest_document(
             "text_preview": text_preview,
         }
 
-        # enrichment (LLM)
-        enrichment = await enrich(b.text, hierarchy_path)
+        # enrichment (LLM) — fail-soft: empty dict if LLM is down
+        try:
+            enrichment = await enrich(b.text, hierarchy_path)
+        except Exception as e:
+            yield {"type": "chunk_failed", "chunk_id": chunk_id, "stage": "enrich", "reason": type(e).__name__}
+            enrichment = {}
         yield {"type": "chunk_enriched", "chunk_id": chunk_id, **enrichment}
 
-        # embedding
-        vector = await embed_document(b.text)
+        # embedding — fail-hard for THIS chunk only, then continue with the next
+        try:
+            vector = await embed_document(b.text)
+        except Exception as e:
+            failed_count += 1
+            yield {"type": "chunk_failed", "chunk_id": chunk_id, "stage": "embed", "reason": type(e).__name__}
+            continue
         yield {"type": "chunk_embedded", "chunk_id": chunk_id, "dim": len(vector)}
 
         # indexing
@@ -207,15 +218,30 @@ async def ingest_document(
             "summary": enrichment.get("summary") or None,
             "embedding": vector,
         }
-        os_client.index(
-            index=settings.opensearch_index,
-            id=chunk_id,
-            body=document,
-            refresh=False,
-        )
-        yield {"type": "chunk_indexed", "chunk_id": chunk_id}
+        try:
+            os_client.index(
+                index=settings.opensearch_index,
+                id=chunk_id,
+                body=document,
+                refresh=False,
+            )
+            succeeded_count += 1
+            yield {"type": "chunk_indexed", "chunk_id": chunk_id}
+        except Exception as e:
+            failed_count += 1
+            yield {"type": "chunk_failed", "chunk_id": chunk_id, "stage": "index", "reason": type(e).__name__}
+            continue
 
     # refresh once at the end so the new chunks are searchable immediately
-    os_client.indices.refresh(index=settings.opensearch_index)
+    try:
+        os_client.indices.refresh(index=settings.opensearch_index)
+    except Exception:
+        pass
 
-    yield {"type": "complete", "chunks": total, "total_ms": (time.time() - t0) * 1000}
+    yield {
+        "type": "complete",
+        "chunks": total,
+        "succeeded": succeeded_count,
+        "failed": failed_count,
+        "total_ms": (time.time() - t0) * 1000,
+    }

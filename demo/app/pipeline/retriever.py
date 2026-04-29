@@ -79,6 +79,7 @@ async def retrieve(
     security_tier: SecurityTier,
     query_type: str,
     settings,
+    force_hyde: bool = False,
 ) -> list[dict]:
     """Main retrieval entry point — returns up to top_k_rerank chunks.
 
@@ -103,7 +104,7 @@ async def retrieve(
     # HyDE: for SIMPLE queries, draft a hypothetical passage and also embed that,
     # then kNN with a blended vector. M4: emit trace event so the UI can show it.
     hyde_embedding = None
-    if query_type == "SIMPLE" and getattr(settings, "enable_hyde", False):
+    if (force_hyde or query_type == "SIMPLE") and getattr(settings, "enable_hyde", False):
         try:
             import time as _time
             from app.pipeline.hyde import draft_hypothesis

@@ -38,6 +38,14 @@ class CircuitBreaker:
         self.state: State = State.CLOSED
         self._failures: list[float] = []
         self._opened_at: float | None = None
+        # Last state-transition recorded as (old, new, ts). Routers can read this
+        # right after a request to decide whether to emit a trace event to the UI.
+        self.last_transition: tuple[State, State, float] | None = None
+
+    def _transition(self, new_state: State) -> None:
+        if new_state != self.state:
+            self.last_transition = (self.state, new_state, time.time())
+            self.state = new_state
 
     # ── public API ──
     def before(self) -> None:
@@ -45,25 +53,30 @@ class CircuitBreaker:
         if self.state == State.OPEN:
             if self._opened_at is not None and (time.time() - self._opened_at) >= self.recover_after_s:
                 log.info("breaker_half_open")
-                self.state = State.HALF_OPEN
+                self._transition(State.HALF_OPEN)
             else:
                 raise BreakerOpenError("LLM-service tijdelijk onbeschikbaar (circuit open).")
 
     def on_success(self) -> None:
         if self.state == State.HALF_OPEN:
             log.info("breaker_closed_after_recovery")
-            self.state = State.CLOSED
+            self._transition(State.CLOSED)
             self._failures.clear()
 
     def on_failure(self) -> None:
         now = time.time()
         self._failures.append(now)
-        # Garbage-collect old failures outside the window
         self._failures = [t for t in self._failures if now - t < self.window_s]
         if self.state == State.HALF_OPEN or len(self._failures) >= self.threshold:
             log.warning("breaker_opened", failures=len(self._failures))
-            self.state = State.OPEN
+            self._transition(State.OPEN)
             self._opened_at = now
+
+    def consume_transition(self) -> tuple[State, State, float] | None:
+        """Pop the last transition (router emits it as a trace event, then clears)."""
+        t = self.last_transition
+        self.last_transition = None
+        return t
 
     def status(self) -> dict:
         return {

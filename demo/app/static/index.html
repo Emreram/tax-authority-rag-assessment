@@ -33,7 +33,7 @@
     },
   };
 </script>
-<link rel="stylesheet" href="/static/theme.css?v=16">
+<link rel="stylesheet" href="/static/theme.css?v=22">
 </head>
 <body class="bg-bd-ink text-slate-100 font-sans antialiased min-h-screen">
 
@@ -239,6 +239,14 @@
           <button type="submit" class="bg-bd-orange hover:bg-bd-orange-dim px-5 py-2 rounded text-sm font-medium">Zoek</button>
         </form>
 
+        <div class="flex items-center gap-2 text-xs text-slate-400">
+          <span>Voorbeeld:</span>
+          <button type="button" id="retrieval-example"
+            class="px-3 py-1.5 bg-bd-surface border border-bd-border rounded hover:border-bd-orange hover:text-bd-orange transition text-xs">
+            Wat is de arbeidskorting voor 2024?
+          </button>
+        </div>
+
         <div id="retrieval-timings" role="status" aria-live="polite" class="text-xs text-slate-400 font-mono"></div>
         <div id="retrieval-config-pills" class="flex flex-wrap gap-2 text-[11px] font-mono"></div>
 
@@ -341,6 +349,10 @@
             <h1 class="text-2xl font-semibold">Kwaliteit</h1>
             <p class="text-slate-400 text-sm">Eval-metrics en golden-set status.</p>
           </div>
+          <button id="tour-launch-btn" type="button" aria-label="Take the guided tour">
+            <span style="font-size: 15px;">🎬</span>
+            <span>Take the tour</span>
+          </button>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="eval-metrics"></div>
@@ -421,6 +433,7 @@
 <!-- ═══════════════════ TOAST CONTAINER ═══════════════════ -->
 <div id="toast-container" role="status" aria-live="polite" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm"></div>
 
-<script src="/static/app.js?v=16"></script>
+<script src="/static/tour.js?v=22"></script>
+<script src="/static/app.js?v=22"></script>
 </body>
 </html>

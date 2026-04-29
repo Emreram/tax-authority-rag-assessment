@@ -43,6 +43,7 @@ async def generate(
     temperature: float = 0.0,
     max_tokens: int = 512,
     model: Optional[str] = None,
+    timeout: Optional[float] = None,
 ) -> str:
     s = get_settings()
     breaker.before()
@@ -56,6 +57,7 @@ async def generate(
             temperature=temperature,
             max_tokens=max_tokens,
             stream=False,
+            timeout=timeout if timeout is not None else s.llm_timeout_generate_s,
             extra_body={"chat_template_kwargs": {"enable_thinking": False}},
         )
         breaker.on_success()
@@ -73,6 +75,7 @@ async def generate_stream(
     temperature: float = 0.2,
     max_tokens: int = 512,
     model: Optional[str] = None,
+    timeout: Optional[float] = None,
 ) -> AsyncIterator[str]:
     s = get_settings()
     breaker.before()
@@ -87,6 +90,7 @@ async def generate_stream(
             temperature=temperature,
             max_tokens=max_tokens,
             stream=True,
+            timeout=timeout if timeout is not None else s.llm_timeout_generate_s,
             extra_body={"chat_template_kwargs": {"enable_thinking": False}},
         )
         async for chunk in stream:
@@ -113,10 +117,12 @@ async def generate_json(
     temperature: float = 0.0,
     max_tokens: int = 1024,
     model: Optional[str] = None,
+    timeout: Optional[float] = None,
 ) -> dict:
     """Structured JSON output. Falls back to prompt-parsing if response_format unsupported."""
     s = get_settings()
     breaker.before()
+    effective_timeout = timeout if timeout is not None else s.llm_timeout_classify_s
     try:
         resp = await get_client().chat.completions.create(
             model=model or s.llm_model,
@@ -127,6 +133,7 @@ async def generate_json(
             temperature=temperature,
             max_tokens=max_tokens,
             response_format={"type": "json_object"},
+            timeout=effective_timeout,
             extra_body={"chat_template_kwargs": {"enable_thinking": False}},
         )
         text = resp.choices[0].message.content or ""
@@ -142,6 +149,7 @@ async def generate_json(
             temperature=temperature,
             max_tokens=max_tokens,
             model=model,
+            timeout=effective_timeout,
         )
     try:
         return json.loads(text)

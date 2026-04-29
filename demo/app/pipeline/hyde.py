@@ -25,8 +25,10 @@ Nederlandse fiscale terminologie. Geen disclaimers, geen vragen terug.
 
 
 async def draft_hypothesis(query: str) -> str:
+    from app.config import get_settings
     try:
-        raw = await generate(HYDE_SYSTEM, query, temperature=0.2, max_tokens=80)
+        raw = await generate(HYDE_SYSTEM, query, temperature=0.2, max_tokens=80,
+                             timeout=get_settings().llm_timeout_hyde_s)
     except Exception as e:
         log.warning("hyde_draft_failed", error=str(e))
         return ""

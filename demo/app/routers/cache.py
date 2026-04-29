@@ -19,6 +19,23 @@ async def cache_stats(request: Request):
     return stats
 
 
+@router.get("/metrics/summary", summary="Reliability counters (cache hits, refuse rates, …)")
+async def metrics_summary(request: Request):
+    """Surfaces metric:* counters from Redis for the Kwaliteit-tab reliability cards."""
+    from app.metrics import get_summary
+    counters = get_summary(request.app.state.redis)
+    hits = counters.get("cache_hits", 0)
+    misses = counters.get("cache_misses", 0)
+    total = hits + misses
+    return {
+        "counters": counters,
+        "rates": {
+            "cache_hit_ratio": (hits / total) if total else None,
+            "total_queries": total,
+        },
+    }
+
+
 @router.get("/audit/recent", summary="Recent query audit-trail (last 50)")
 async def audit_recent(request: Request, limit: int = 50):
     """M10 — per-query audit log. Used by the Operations → Toegang dashboard."""
