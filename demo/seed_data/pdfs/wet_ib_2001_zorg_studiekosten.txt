@@ -1,0 +1,51 @@
+# Bron: Wet inkomstenbelasting 2001, art. 6.17-6.30 (BWBR0011353)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet IB 2001 — Hoofdstuk 6 — Afdeling 6.4 — Specifieke zorgkosten en studiekosten
+
+Artikel 6.17 — Uitgaven voor specifieke zorgkosten
+
+Lid 1. Aftrekbaar zijn uitgaven voor specifieke zorgkosten gemaakt door de belastingplichtige, zijn echtgenoot of zijn kinderen jonger dan 27 jaar, voor zover die kosten verband houden met:
+a. genees- en heelkundige hulp, met uitzondering van ooglaserbehandelingen voor cosmetische verbetering van scherp zicht;
+b. farmaceutische hulpmiddelen voorgeschreven door een arts;
+c. andere hulpmiddelen, met uitzondering van brillen, contactlenzen en andere hulpmiddelen ter ondersteuning van het gezichtsvermogen;
+d. vervoer per ambulance of in verband met geneeskundige behandeling, voor zover niet vergoed;
+e. dieet op medisch voorschrift volgens de bedragen van het Besluit dieetkostenforfait;
+f. extra gezinshulp wegens ziekte of invaliditeit;
+g. extra kleding en beddengoed wegens ziekte of invaliditeit (forfait €310 of €775);
+h. reiskosten ziekenbezoek aan inwonende echtgenoot/familielid in het ziekenhuis (€0,19 per kilometer of openbaar vervoer).
+
+Lid 2. Niet aftrekbaar onder dit artikel zijn:
+- premie zorgverzekering (basis of aanvullend) — die loopt buiten de IB om
+- eigen risico zorgverzekering
+- kosten voor wellness, fitness, alternatieve behandelaars zonder erkende kwalificatie
+- esthetische ingrepen zonder medische noodzaak
+
+Artikel 6.20 — Drempel zorgkosten
+
+Lid 1. Op het totaal van de specifieke zorgkosten wordt een drempelbedrag in mindering gebracht. Het drempelbedrag wordt berekend als percentage van het verzamelinkomen vóór persoonsgebonden aftrek:
+- Bij verzamelinkomen tot €8.611: drempel €144
+- Bij verzamelinkomen €8.611 — €43.853: drempel 1,65% van het verzamelinkomen
+- Bij verzamelinkomen boven €43.853: 1,65% × €43.853 + 5,75% × (verzamelinkomen − €43.853)
+
+Lid 2. Ouderen (≥65 jaar) en chronisch zieken kennen een verhoogde aftrek (artikel 6.19) en een lagere effectieve drempel via de aftrekvermenigvuldiging.
+
+Artikel 6.27 — Studiekosten en andere scholingsuitgaven (uitfasering)
+
+Lid 1 (geldend tot en met 2021). Aftrekbaar waren scholingsuitgaven gemaakt voor het volgen van een opleiding of studie met het oog op het verwerven van inkomen uit werk en woning, boven een drempel van €250 en tot een maximum van €15.000.
+
+Lid 2. Per 1 januari 2022 is deze aftrek afgeschaft en vervangen door het STAP-budget (Stimulering Arbeidsmarkt Positie) — een subsidie via UWV van maximaal €1.000 per persoon per jaar voor scholing. Het STAP-budget loopt zelf in 2024 ten einde; de Tweede Kamer behandelt opvolgers (Leerrechten).
+
+Lid 3. Lopende verplichtingen vóór 1 januari 2022 aangegaan blijven onder overgangsrecht aftrekbaar tot het oorspronkelijke contract afloopt, mits de opleiding daadwerkelijk begint vóór 31 december 2024.
+
+Praktijkvoorbeeld zorgkosten
+
+Een belastingplichtige met €38.000 verzamelinkomen heeft €1.200 aan tandartskosten (zorgverzekering vergoedt niet), €350 aan medisch dieet en €420 aan voorgeschreven hulpmiddelen. Drempel: 1,65% × €38.000 = €627. Aftrekbaar: €1.200 + €350 + €420 − €627 = **€1.343**.
+
+Niet-aftrekbare uitgaven (vaak gevraagd)
+
+- Tandverzorging zonder medische noodzaak, witte vullingen, esthetische gebitsbehandelingen
+- Kuur of vakantie op aanraden van arts zonder medische indicatie
+- Sportabonnement of fysiofitness zonder verwijzing
+- Vergoeding via aanvullende zorgverzekering die al heeft uitbetaald
+- Babyverzorgingsproducten, kinderopvang, kinderverzorgingscursussen

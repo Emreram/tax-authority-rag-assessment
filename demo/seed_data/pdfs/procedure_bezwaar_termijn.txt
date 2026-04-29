@@ -1,0 +1,93 @@
+# Bron: Algemene wet bestuursrecht (Awb), artikel 6:7-6:11 + AWR procedurebepalingen
+# Versie 2024 — geldend per 1 januari 2024
+
+Awb / AWR — Bezwaar- en beroepsprocedure tegen belastingaanslagen
+
+Artikel 6:7 Awb — Bezwaartermijn
+
+Lid 1. De termijn voor het indienen van een bezwaarschrift bedraagt **zes weken**.
+
+Lid 2. De termijn vangt aan op de dag na die waarop het besluit op de voorgeschreven wijze is bekendgemaakt — voor een aanslag is dat de dag na de dagtekening op het aanslagbiljet.
+
+Artikel 6:8 Awb — Termijn-overschrijding
+
+Lid 1. Een te laat ingediend bezwaarschrift wordt niet-ontvankelijk verklaard.
+
+Lid 2. Verschoonbaar verzuim: indien de indiener redelijkerwijs niet in verzuim heeft kunnen zijn (bijv. ziekenhuisopname, overlijden naaste, technisch storing post), kan de termijn-overschrijding worden geheeld.
+
+Lid 3. Bij twijfel over ontvangst datumstempel: de poststempel dient als bewijs. Indien geen poststempel: er wordt geacht te zijn ingediend op de dag dat het bestuursorgaan het stuk heeft ontvangen.
+
+Artikel 6:9 Awb — Verzending
+
+Lid 1. Bij verzending per post is een bezwaarschrift tijdig ingediend indien het vóór het einde van de termijn ter post is bezorgd, mits het bezwaarschrift uiterlijk een week na afloop van de termijn is ontvangen.
+
+Lid 2. Elektronische indiening via Mijn Belastingdienst is gelijkgesteld aan tijdige indiening op de dag van bevestiging.
+
+Artikel 7:10 Awb — Beslissingstermijn op bezwaar
+
+Lid 1. Het bestuursorgaan beslist binnen **zes weken** na ontvangst van het bezwaarschrift.
+
+Lid 2. Bij ingewikkelde zaken (bijv. uitvoerig onderzoek nodig, hoorzitting, advies van adviseur) kan de beslistermijn met ten hoogste **zes weken** worden verlengd. De Belastingdienst stelt de indiener daarvan schriftelijk op de hoogte vóór afloop van de eerste termijn.
+
+Lid 3. Bij overschrijding zonder bericht: de bezwaarmaker kan ingebrekestelling sturen (artikel 4:17 Awb). Twee weken na ingebrekestelling zonder beslissing → dwangsom (€23 per dag, oplopend, maximaal €1.442 totaal).
+
+Artikel 6:13 Awb — Hoorrecht
+
+Voordat het bestuursorgaan beslist op het bezwaar, stelt het de indiener in de gelegenheid om te worden gehoord (artikel 7:2 Awb), tenzij:
+- Het bezwaar kennelijk niet-ontvankelijk is
+- Het bezwaar kennelijk ongegrond is
+- De indiener heeft afgezien van het hoorrecht
+- Volledig wordt tegemoetgekomen aan het bezwaar
+
+Hoorzitting kan op verzoek van de indiener plaatsvinden bij de inspecteur, telefonisch of online via videoconferentie.
+
+Stappenplan bezwaarprocedure
+
+1. **Aanslag ontvangen** — let op dagtekening (rechtsboven op het biljet).
+2. **Termijn berekenen** — 6 weken na dag-ná-dagtekening. Voorbeeld: aanslag dagtekening 15 januari 2024 → bezwaartermijn loopt 16 januari t/m 26 februari 2024 (laatste dag).
+3. **Bezwaar indienen** — schriftelijk per brief, of elektronisch via Mijn Belastingdienst Zakelijk/Particulier. Verplichte elementen (artikel 6:5 Awb): NAW, datum, dagtekening aanslag, gronden van bezwaar, ondertekening.
+4. **Ontvangstbevestiging** — Belastingdienst bevestigt binnen 14 dagen.
+5. **Hoorzitting** (optioneel, op verzoek of door inspecteur).
+6. **Uitspraak op bezwaar** — binnen 6 (of 12) weken.
+7. **Beroep mogelijk** bij rechtbank binnen 6 weken na uitspraak op bezwaar.
+
+Praktische voorbeelden
+
+Voorbeeld 1 — termijn berekenen
+Aanslag IB 2023 dagtekening dinsdag 9 januari 2024. Termijn loopt vanaf woensdag 10 januari 2024. Zes weken later: dinsdag 20 februari 2024 — laatste dag van indiening. Op 21 februari 2024 ingediend → niet-ontvankelijk tenzij verschoonbaar verzuim.
+
+Voorbeeld 2 — verlenging beslistermijn
+Bezwaar ingediend 20 februari 2024. Eerste termijn 6 weken: tot 2 april 2024. Belastingdienst meldt op 28 maart 2024 verlenging met 6 weken → tot 14 mei 2024. Op 15 mei nog geen beslissing → ingebrekestelling mogelijk.
+
+Voorbeeld 3 — verschoonbaar verzuim
+Bezwaarmaker had op 22 februari 2024 een ongeval, lag in coma tot 5 maart. Bezwaar binnengekomen op 8 maart 2024 — vier dagen na termijn. Met medische verklaring → verschoonbaar verzuim, ontvankelijk.
+
+Aansluitende beroep- en cassatieprocedure
+
+Beroep
+- Termijn: 6 weken na uitspraak op bezwaar
+- Rechtbank: bestuursrecht-sectie of belastingsectie
+- Griffierecht: €50-€365 per zaak (per 2024)
+- Behandeling: schriftelijk of mondeling
+
+Hoger beroep
+- Tegen rechtbank-uitspraak: hoger beroep bij Gerechtshof
+- Termijn: 6 weken
+- Griffierecht: €138 (privé) of €548 (rechtspersoon)
+
+Cassatie
+- Tegen Gerechtshof-uitspraak: cassatie bij Hoge Raad (artikel 27c AWR)
+- Termijn: 6 weken
+- Cassatie-grond: schending of verkeerde toepassing van het recht (geen feitelijke heroverweging)
+- Griffierecht: €548-€2.190
+
+Veelgestelde vragen
+
+V: Mag ik een bezwaar mondeling indienen?
+A: Nee. Schriftelijk vereist (artikel 6:4 Awb). Een telefonisch protest bij de inspecteur telt niet als bezwaar.
+
+V: Schorst een bezwaar de betaalplicht?
+A: Nee, niet automatisch. Wel kan om uitstel van betaling worden gevraagd (artikel 25 Invorderingswet 1990). De inspecteur kan dit toekennen, geheel of gedeeltelijk.
+
+V: Wat is een pro forma bezwaar?
+A: Een bezwaarschrift zonder uitgewerkte gronden, ingediend om de termijn veilig te stellen. Daarna binnen redelijke termijn aanvullen met uitgebreidere argumentatie. Belastingdienst accepteert dit, mits binnen 4-6 weken aangevuld.

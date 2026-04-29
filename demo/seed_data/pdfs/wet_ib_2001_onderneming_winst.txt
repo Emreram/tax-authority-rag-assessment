@@ -1,0 +1,61 @@
+# Bron: Wet inkomstenbelasting 2001, art. 3.4-3.7 (BWBR0011353)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet IB 2001 — Hoofdstuk 3 — Afdeling 3.2 — Onderneming en winst
+
+Artikel 3.4 — Begrip ondernemer
+
+Lid 1. Voor de toepassing van deze wet wordt onder ondernemer verstaan: de belastingplichtige voor rekening van wie een onderneming wordt gedreven en die rechtstreeks wordt verbonden voor verbintenissen betreffende die onderneming.
+
+Lid 2. Aan de eis van rechtstreekse verbondenheid is voldaan als de belastingplichtige aansprakelijk is voor schulden van de onderneming met zijn privévermogen. Een eenmanszaak of een vennoot van een vennootschap onder firma (vof) of een maatschap voldoet hieraan; een aandeelhouder van een BV niet (die heeft inkomen uit aanmerkelijk belang — Box 2).
+
+Artikel 3.5 — Begrip onderneming
+
+Onder onderneming wordt verstaan: een duurzame organisatie van kapitaal en arbeid die deelneemt aan het economisch verkeer met het oogmerk om winst te behalen, welke winst ook redelijkerwijs kan worden verwacht.
+
+De drie criteria — duurzaamheid, deelname economisch verkeer, winstoogmerk plus winstverwachting — moeten cumulatief vervuld zijn. Hobbymatige activiteiten (geen winstverwachting) vallen niet onder dit artikel; resultaten daaruit zijn ofwel onbelast ofwel resultaat uit overige werkzaamheden (artikel 3.90).
+
+Artikel 3.6 — Urencriterium
+
+Lid 1. Aan het urencriterium voldoet de ondernemer die:
+a. ten minste 1.225 uur in het kalenderjaar besteedt aan werkzaamheden voor één of meer van zijn ondernemingen, en
+b. de tijd die hij in totaal in dat kalenderjaar besteedt aan werkzaamheden voor zijn onderneming en aan andere werkzaamheden, voor meer dan de helft besteedt aan werkzaamheden voor zijn onderneming (de zogenoemde 50%-eis).
+
+Lid 2. De 50%-eis geldt niet voor startende ondernemers in elk van de drie kalenderjaren waarin men recht heeft op de startersaftrek (artikel 3.78 lid 4).
+
+Lid 3. Het urencriterium is een voorwaarde voor:
+- Zelfstandigenaftrek (artikel 3.76)
+- Startersaftrek (artikel 3.78)
+- Meewerkaftrek (artikel 3.78a)
+- Aftrek voor speur- en ontwikkelingswerk (artikel 3.77)
+- Stakingsaftrek (artikel 3.79)
+
+Artikel 3.7 — Winst uit onderneming
+
+Lid 1. Winst uit onderneming is het bedrag van de gezamenlijke voordelen die, onder welke naam en in welke vorm ook, worden verkregen uit een onderneming.
+
+Lid 2. Tot de winst behoren:
+a. de jaaromzet minus de directe en indirecte kosten en lasten;
+b. waardeveranderingen van bedrijfsmiddelen (afschrijving, herwaardering bij afwikkeling);
+c. winst behaald bij staking of overdracht van de onderneming (artikel 3.80, stakingswinst);
+d. waardeveranderingen van vorderingen en schulden in de winstsfeer.
+
+Lid 3. Niet tot de winst behoren:
+- privé-uitgaven (zie artikel 3.14)
+- vermogensaanwas op niet-bedrijfsmiddelen (vallen in Box 3)
+- giften die niet onder artikel 3.13 ondernemerseigen-giftenaftrek vallen
+
+Praktijkvoorbeelden
+
+Voorbeeld — vof-vennoot
+Twee compagnons drijven een vof. Beide werken meer dan 1.225 uur per jaar voor de vof. Beide voldoen aan urencriterium en kunnen de zelfstandigenaftrek (€3.750), de MKB-winstvrijstelling (artikel 3.79a, 13,31%) en — als startend in jaar 1-3 — startersaftrek (€2.123 extra) claimen.
+
+Voorbeeld — bijverdienen naast werk
+Een werknemer werkt 32 uur per week in loondienst (≈1.500 uur/jaar) en heeft daarnaast een eenmanszaak waarin hij 800 uur besteedt. Niet aan urencriterium voldaan (50%-eis faalt: 800 < 1.500), dus geen zelfstandigenaftrek. Wel ondernemer-status; winst is gewoon belast in Box 1.
+
+Voorbeeld — geen onderneming
+Iemand verkoopt sporadisch tweedehands kleding via Marktplaats voor totaal €600 per jaar. Geen duurzaamheid, geen winstoogmerk-met-verwachting. Niet aangemerkt als onderneming. Resultaten onbelast tenzij sprake is van resultaat uit overige werkzaamheden.
+
+Documentatieplicht
+
+Een ondernemer moet een administratie voeren waaruit te allen tijde de rechten en verplichtingen blijken (artikel 52 AWR). Bewaartermijn: 7 jaar voor financiële stukken, 10 jaar voor gegevens onroerend goed.

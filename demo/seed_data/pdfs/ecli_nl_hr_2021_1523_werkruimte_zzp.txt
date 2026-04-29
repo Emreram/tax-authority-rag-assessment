@@ -1,0 +1,51 @@
+# Bron: data.rechtspraak.nl ECLI:NL:HR:2021:1523 — Hoge Raad 11 juni 2021
+# Belastingkamer — werkruimte ZZP'er
+
+Hoge Raad der Nederlanden — Belastingkamer
+Arrest van 11 juni 2021
+ECLI:NL:HR:2021:1523
+Nummer: 19/04717
+
+Onderwerp: aftrek werkruimte in eigen woning bij IB-ondernemer (ZZP'er); uitleg artikel 3.17 lid 1 onder a Wet IB 2001 — eis "zelfstandig gedeelte van de woning". Cassatie tegen uitspraak Gerechtshof 's-Hertogenbosch van 3 september 2019.
+
+Hoofdstuk 1 — Geding in cassatie
+
+De Staatssecretaris van Financiën heeft tegen de uitspraak van het Hof beroep in cassatie ingesteld. Belanghebbende — een freelance journaliste die in haar eigen woning werkte — heeft een verweerschrift ingediend en concludeert tot ongegrondverklaring. De Advocaat-Generaal P.J. Wattel heeft op 18 maart 2021 geconcludeerd tot gegrondverklaring van het cassatieberoep van de Staatssecretaris.
+
+Hoofdstuk 2 — Feiten
+
+2.1 Belanghebbende dreef in de jaren 2014-2016 een eenmanszaak vanuit een slaapkamer op de eerste verdieping van haar tweekamerappartement. De ruimte was ingericht met bureau, computer, archiefkast en stoel. Er was geen aparte ingang; toegang verliep via de centrale woningingang en de woonkamer. De ruimte deelde sanitaire voorzieningen met de rest van de woning.
+
+2.2 Belanghebbende heeft in haar aangiftes IB voor de jaren 2014-2016 een evenredig deel van de woonlasten (huur, energie, water) als ondernemingskosten ten laste van de winst gebracht: 22% (oppervlakte slaapkamer ÷ totaal woonoppervlak).
+
+2.3 De inspecteur heeft deze aftrek bij navorderingsaanslag gecorrigeerd, op grond van artikel 3.17 lid 1 onder a Wet IB 2001. Belanghebbende heeft hiertegen bezwaar gemaakt en vervolgens beroep ingesteld bij het Gerechtshof.
+
+2.4 Het Hof heeft het beroep gegrond verklaard en de aftrek geheel toegestaan. Het Hof oordeelde dat de slaapkamer "naar verkeersopvatting" een zelfstandig deel vormde, omdat zij uitsluitend voor de onderneming werd gebruikt en feitelijk afgesloten kon worden van de overige woonruimten.
+
+Hoofdstuk 3 — Beoordeling van het cassatiemiddel
+
+3.1 Het cassatiemiddel betoogt dat het Hof artikel 3.17 lid 1 onder a Wet IB 2001 onjuist heeft toegepast. De zelfstandigheidseis vergt volgens de Staatssecretaris meer dan exclusief zakelijk gebruik: er moet sprake zijn van fysieke zelfstandigheid die zich uit in een eigen ingang of een eigen sanitaire voorziening, of een combinatie van bouwkundige kenmerken die het mogelijk maken de werkruimte als afzonderlijk verhuurbaar onderdeel aan te merken.
+
+3.2 De Hoge Raad stelt voorop dat artikel 3.17 lid 1 onder a Wet IB 2001 voorschrijft dat kosten van een werkruimte in een woning die behoort tot het privé-vermogen van de ondernemer slechts in aftrek komen indien de werkruimte een zelfstandig gedeelte van de woning vormt. De parlementaire geschiedenis (Kamerstukken II 1998/99, 26 727, nr. 3, p. 105) maakt duidelijk dat de wetgever heeft beoogd alleen die werkruimten voor aftrek in aanmerking te brengen die — los van het feitelijk gebruik — naar bouwkundige aard kunnen worden aangemerkt als afzonderlijk verhuurbaar.
+
+3.3 Voor de uitleg van de zelfstandigheidseis is dus niet beslissend of de werkruimte exclusief voor de onderneming wordt gebruikt. Doorslaggevend is of de werkruimte naar verkeersopvatting een zelfstandig gedeelte van de woning vormt. Indicatoren daarvoor zijn een eigen opgang of ingang, eigen sanitaire voorzieningen, eigen meters voor energie en water, en de mogelijkheid om de ruimte separaat te verhuren.
+
+3.4 Een slaapkamer op de eerste verdieping zonder eigen ingang en zonder eigen sanitaire voorziening voldoet niet aan deze eisen. Het Hof heeft daarmee een onjuiste maatstaf aangelegd door het exclusieve zakelijke gebruik en de afsluitbaarheid alleen voldoende te achten.
+
+3.5 Het cassatieberoep slaagt. De zaak wordt zelf afgedaan: de aftrek voor de werkruimte wordt voor de jaren 2014-2016 alsnog geweigerd. Wel blijven de aftrek voor zakelijke telefoon- en internetkosten (apart geadministreerd, zonder gebondenheid aan de werkruimte-eis) intact.
+
+Hoofdstuk 4 — Beslissing
+
+De Hoge Raad:
+- vernietigt de uitspraak van het Gerechtshof 's-Hertogenbosch van 3 september 2019;
+- bevestigt de uitspraak van de Rechtbank;
+- verklaart het beroep van belanghebbende ongegrond;
+- houdt het griffierecht in en veroordeelt belanghebbende in de proceskosten.
+
+Hoofdstuk 5 — Implicaties voor de praktijk
+
+Dit arrest verduidelijkt definitief dat artikel 3.17 lid 1 onder a Wet IB 2001 een **bouwkundige** zelfstandigheidstoets vergt, niet een gebruiks-toets. ZZP'ers en IB-ondernemers die thuiswerken in een gewone slaapkamer, woonkamer of zolder zonder aparte voorzieningen kunnen geen werkruimte-aftrek claimen, ook niet wanneer zij de ruimte uitsluitend voor het werk gebruiken.
+
+Wel blijven aftrekbaar: zakelijk gebruik telefoon, internet, kantoorbenodigdheden, en eventueel een huur of leaseprijs voor een externe werkruimte. De werkkostenregeling (artikel 31a Wet LB) biedt werknemers separate ruimte voor thuiswerk-vergoedingen onder de noodzakelijkheidstoets.
+
+Het arrest is gewezen door de vice-president M.E. van Hilten als voorzitter, en de raadsheren E.N. Punt, P.M.F. van Loon, M.A. Fierstra en J. Wortel, en in het openbaar uitgesproken op 11 juni 2021.

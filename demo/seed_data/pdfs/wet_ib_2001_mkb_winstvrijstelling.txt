@@ -1,0 +1,53 @@
+# Bron: Wet inkomstenbelasting 2001, art. 3.79a (BWBR0011353)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet IB 2001 — Hoofdstuk 3 — Afdeling 3.2 — Artikel 3.79a — MKB-winstvrijstelling
+
+Artikel 3.79a — MKB-winstvrijstelling
+
+Lid 1. Voor de ondernemer die in het kalenderjaar voor het bepalen van de winst uit onderneming aftrek heeft genoten van de zelfstandigenaftrek (artikel 3.76) of de startersaftrek (artikel 3.78), bedraagt de MKB-winstvrijstelling 13,31% van de winst, na vermindering met de zelfstandigenaftrek en de startersaftrek.
+
+Lid 2. Voor het kalenderjaar 2024 is het percentage definitief vastgesteld op 13,31%. Vóór 2022 was dit 14%. De stapsgewijze afbouw maakt onderdeel uit van het Belastingplan 2022-2024 om de fiscale behandeling van ondernemers en werknemers naar elkaar toe te brengen.
+
+Lid 3. Bij verlies uit onderneming wordt de MKB-winstvrijstelling spiegelbeeldig toegepast: 13,31% van het verlies wordt niet ten laste van het inkomen gebracht (anti-misbruikregel — voorkomt dat ondernemers verliesjaren versterkt aftrekken).
+
+Lid 4. Een ondernemer zonder zelfstandigenaftrek (omdat hij niet voldoet aan het urencriterium van artikel 3.6) heeft géén recht op de MKB-winstvrijstelling. De koppeling met artikel 3.76 en 3.78 is hard.
+
+Berekeningsvolgorde
+
+De MKB-winstvrijstelling wordt **na** zelfstandigenaftrek en startersaftrek berekend, niet daarvóór. Stappen:
+
+1. Bepaal de winst uit onderneming (artikel 3.7)
+2. Trek af: zelfstandigenaftrek (€3.750 in 2024)
+3. Trek af: eventueel startersaftrek (€2.123 extra in jaar 1, 2 en 3 startend ondernemerschap)
+4. Trek af: meewerkaftrek (artikel 3.78a) — voor partners die meewerken
+5. Op het resterende bedrag: MKB-winstvrijstelling = 13,31% × resterend bedrag
+6. Het resterende bedrag minus deze 13,31% is de winst-component in Box 1
+
+Praktijkvoorbeeld 2024 — startende ondernemer
+
+Winst uit eenmanszaak: €60.000
+Voldoet aan urencriterium: ja, 1.300 uur
+Recht op startersaftrek (jaar 2): ja
+
+Stap 1: Winst = €60.000
+Stap 2: − Zelfstandigenaftrek €3.750 = €56.250
+Stap 3: − Startersaftrek €2.123 = €54.127
+Stap 4: − Meewerkaftrek €0 = €54.127
+Stap 5: MKB-winstvrijstelling = 13,31% × €54.127 = €7.204
+Stap 6: Belastbare winst Box 1 = €54.127 − €7.204 = **€46.923**
+
+Hierop wordt vervolgens de progressieve heffing van Box 1 toegepast (37,07% schijf 1, 49,5% schijf 2 in 2024) inclusief heffingskortingen (algemene heffingskorting + arbeidskorting).
+
+Vergelijking: zonder MKB-winstvrijstelling zou de belastbare winst €54.127 zijn — een verschil van €7.204 dat rechtstreeks in een lagere belastingdruk vertaalt (~€2.673 minder belasting bij 37,07% tarief).
+
+Veelgestelde vragen
+
+V: Geldt de MKB-winstvrijstelling ook voor BV's?
+A: Nee. De MKB-winstvrijstelling is specifiek voor IB-ondernemers (eenmanszaak, vof, maatschap). BV's vallen onder de Wet Vpb 1969 met eigen tariefstructuur (15% tot €395.000 winst, 25,8% daarboven in 2024).
+
+V: Kan ik de MKB-winstvrijstelling claimen als ik geen winst maar verlies maak?
+A: De vrijstelling werkt spiegelbeeldig op verlies — 13,31% van het verlies komt NIET ten laste van het inkomen. Dit verlaagt de mate waarin een ondernemer een verliesjaar fiscaal kan compenseren met andere Box 1-inkomsten of met latere winstjaren.
+
+V: Wat als ik halverwege het jaar mijn onderneming staakt?
+A: De MKB-winstvrijstelling is alleen van toepassing op de "lopende" winst, niet op de stakingswinst (artikel 3.80). Voor stakingswinst geldt afzonderlijke stakingsaftrek (artikel 3.79).

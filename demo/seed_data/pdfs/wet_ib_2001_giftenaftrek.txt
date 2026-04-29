@@ -1,0 +1,58 @@
+# Bron: Wet inkomstenbelasting 2001, art. 6.31-6.39 (BWBR0011353)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet IB 2001 — Hoofdstuk 6 — Afdeling 6.5 — Aftrekbare giften
+
+Artikel 6.32 — Aftrekbare giften
+
+Lid 1. Aftrekbaar zijn giften aan algemeen nut beogende instellingen (ANBI's), aan steunstichtingen sociaal belang behartigende instellingen (SBBI's) en aan bepaalde verenigingen, mits voldaan aan de voorwaarden van dit hoofdstuk.
+
+Lid 2. Voor reguliere giften (niet-periodiek) geldt:
+- Drempel: 1% van het verzamelinkomen, met een minimum van €60
+- Plafond: 10% van het verzamelinkomen
+- Boven het plafond geen aftrek
+
+Lid 3. Voor periodieke giften (gestructureerd via notariële akte of onderhandse akte met UBO-vereisten, looptijd minimaal 5 jaar of tot overlijden) geldt:
+- Geen drempel
+- Plafond per 1 januari 2023: €250.000 per huishouden per jaar (was vóór 2023 ongelimiteerd)
+
+Artikel 6.33 — Begrip ANBI
+
+Lid 1. Een algemeen nut beogende instelling is een instelling die zich voor minstens 90% inzet voor het algemeen nut, daadwerkelijk in Nederland of in een land waarmee Nederland een belastingverdrag heeft gesloten dat informatieverstrekking regelt.
+
+Lid 2. De Belastingdienst houdt een openbaar register van ANBI's. Een gift aan een organisatie die niet is geregistreerd levert geen aftrek op, ook niet als de doelstelling materieel aan de eisen voldoet.
+
+Lid 3. Culturele ANBI's krijgen een vermenigvuldigingsfactor 1,25 (multiplier) op de aftrek, met een maximum extra aftrek van €1.250 voor giften tot €5.000.
+
+Artikel 6.39 — Vorm en bewijs van de gift
+
+Lid 1. Reguliere giften moeten schriftelijk aantoonbaar zijn (bankafschrift, kwitantie). Contante giften zijn vanaf 2024 niet meer aftrekbaar zonder bankoverschrijving.
+
+Lid 2. Periodieke giften vereisen een notariële of onderhandse akte met daarin opgenomen: looptijd, ontvanger, jaarlijks bedrag, ontbindende voorwaarde bij overlijden of arbeidsongeschiktheid.
+
+Lid 3. Geen aftrek bij quid-pro-quo: een betaling waarbij de gever een tegenprestatie krijgt (bijv. ledenkorting, museumkaart, lidmaatschap met voordelen) is geen gift maar een overeenkomst.
+
+Praktische rekenvoorbeelden
+
+Voorbeeld 1 — Eenmalige gift
+Verzamelinkomen €40.000. Drempel = 1% × €40.000 = €400. Plafond = 10% × €40.000 = €4.000.
+Gift aan KWF Kankerbestrijding (ANBI): €1.500. Aftrek = €1.500 − €400 = **€1.100**.
+
+Voorbeeld 2 — Periodieke gift culturele ANBI
+Verzamelinkomen €60.000. Periodieke gift Concertgebouw (culturele ANBI) van €2.000 voor 5 jaar.
+Aftrek per jaar = €2.000 × 1,25 = €2.500 (drempelvrij door periodieke vorm).
+
+Voorbeeld 3 — Niet-aftrekbaar
+Donatie €100 aan crowdfunding voor een zieke buurman: niet-ANBI, geen aftrek.
+Lidmaatschap Greenpeace €50: deels gift, deels lidmaatschap — Belastingdienst geeft niet altijd akkoord. Vraag de organisatie om een gift-bewijs voor het giftgedeelte.
+
+Veelgestelde vragen
+
+V: Mag ik mijn gift aan de kerk aftrekken?
+A: Ja, mits de kerk een ANBI-status heeft (alle gevestigde religies in NL doorgaans wel) en je hebt een schriftelijk bewijs van de bijdrage.
+
+V: Verlies ik mijn aftrek als ik halverwege de 5 jaar stop met de periodieke gift?
+A: Ja, terugwerkend. De aftrek over voorgaande jaren wordt nagevorderd via een correctie-aanslag (artikel 16 AWR). Uitzondering: bij arbeidsongeschiktheid of overlijden binnen de looptijd, zoals geregeld in de akte.
+
+V: Kan een ondernemer giften aftrekken van de winst?
+A: Onder strikte voorwaarden ja (artikel 16 Wet Vpb 1969 voor BV's; artikel 3.13 IB voor IB-ondernemers), met een eigen plafond. Maar particuliere giftenaftrek loopt apart via dit hoofdstuk 6.

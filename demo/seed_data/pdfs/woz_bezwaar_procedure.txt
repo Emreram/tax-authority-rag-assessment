@@ -1,0 +1,76 @@
+# Bron: Wet waardering onroerende zaken (WOZ), Awb (BWBR0007119)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet WOZ — Bezwaar tegen WOZ-beschikking — procedure 2024
+
+Artikel 22 Wet WOZ — WOZ-beschikking
+
+Lid 1. De gemeente stelt jaarlijks de waarde van een onroerende zaak vast per peildatum 1 januari van het voorgaande kalenderjaar. De WOZ-beschikking 2024 hanteert de waarde per 1 januari 2023 (één-jaarsregeling).
+
+Lid 2. De WOZ-waarde dient als grondslag voor:
+- Onroerende zaakbelasting (OZB) door de gemeente
+- Eigenwoningforfait in Box 1 (artikel 3.112 Wet IB)
+- Eigenrisicobeschermingsregeling, schenking eigen woning
+- Erfbelasting (waardering van geërfde onroerende zaken)
+- Vermogensbestanddeel in Box 3 (tweede woning, niet de eigen woning)
+
+Lid 3. Tegen de WOZ-beschikking staat bezwaar open binnen **6 weken** na dagtekening (artikel 6:7 Awb). Het bezwaar wordt ingediend bij de gemeente die de beschikking heeft afgegeven (niet bij de Belastingdienst).
+
+Bezwaargronden
+
+Veel voorkomende redenen voor bezwaar:
+1. **Vergelijkbare panden** zijn lager getaxeerd — de gemeente moet de waarde steunen op vergelijkbare verkopen rondom de peildatum.
+2. **Verkoopprijs gerealiseerd** — als het pand in de periode rond de peildatum is verkocht onder de WOZ-waarde, is dat sterke onderbouwing.
+3. **Onderhoudsstaat** — slechte staat (verzakkingen, achterstallig onderhoud, vocht) verlaagt de marktwaarde.
+4. **Functionele verouderde** — bijvoorbeeld geen isolatie, verouderde keuken/badkamer.
+5. **Bestemmingsplan-restricties** — beperking van uitbouw of gebruik.
+6. **Vreemde objecten op buurperceel** — geluidsoverlast, stank, slechte uitzicht.
+7. **Foutieve metrieken** — bijvoorbeeld kadastraal oppervlak, gebruiksoppervlak conform NEN 2580.
+
+Procedure stapsgewijs
+
+1. **Beschikking ontvangen** — meestal eind januari/begin februari.
+2. **Beoordelen** — vergelijk met buurpanden via WOZ-waardeloket en CBS-cijfers.
+3. **Bezwaar indienen** — binnen 6 weken via gemeentelijk loket of digitaal. Schriftelijk vereist (artikel 6:4 Awb).
+4. **Hoorzitting** — gemeente biedt hoor-mogelijkheid (artikel 7:2 Awb).
+5. **Beslissing** — binnen 6 (of 12) weken (artikel 7:10 Awb).
+6. **Beroep** — bij rechtbank-belastingsectie binnen 6 weken na uitspraak op bezwaar.
+
+Geen kosten? Niet helemaal
+
+Bezwaar maken bij de gemeente is gratis. Maar er zijn private "no-cure-no-pay"-bedrijven (bezwaarmaker.nl, woz-aanvechter.nl) die werken op basis van de proceskostenvergoeding (artikel 7:15 Awb): bij een gegrond bezwaar krijgt de bezwaarmaker een vergoeding voor "deskundigenbijstand" — meestal € 296-€597 per zaak, afhankelijk van het verlaagde bedrag. Deze bedrijven incasseren die vergoeding.
+
+NB: Per 2024 is er een politiek debat over inperking van de proceskostenvergoeding voor WOZ-bezwaren — gemeenten zien de stroom als kostenpost. Stand 2024: vergoeding nog steeds geldig, maar uitvoering wijzigt mogelijk per 2025.
+
+Praktische voorbeelden
+
+Voorbeeld 1 — duidelijk te hoog
+WOZ-waarde 2024: €580.000. Buurman met identiek pand (één hoekhuis verschil): €510.000. Bezwaar met taxatieoverzicht buurpanden → gegrond verklaard, waarde verlaagd naar €520.000.
+
+Voorbeeld 2 — verkocht onder WOZ
+Pand WOZ €350.000, verkocht 4 maanden vóór peildatum voor €315.000. Bezwaar wegens lagere marktwaarde → succesvol, waarde aangepast tot transactiewaarde.
+
+Voorbeeld 3 — onderhoudsachterstand
+WOZ €410.000. Bouwkundig rapport laat zien: verzakking, asbest, vocht, schatting herstel €40.000. Bezwaar met rapport → waarde verlaagd tot €370.000.
+
+Effect op andere belastingen
+
+Een verlaging van WOZ heeft cascade-effect:
+- OZB-aanslag van gemeente verlaagt automatisch
+- Eigenwoningforfait in Box 1 verlaagt → minder belastbaar inkomen
+- Bij erfenis van pand: lager bedrag voor erfbelasting
+
+Verhoging van WOZ — om bezwaar te overwegen aanleiding kan zijn:
+- Bij verkoop overdrachtsbelasting hoger
+- Bij verhuur: hogere huurprijs maximaal toegestaan (puntenstelsel sociale huur)
+
+Veelgestelde vragen
+
+V: Mag ik de WOZ-waarde "naar boven" bezwaren?
+A: Juridisch ja, maar zelden in eigen voordeel. Hogere WOZ verhoogt OZB en eigenwoningforfait. Praktisch komt verhoging via een nieuwe taxatie achteraf naar voren bij gemeentelijke herwaardering.
+
+V: Mijn buurman heeft een veel hogere WOZ. Is mijn bezwaar nu kansloos?
+A: Niet automatisch. De gemeente moet onderbouwen dat zijn taxatie van uw pand klopt op basis van vergelijkbare verkopen — niet uw buurman, maar de markt rondom peildatum.
+
+V: Wat als de gemeente niet binnen 6 weken beslist?
+A: Stuur een ingebrekestelling (artikel 4:17 Awb). Twee weken later zonder beslissing: dwangsom €23 per dag (max €1.442 totaal). Daarna mogelijk beroep bij rechtbank wegens niet-tijdig beslissen.

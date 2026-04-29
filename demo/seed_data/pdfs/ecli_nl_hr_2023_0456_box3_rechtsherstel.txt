@@ -1,0 +1,57 @@
+# Bron: data.rechtspraak.nl ECLI:NL:HR:2023:0456 — Hoge Raad 3 maart 2023
+# Belastingkamer — Box 3 forfaitair stelsel en rechtsherstel
+
+Hoge Raad der Nederlanden — Belastingkamer
+Arrest van 3 maart 2023
+ECLI:NL:HR:2023:0456
+Nummer: 22/01237
+
+Onderwerp: Box 3 forfaitair stelsel en de eis van rechtsherstel naar aanleiding van het Kerstarrest (HR 24 december 2021, ECLI:NL:HR:2021:1963). Cassatie tegen uitspraak Gerechtshof Den Haag van 14 december 2022. Massaal-bezwaarprocedure aangewezen door de Belastingdienst.
+
+Hoofdstuk 1 — Geding in cassatie
+
+Belanghebbende — een spaarder met overwegend bankdeposito's en geen aandelen — heeft tegen de uitspraak van het Hof Den Haag beroep in cassatie ingesteld. De Staatssecretaris van Financiën heeft een verweerschrift ingediend. De Advocaat-Generaal R.E.C.M. Niessen heeft op 24 januari 2023 geconcludeerd tot gegrondverklaring van het beroep.
+
+Hoofdstuk 2 — Feiten en eerdere procedures
+
+2.1 Belanghebbende had op 1 januari 2018 een spaartegoed van €312.000 bij een Nederlandse bank en geen overige bezittingen. De ontvangen rente over 2018 bedroeg €498. Het forfaitaire rendement Box 3 voor 2018 was berekend volgens de toen geldende drie-schijven-systematiek en bedroeg €11.640.
+
+2.2 De aanslag IB 2018 belaste het forfaitaire rendement van €11.640 tegen het Box 3-tarief van 30%. Belanghebbende heeft hiertegen bezwaar gemaakt en zich aangesloten bij de massaal-bezwaarprocedure die naar aanleiding van het Kerstarrest is geïnstitueerd door artikel 25c AWR.
+
+2.3 Het Hof Den Haag heeft het beroep gegrond verklaard en bepaald dat het werkelijke rendement (€498) als heffingsgrondslag moet gelden. Het Hof verwees daarvoor naar het Kerstarrest en overwoog dat een forfaitair stelsel dat tot een grove disproportie leidt onverenigbaar is met artikel 1 EP EVRM en artikel 14 EVRM.
+
+2.4 Belanghebbende stelt cassatie in op het punt van de proceskostenvergoeding en de wijze waarop het rechtsherstel administratief moet worden vormgegeven. De Staatssecretaris stelt incidenteel cassatie in en betoogt dat het rechtsherstel slechts geldt voor degenen die individueel hebben aangetoond dat hun werkelijke rendement lager was, en niet via een algemene regel.
+
+Hoofdstuk 3 — Beoordeling van de middelen
+
+3.1 De Hoge Raad onderschrijft het oordeel van het Hof dat in de jaren 2017-2022 het forfaitaire Box 3-stelsel onverenigbaar was met artikel 1 Eerste Protocol bij het EVRM voor belastingplichtigen die kunnen aantonen dat hun werkelijke rendement lager was dan het fictieve rendement.
+
+3.2 Het rechtsherstel als bedoeld in het Kerstarrest geldt in beginsel voor alle belastingplichtigen die tijdig bezwaar hebben gemaakt of zich hebben aangesloten bij de massaal-bezwaarprocedure. De Belastingdienst dient deze groepen ambtshalve rechtsherstel te bieden — niet eerst nadat de belastingplichtige individueel het werkelijke rendement aantoont.
+
+3.3 Voor de berekening van het werkelijke rendement geldt het volgende:
+- Banktegoeden: feitelijk ontvangen rente, ongeacht het forfait
+- Effectenportefeuille: ontvangen dividenden plus gerealiseerde koersresultaten in het belastingjaar (indirecte resultaten — ongerealiseerde waardestijgingen — zijn omstreden en in latere arresten nader bepaald)
+- Onroerende zaken (anders dan eigen woning): ontvangen huur minus zakelijke kosten plus eventuele waardeverandering
+- Schulden: feitelijk betaalde rente
+
+3.4 Het Hof heeft de proceskosten-vergoeding terecht toegekend op grond van artikel 7:15 Awb. Het verzoek om verhoging van die vergoeding wordt afgewezen — de toegekende bedragen vallen binnen de forfaitaire schaal van het Besluit proceskosten bestuursrecht.
+
+3.5 Het incidentele middel van de Staatssecretaris faalt: ambtshalve rechtsherstel voor de groep tijdig-bezwaar-makende belastingplichtigen is verenigbaar met de uitvoeringspraktijk en is door de wetgever ook nadrukkelijk beoogd in de Wet rechtsherstel box 3 (Stb. 2022, 533).
+
+Hoofdstuk 4 — Beslissing
+
+De Hoge Raad:
+- verwerpt het principale cassatieberoep van belanghebbende met betrekking tot de proceskosten;
+- verwerpt het incidentele cassatieberoep van de Staatssecretaris;
+- bevestigt de uitspraak van het Gerechtshof Den Haag voor het overige;
+- veroordeelt de Staatssecretaris in de proceskosten in cassatie tot een bedrag van € 2.193.
+
+Hoofdstuk 5 — Doorwerking en uitvoeringspraktijk
+
+5.1 Voor belastingplichtigen die tijdig bezwaar hebben gemaakt of die in de massaal-bezwaarprocedure zijn opgenomen: de Belastingdienst voert ambtshalve correctie uit door berekening van het werkelijke rendement op basis van door de belastingplichtige verstrekte gegevens.
+
+5.2 Voor belastingplichtigen die niet tijdig bezwaar hebben gemaakt: het Kerstarrest werkt niet ambtshalve door. Wel kan via een verzoek tot ambtshalve vermindering (artikel 9.6 Wet IB 2001 jo. artikel 65 AWR) onder voorwaarden alsnog rechtsherstel worden verkregen, maar de slagingskans is beperkt.
+
+5.3 Voor de jaren vanaf 2023 geldt de Overbruggingswet box 3 (drie-categorieën-stelsel met afzonderlijke forfaits voor banktegoeden, overige bezittingen en schulden). Ook onder deze wet blijft de tegenbewijsregel van toepassing: de belastingplichtige kan aantonen dat zijn werkelijke rendement lager was.
+
+Het arrest is gewezen door de vice-president M.W.C. Feteris als voorzitter, en de raadsheren M.A. Fierstra, J.A.R. van Eijsden, E.F. Faase en J. Wortel, en in het openbaar uitgesproken op 3 maart 2023.

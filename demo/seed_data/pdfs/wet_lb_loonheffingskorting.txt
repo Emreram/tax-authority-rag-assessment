@@ -1,0 +1,75 @@
+# Bron: Wet op de loonbelasting 1964, art. 22a-22aa (BWBR0002471)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet LB 1964 — Artikel 22a-22aa — Loonheffingskorting
+
+Artikel 22a — Loonheffingskorting
+
+Lid 1. De loonheffingskorting is het bedrag dat de inhoudingsplichtige (werkgever, uitkeringsinstantie) op het door hem verschuldigde bedrag aan loonheffing in mindering brengt.
+
+Lid 2. De loonheffingskorting bestaat uit twee componenten:
+- Algemene heffingskorting (artikel 22 Wet LB jo. artikel 8.10 Wet IB)
+- Arbeidskorting (artikel 22a Wet LB jo. artikel 8.11 Wet IB)
+- Eventueel: ouderenkorting, alleenstaandeoudersaftrek, jonggehandicaptenkorting (per situatie)
+
+Lid 3. Een werknemer kan de loonheffingskorting bij slechts ÉÉN inhoudingsplichtige tegelijk laten toepassen. Bij meerdere dienstverbanden moet de werknemer kiezen — meestal de werkgever met het hoogste loon, om optimale verrekening te krijgen.
+
+Lid 4. Bij dubbele toepassing (twee werkgevers passen heffingskorting beide toe) ontstaat een te lage inhouding gedurende het jaar. Dit wordt achteraf via de inkomstenbelasting-aangifte gecorrigeerd — meestal terugbetalen.
+
+Artikel 22aa — Verklaring loonheffingskorting
+
+Lid 1. Een werknemer geeft op het formulier "Model opgaaf gegevens voor de loonheffingen" aan of de werkgever de loonheffingskorting moet toepassen ("Ja, vanaf [datum]") of niet ("Nee").
+
+Lid 2. Voor de werkgever geldt: bij "geen verklaring ontvangen" past de werkgever het hoogste tarief toe (anoniementarief 52%, artikel 26b Wet LB). Dat is een prikkel voor de werknemer om altijd het formulier in te vullen.
+
+Lid 3. Bij wijziging van inhoudingsplichtige (nieuwe baan, einde uitkering): de werknemer dient binnen redelijke termijn een nieuwe verklaring in te dienen.
+
+Algemene heffingskorting in 2024 (op jaarbasis)
+
+Bedragen 2024:
+- Maximaal €3.362 (per 1 januari 2024) bij verzamelinkomen tot €24.812
+- Afbouw boven dat bedrag: 6,007% van het verzamelinkomen boven €24.812
+- Vanaf verzamelinkomen €75.518: heffingskorting €0 (volledig afgebouwd)
+
+AOW-gerechtigden hebben een lagere algemene heffingskorting (omdat zij geen AOW-premie meer betalen): maximaal €1.735 in 2024.
+
+Arbeidskorting in 2024 (op jaarbasis)
+
+De arbeidskorting hangt af van het arbeidsinkomen (loon, winst uit onderneming, resultaat overige werkzaamheden):
+- 0%-€11.490: opbouw (8,231% × inkomen)
+- €11.490-€24.821: opbouw verder (€946 + 31,433% × (inkomen − €11.490))
+- €24.821-€39.957: maximumbereik (max €5.532)
+- €39.957-€124.935: afbouw (6,510% × (inkomen − €39.957), tot €0)
+
+Voor AOW-gerechtigden: arbeidskorting maximaal €2.854 in 2024.
+
+Praktijkvoorbeelden
+
+Voorbeeld 1 — fulltime werknemer
+Werkneemster met €38.000 jaarinkomen, één werkgever, loonheffingskorting toegepast bij die werkgever.
+- Algemene heffingskorting: €3.362 − 6,007% × (€38.000 − €24.812) = €3.362 − €792 = €2.570
+- Arbeidskorting: maximumbereik = €5.532
+- Totale loonheffingskorting: €8.102 per jaar (≈ €675 per maand minder belasting)
+
+Voorbeeld 2 — twee parttime banen
+Werknemer heeft baan A (€22.000) en baan B (€8.000). Toepassing loonheffingskorting alleen bij baan A (hoogste loon).
+- Bij baan A: korting toegepast op €22.000 inkomen
+- Bij baan B: geen korting → vol tarief op €8.000
+- Resultaat: aan het einde van het jaar ontstaat in de IB-aangifte vaak een teruggave (de korting is op slechts €22.000-basis maar zou over €30.000 totaal-inkomen ook al deels van toepassing zijn).
+
+Voorbeeld 3 — geen verklaring ingeleverd
+Iemand begint op een nieuwe baan en verzuimt het opgavenformulier. De werkgever past anoniementarief 52% toe op heel het loon. Zodra de verklaring binnen is: werkgever past correcties toe in de eerstvolgende salarisronde.
+
+Voorbeeld 4 — AOW + bijbaan
+67-jarige met AOW-uitkering en parttime baan. AOW-instantie past loonheffingskorting toe (laag tarief), bijbaan-werkgever niet. Bij voldoende totaal-inkomen ontstaat geen kortingsverlies — wel let op de afwijkende AOW-percentages.
+
+Veelgestelde vragen
+
+V: Verandert de loonheffingskorting bij ziekteverzuim?
+A: Tijdens ziekteverlof loopt de loonheffingskorting gewoon door als werkgever doorbetaalt. Bij UWV-uitkering past UWV de korting toe, mits werknemer de verklaring bij UWV indient.
+
+V: Kan ik de loonheffingskorting wisselen halverwege het jaar?
+A: Ja. Een werknemer mag op elk moment de keuze veranderen door bij beide werkgevers een nieuwe verklaring in te leveren. Wijzigingen werken vanaf het moment van indiening, geen terugwerkende kracht.
+
+V: Geldt er een aparte loonheffingskorting voor zwangerschap- en bevallingsuitkering?
+A: Nee, deze uitkering valt onder reguliere loonheffing. UWV past de korting toe als de werkneemster zich daar aanmeldt voor de duur van de uitkering.

@@ -1,0 +1,100 @@
+# Bron: Wet inkomstenbelasting 2001, art. 5.2-5.5 + Wet rechtsherstel box 3 (BWBR0011353 + BWBR0046983)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet IB 2001 — Hoofdstuk 5 — Box 3: Belastbaar inkomen uit sparen en beleggen — systematiek 2024
+
+Artikel 5.2 — Heffingsgrondslag Box 3
+
+Lid 1. De heffingsgrondslag is de waarde in het economische verkeer van de bezittingen verminderd met de schulden, beoordeeld op 1 januari van het kalenderjaar (peildatum).
+
+Lid 2. Tot de bezittingen behoren onder meer:
+- Spaartegoeden bij Nederlandse en buitenlandse banken
+- Aandelen en obligaties (niet vallend onder aanmerkelijk belang)
+- Cryptovaluta
+- Tweede woning, vakantiehuis (niet de eigen woning — die zit in Box 1)
+- Vorderingen, deposito's
+- Contant geld boven €621 (heffingvrij forfait per persoon)
+
+Lid 3. Tot de schulden behoren onder meer:
+- Persoonlijke leningen, doorlopende kredieten
+- Hypotheken voor tweede woning of vakantiehuis (niet de eigenwoning-schuld)
+- Studieschulden boven drempel
+- Drempel schulden: €3.700 per persoon (€7.400 fiscale partners)
+
+Artikel 5.3 — Heffingsvrij vermogen 2024
+
+Per persoon belastingvrij: **€57.000**.
+Voor fiscale partners samen: **€114.000**.
+Boven dit drempelbedrag wordt de heffing toegepast.
+
+Artikel 5.4 — Forfaitaire systematiek (Wet rechtsherstel box 3 + Overbruggingswet)
+
+Lid 1. Voor het kalenderjaar 2024 wordt het belastbare inkomen uit sparen en beleggen berekend door drie aparte vermogensklassen te onderscheiden, elk met een eigen forfaitair rendement:
+
+**Klasse 1 — Banktegoeden** (spaargeld, betaalrekeningen)
+Forfaitair rendement 2024: **1,03%**
+
+**Klasse 2 — Overige bezittingen** (aandelen, obligaties, vakantiehuis, crypto)
+Forfaitair rendement 2024: **6,04%**
+
+**Klasse 3 — Schulden**
+Forfaitair rente-aftrek 2024: **2,47%** (de schuld krijgt een negatief rendement)
+
+Lid 2. Het rendement per klasse wordt opgeteld; van het totaal wordt het heffingvrije vermogen afgetrokken.
+
+Lid 3. Het belastingtarief in Box 3 voor 2024 is **36%**.
+
+Tegenbewijsregeling — werkelijk-rendement-toets
+
+Sinds de uitspraken van de Hoge Raad (Kerstarrest 24 december 2021 — ECLI:NL:HR:2021:1963 — en Box 3 herstel-arrest 6 juni 2024 — ECLI:NL:HR:2024:0704) geldt:
+
+De belastingplichtige mag bewijzen dat zijn werkelijk gerealiseerde rendement lager was dan de forfaitair berekende uitkomst. In dat geval wordt het werkelijke rendement belast.
+
+Werkelijk rendement = ontvangen rente + ontvangen dividenden + gerealiseerde koersresultaten + waardeveranderingen onroerende zaken (in het belastingjaar) − rentelasten op schulden.
+
+De belastingplichtige draagt de bewijslast (artikel 25 Awb-fiscaal). Documentatie: bankafschriften, dividendoverzichten, taxaties.
+
+Praktische rekenvoorbeelden
+
+Voorbeeld 1 — alleen spaargeld
+Spaargeld op 1 januari 2024: €120.000.
+Heffingvrij vermogen €57.000 → grondslag: €63.000.
+Forfaitair rendement: 1,03% × €63.000 = €649.
+Belasting: 36% × €649 = **€234**.
+
+Voorbeeld 2 — gemengd vermogen
+Spaargeld €40.000, aandelen €80.000, schuld lening €15.000.
+Bezittingen: €40.000 (klasse 1) + €80.000 (klasse 2) = €120.000
+Schulden: €15.000 − drempel €3.700 = €11.300 (klasse 3)
+Heffingvrij: €57.000
+
+Berekening rendement:
+- Klasse 1: 1,03% × (€40.000 / €120.000) × (totale grondslag) — proportionele toedeling
+- Klasse 2: 6,04% × (€80.000 / €120.000) × (totale grondslag)
+- Klasse 3: −2,47% × (€11.300 / €11.300) (volledig)
+
+Vereenvoudigd: gemiddeld rendement = (1,03 × 40 + 6,04 × 80) / 120 = ~4,37%
+Toegepast op grondslag (€120.000 − €11.300 − €57.000) = €51.700
+Forfaitair rendement: 4,37% × €51.700 = €2.259
+Belasting: 36% × €2.259 = **€813**.
+
+Voorbeeld 3 — tegenbewijs werkelijk rendement
+Iemand met €200.000 in een vakantiewoning die in 2024 met €5.000 in waarde daalde + €2.000 huur ontvangen. Werkelijk rendement: −€3.000 (verlies). Met tegenbewijs: belastbaar rendement €0 i.p.v. forfaitair 6,04% × (€200.000 − €57.000) = €8.638. Tegenbewijsroute zeer voordelig.
+
+Heffing tarief- en grondslagstapelingen
+
+Box 3-belasting wordt afzonderlijk berekend van Box 1 en Box 2. De heffing in elk box telt op tot de totale aanslag. Heffingskortingen worden eerst op Box 1 toegepast, daarna op Box 2/3.
+
+Veelgestelde vragen
+
+V: Moet ik mijn cryptoportefeuille opgeven in Box 3?
+A: Ja. Cryptovaluta vallen onder "overige bezittingen" (klasse 2) — forfaitair 6,04% in 2024.
+
+V: Mijn enige vermogen is een tweede huis met hypotheek — hoe werkt dat?
+A: Het tweede huis = klasse 2 (waarde WOZ minus eventuele courtage). De hypotheek = klasse 3. Per saldo werkt de hypotheek als een negatief rendement (rente-aftrek tegen 2,47% forfaitair).
+
+V: Wat als de fiscus en ik het oneens zijn over werkelijk rendement?
+A: Bezwaar tegen aanslag binnen 6 weken (artikel 6:7 Awb). Tegenbewijs documenteren met bankafschriften en taxaties. Bij conflict: beroep bij rechtbank, hoger beroep bij Gerechtshof, cassatie bij Hoge Raad.
+
+V: Telt mijn pensioenpot mee in Box 3?
+A: Nee. Pensioenrechten in Box 1 (uitkering) of (eventueel) Box 2 (lijfrentepolissen onder striktere voorwaarden). Niet in Box 3.

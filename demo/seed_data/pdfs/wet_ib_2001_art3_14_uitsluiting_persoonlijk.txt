@@ -1,0 +1,42 @@
+# Bron: Wet inkomstenbelasting 2001, artikel 3.14 (wetten.overheid.nl, BWBR0011353)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet IB 2001 — Hoofdstuk 3 — Afdeling 3.2 — Artikel 3.14 — Algemeen niet aftrekbare kosten
+
+Artikel 3.14 — Uitsluiting persoonlijke uitgaven van aftrek
+
+Lid 1. Bij het bepalen van de winst uit onderneming en bij het bepalen van het belastbare loon komen niet in aftrek de kosten en lasten die verband houden met:
+a. de persoon van de belastingplichtige zelf, waaronder begrepen kosten van levensonderhoud, kleding, voeding en persoonlijke verzorging;
+b. de huisvesting van de belastingplichtige als woning, voor zover die niet als werkruimte voor de onderneming wordt gebruikt;
+c. ontspanning, vakantie en privébezoek;
+d. geldboeten opgelegd door een Nederlandse strafrechter of bestuursorgaan;
+e. misdrijven waarvoor de belastingplichtige onherroepelijk is veroordeeld.
+
+Lid 2. Onder kosten van persoonlijke verzorging worden in elk geval verstaan: kapper, persoonlijke kleding (ook als die deels voor het werk wordt gebruikt), make-up, contactlenzen en brillen voor algemeen gebruik, en gewone schoenen.
+
+Lid 3. Huishoudelijke uitgaven — boodschappen, schoonmaakmiddelen, huishoudelijke apparatuur, water, elektra en gas voor het privégedeelte van een woning — vormen geen aftrekbare kosten in welke heffing dan ook. De Hoge Raad heeft dit consequent bevestigd: privé-uitgaven blijven privé, ongeacht of de belastingplichtige werknemer, ondernemer of resultaatgenieter is.
+
+Lid 4. In aanvulling op lid 1 is artikel 3.15 van toepassing voor representatie-, congres-, studiereis- en relatiegeschenkkosten, die slechts beperkt aftrekbaar zijn voor ondernemers.
+
+Lid 5. Voor werknemers geldt dat onkostenvergoedingen die gericht vrijgesteld zijn (artikel 31a Wet LB 1964 — werkkostenregeling) niet onder dit artikel vallen, mits ze voldoen aan de noodzakelijkheids- of vrijstellingscriteria.
+
+Toelichting
+
+De kernregel is dat de fiscus geen subsidie geeft op privé-leven. Een ondernemer die thuis werkt, kan niet de boodschappen of het wasmiddel aftrekken. Een werknemer kan geen aftrek claimen voor kleding, koffie of haarverzorging. Voor zelfstandigenaftrek, MKB-winstvrijstelling en kostenaftrek geldt steeds: de uitgave moet zakelijk zijn, niet huishoudelijk.
+
+Werkruimte in een woning is een aparte regeling (artikel 3.16 en 3.17): alleen kosten voor een fiscaal kwalificerende werkruimte (zelfstandig deel met eigen ingang of voorzieningen, voldoet aan inkomenstoets) zijn binnen strikte grenzen aftrekbaar.
+
+Voor reiskosten woon-werk geldt artikel 3.17 voor ondernemers en de werkkostenregeling/reiskostenvergoeding voor werknemers — alle binnen wettelijke maxima (€0,23 per kilometer in 2024).
+
+Praktijkvoorbeelden niet-aftrekbaar
+- Energiekosten van het privégedeelte van de woning
+- Aankoop wasmachine voor huishouden
+- Boodschappen, ook als deze gedeeltelijk voor zakelijke lunches worden gebruikt
+- Persoonlijke kleding (ook bij representatieve functies, tenzij het echte bedrijfskleding met logo betreft)
+- Vakantiereizen, ook als deze deels voor netwerken worden benut
+
+Wel aftrekbaar (binnen voorwaarden van andere artikelen)
+- Telefoonkosten zakelijk gebruik (deel)
+- Internetabonnement zakelijk gebruik (deel)
+- Studiekosten direct gerelateerd aan beroepsuitoefening (artikel 6.27 — persoonsgebonden aftrek tot 2022, daarna afgeschaft)
+- Bedrijfskleding met onuitwisbaar logo of beschermend karakter

@@ -1,0 +1,69 @@
+# Bron: Successiewet 1956, art. 32-33 (BWBR0002226)
+# Versie 2024 — geldend per 1 januari 2024
+
+Successiewet 1956 — Artikel 32 en 33 — Vrijstellingen erf- en schenkbelasting
+
+Artikel 32 — Vrijstellingen erfbelasting (per relatie tot de overledene)
+
+Lid 1. De volgende vrijstellingen gelden bij erfbelasting in 2024:
+
+a. Echtgenoot of geregistreerde partner: €795.156
+b. Kinderen, kleinkinderen (ook stief- en pleegkinderen): €25.187
+c. Kinderen met een ernstige beperking: €70.299 (bijzondere vrijstelling, mits aan voorwaarden voldaan)
+d. Ouders: €59.643
+e. Andere verkrijgers (broers, zussen, overige familie, derden): €2.658
+
+Lid 2. Bij overschrijding van het vrijstellingsbedrag wordt het meerdere belast volgens het tarief van artikel 24 (zie aparte tabel-document).
+
+Lid 3. De vrijstellingen zijn éénmalig per overlijden — de echtgenoot van een overledene krijgt de vrijstelling van €795.156 toegepast op de hele nalatenschap, niet per kind of per onderdeel.
+
+Lid 4. De vrijstelling voor de echtgenoot wordt verminderd met de helft van de waarde van de niet-bedongen pensioen-aanspraken die de langstlevende partner verkrijgt (de zogenoemde imputatieregel — artikel 32 lid 2 SW).
+
+Artikel 33 — Vrijstellingen schenkbelasting (per relatie tot de schenker)
+
+Lid 1. De volgende vrijstellingen gelden bij schenkbelasting in 2024:
+
+a. Schenking van ouder aan kind, jaarlijkse vrijstelling: €6.633
+b. Schenking eenmalig hoger (kind 18-40 jaar, vrije besteding): €31.813 — ééns in een leven
+c. Schenking eenmalig hoger (kind 18-40 jaar, voor eigen woning): €31.813 — alternatief voor 33b, niet cumulatief
+d. Schenking eenmalig hoger (kind 18-40 jaar, voor dure studie): €66.268 — alternatief voor 33b, niet cumulatief
+e. Schenking aan andere personen, jaarlijks: €2.658
+
+Lid 2. Per 2023 is de "jubelton" (eenmalige verhoogde vrijstelling van €106.671 voor eigen woning) afgeschaft. Wel blijft de €31.813-eigen-woning-vrijstelling beschikbaar (lid 1 onder c).
+
+Lid 3. De jaarlijkse vrijstelling werkt als jaarlijks "resetbaar bedrag": een ouder kan jaarlijks €6.633 belastingvrij aan een kind schenken, jaar in jaar uit. Bij meerdere kinderen geldt het bedrag per kind.
+
+Lid 4. Schenking aan ANBI's en SBBI's is geheel vrijgesteld van schenkbelasting (geen plafond).
+
+Lid 5. Voor schenking via een akte van schenking met opschortende voorwaarde (bijv. wanneer pas bij 21e jaar tot uitkering komt): de vrijstelling wordt toegepast op het tijdstip van toetreding van de voorwaarde, niet op de aktedatum.
+
+Praktijkvoorbeelden
+
+Voorbeeld 1 — Echtgenoot erft
+Vader overlijdt, laat vermogen na van €600.000 aan moeder. Vrijstelling echtgenoot €795.156 — geheel vrijgesteld. Geen erfbelasting.
+
+Voorbeeld 2 — Twee kinderen erven
+Vader overlijdt, vermogen €700.000, twee kinderen erven elk €350.000. Vrijstelling per kind €25.187. Belastbaar deel per kind: €324.813. Belasting (zie tarieftabel artikel 24): eerste schijf 10% tot €152.368 = €15.237; tweede schijf 20% over €172.445 = €34.489. Totaal per kind: ~€49.726.
+
+Voorbeeld 3 — Schenking eigen woning
+Een vader schenkt zijn 35-jarige zoon €31.813 ten behoeve van het kopen van een eigen woning. Eenmalig vrijstelling artikel 33 lid 1 onder c — vrijgesteld, mits binnen 2 kalenderjaren daadwerkelijk gebruikt voor eigen woning en goed gedocumenteerd in de belastingaangifte schenkbelasting.
+
+Voorbeeld 4 — Jaarlijkse schenkingen
+Een grootouder schenkt 5 kleinkinderen elk €6.000 per jaar gedurende 10 jaar. Onder vrijstelling van €2.658 per kleinkind per jaar (artikel 33 lid 1 onder e — andere persoon). Boven vrijstelling: €3.342 per kind per jaar belast tegen tariefstap 1 voor "andere verkrijger" (30% in 2024 — zie artikel 24).
+
+Aangifte- en betalingsplicht
+
+Erfbelasting: aangifte binnen 8 maanden na overlijden (artikel 39 SW). Belasting wordt door de notaris of executeur ingehouden uit de nalatenschap of door erfgenamen zelf aangegeven.
+
+Schenkbelasting: aangifte vóór 1 maart van het jaar volgend op de schenking (artikel 38 SW), in te dienen door de begiftigde. Bij eenmalige verhoogde vrijstelling: expliciete melding op het aangifteformulier ("beroep op verhoogde vrijstelling artikel 33 lid 1 onder b/c/d").
+
+Veelgestelde vragen
+
+V: Geldt de vrijstelling voor mijn schoonkind ook?
+A: Echtgenoten of geregistreerde partners van kinderen vallen onder dezelfde vrijstelling als kinderen (€25.187 erfbelasting, €6.633 jaarlijks schenkbelasting), mits getrouwd of geregistreerd partnerschap bij overlijden of schenking.
+
+V: Kan ik samenstellen: jubelton afgeschaft, maar mag mijn ouder mij in 2024 toch een groot bedrag belastingvrij schenken voor de eigen woning?
+A: Ja, tot €31.813 (artikel 33 lid 1 onder c). Het verschil met de oude jubelton (€106.671) is afgeschaft. Voor zoons/dochters tussen 18 en 40 jaar.
+
+V: Wat is het verschil tussen erf- en schenkbelasting in tarief?
+A: De tarieven zijn gelijk (artikel 24 SW), maar de vrijstellingen verschillen (zie boven). Echtgenoot/kind tarieven beginnen bij 10%; broer/zus en derden bij 30%.

@@ -1,0 +1,71 @@
+# Bron: Wet op de omzetbelasting 1968, art. 11 (BWBR0002629)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet OB 1968 — Artikel 11 — Vrijstellingen omzetbelasting
+
+Artikel 11 — Vrijgestelde prestaties
+
+Lid 1. Vrijgesteld van omzetbelasting zijn de volgende leveringen en diensten (samenvatting per categorie):
+
+a. Levering van onroerende zaken bestaande uit ongebouwde grond (geen bouwterrein) en de levering van onroerende zaken meer dan 2 jaar na eerste ingebruikname. Verhuur van onroerende zaken — tenzij sprake is van kortdurende horecaverhuur of parkeerruimte.
+
+b. Verzekeringsdiensten — bemiddeling, premiediensten, schadeafhandeling. NB: schadediensten in opdracht van een verzekeraar (taxateurs, herstelbedrijven) zijn niet vrijgesteld — die zijn 21%.
+
+c. Bankdiensten en kredietdiensten — leningen, betaalverkeer, deposito's, omwisseling van valuta. NB: vermogensbeheer en advies zijn meestal NIET vrijgesteld.
+
+d. Onderwijs verzorgd door door de overheid erkende instellingen. Privélessen zijn doorgaans niet vrijgesteld (21%) tenzij door een gekwalificeerd docent in een specifiek erkend onderwijsverband.
+
+e. Sociaal-culturele diensten door instellingen zonder winstoogmerk (vrijwilligersorganisaties, gezondheidszorg).
+
+f. Medische diensten verleend door BIG-geregistreerde beoefenaars (arts, tandarts, fysiotherapeut, verloskundige, psycholoog/psychotherapeut). Alternatieve geneeswijzen zonder BIG-registratie: niet vrijgesteld (21%).
+
+g. Diensten door beoefenaren van vrije beroepen die op grond van een verklaring van de Belastingdienst zijn vrijgesteld (zeer beperkte categorie).
+
+h. Componisten, schrijvers, journalisten — auteursrechtelijke royalty's en uitvoeringsrechten.
+
+i. Sportverenigingen zonder winstoogmerk — contributies en speelrechten.
+
+j. Postdiensten verzorgd door PostNL als universele dienstverlener (per 2014 ingeperkt vanwege EU-marktwerking).
+
+Lid 2. De vrijstelling betekent: geen BTW op de omzet, MAAR ook geen recht op aftrek van voorbelasting (artikel 15). Anders dan KOR-vrijstelling vraagt deze artikel-11-vrijstelling geen aanvraag — zij is automatisch van toepassing op de prestatie indien aan de voorwaarden voldaan.
+
+Lid 3. Voor onderwijs (lid 1 onder d): de instelling moet ofwel onder de Wet op het onderwijs vallen (regulier basis-, voortgezet of hoger onderwijs), of een door de Belastingdienst goedgekeurde "andere onderwijsinstelling" zijn (CRKBO-register). Particuliere bijles zonder CRKBO-registratie valt niet onder de vrijstelling.
+
+Lid 4. Voor medische diensten (lid 1 onder f): alleen handelingen op het gebied van de gezondheidskundige verzorging van de mens vallen onder de vrijstelling. Esthetische ingrepen zonder medische noodzaak zijn 21% sinds 2014. Een tandarts die alleen tandbleekbehandelingen doet: 21%. Een tandarts die kiezen vult en behandelt: vrijgesteld.
+
+Praktijkvoorbeelden
+
+Voorbeeld 1 — fysiotherapeut
+BIG-geregistreerde fysio behandelt klachten — vrijgesteld op grond van lid 1 onder f. Geen BTW op factuur, geen aftrek BTW op aankoop behandeltafel. Concrete factuur €60 zonder BTW.
+
+Voorbeeld 2 — yoga-docent
+Yogalerares zonder BIG-registratie of CRKBO. Niet vrijgesteld onder artikel 11. Wel mogelijk onder KOR (artikel 25) als omzet < €20.000.
+
+Voorbeeld 3 — particuliere bijles
+Wiskundebijles van een student aan middelbare scholieren. Geen erkende onderwijsinstelling. 21% van toepassing — ofwel vrijstelling via KOR aanvragen.
+
+Voorbeeld 4 — taxiservice
+Personenvervoer is niet vrijgesteld onder artikel 11, maar valt onder verlaagd tarief 9% (bijlage I bij artikel 9).
+
+Lid 1 onder o — onderwijs (uitvoeriger)
+
+Bij onderwijs van een erkende onderwijsinstelling is de vrijstelling van toepassing op:
+- Inschrijfgeld en collegegeld
+- Lesmateriaal verstrekt door de instelling
+- Examengelden door de instelling zelf afgenomen
+
+Niet vrijgesteld:
+- Catering door de instelling (apart 9% voor maaltijden / 21% voor alcoholische dranken)
+- Verhuur ruimten aan derden (21%)
+- Wel of geen vrijstelling voor zakelijke trainingen aan bedrijven hangt af van of de instelling specifiek voor dat type training erkend is — meestal NIET vrijgesteld voor zakelijke maatwerk-trainingen.
+
+Veelgestelde vragen
+
+V: Mijn psycholoog factureert zonder BTW. Klopt dat?
+A: Ja, mits BIG-geregistreerd onder de Wet BIG (gezondheidszorg). Een psycholoog die alleen ondernemers-coaching doet is meestal NIET vrijgesteld omdat dat geen gezondheidskundige verzorging is.
+
+V: Mijn voetbalvereniging is amateur. Moet zij over de contributie BTW rekenen?
+A: Nee, sportverenigingen zonder winstoogmerk zijn vrijgesteld onder lid 1 onder i.
+
+V: Een bouwondernemer levert een nieuwbouw woning aan een particulier. Wel of geen BTW?
+A: Levering binnen 2 jaar na eerste ingebruikname is BTW-belast (21%). Levering ná 2 jaar is vrijgesteld onder lid 1 onder a — maar dan geldt overdrachtsbelasting (10,4% in 2024 voor niet-eigenwoning, 2% voor eigen woning).

@@ -1,0 +1,74 @@
+# Bron: Wet inkomstenbelasting 2001, art. 3.110-3.123 (BWBR0011353)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet IB 2001 — Hoofdstuk 3 — Afdeling 3.6 — Eigen woning regeling
+
+Artikel 3.111 — Begrip eigen woning
+
+Lid 1. Een eigen woning is een gebouw, of een gedeelte ervan, dat de belastingplichtige als hoofdverblijf ter beschikking staat op grond van eigendom, een recht van vruchtgebruik krachtens erfrecht, recht van bewoning krachtens huwelijk of een recht van lidmaatschap van een woningcoöperatie.
+
+Lid 2. De eigen woning valt in Box 1, niet in Box 3. Daardoor wordt zowel een (forfaitair) inkomen toegerekend (eigenwoningforfait, artikel 3.112) als een aftrek toegestaan voor financieringsrente (artikel 3.120) — zogenaamde "hypotheekrenteaftrek".
+
+Lid 3. Voorwaarde "ter beschikking staan als hoofdverblijf": de woning moet feitelijk de plaats zijn waar de belastingplichtige zijn permanente leven leidt. Een tweede woning, vakantiewoning of woning verhuurd aan derden valt buiten deze regeling — die zit in Box 3.
+
+Artikel 3.112 — Eigenwoningforfait 2024
+
+Het eigenwoningforfait bedraagt een percentage van de WOZ-waarde:
+- WOZ < €12.500: forfait 0%
+- WOZ €12.500 − €25.000: 0,10%
+- WOZ €25.000 − €50.000: 0,20%
+- WOZ €50.000 − €75.000: 0,25%
+- WOZ €75.000 − €1.310.000: **0,35%** (standaard-tarief 2024)
+- WOZ > €1.310.000: 2,35% over het meerdere boven €1.310.000 + €4.585
+
+Het forfait wordt opgenomen als inkomen Box 1.
+
+Artikel 3.120 — Aftrekbare kosten met betrekking tot een eigen woning
+
+Lid 1. Tot de aftrekbare kosten met betrekking tot een eigen woning behoren:
+a. Renten van schulden die zijn aangegaan ter verwerving, verbetering of onderhoud van de eigen woning
+b. Kosten verbonden aan een geldlening die voldoet aan de voorwaarden van artikel 3.119a (annuïtaire of lineaire aflossing in maximaal 30 jaar)
+c. Erfpacht-, opstal-, en beklemmingscanons
+
+Lid 2. Niet aftrekbaar zijn:
+- Aflossingen op de hoofdsom (alleen rente)
+- Onderhouds- en reparatiekosten (privé-uitgaven)
+- Notariskosten verbonden aan de aankoop (alleen specifieke financierings-notariskosten zijn aftrekbaar)
+- Verbeteringskosten in het privé-deel zonder financiering
+
+Lid 3. Per 1 januari 2024 wordt het maximale aftrekbare percentage van de hypotheekrente gemaximaliseerd op het tarief van schijf 1 in Box 1: **36,93%** (was vóór 2014 nog 52% via top-tarief — sinds 2014 stapsgewijs afgebouwd).
+
+Lid 4. Voor een belastingplichtige die de hypotheek na 1 januari 2013 is aangegaan: voorwaarde van annuïtaire of lineaire aflossing in maximaal 30 jaar (artikel 3.119a). Aflossingsvrije hypotheken die op of vóór 31 december 2012 lopen, blijven onder overgangsrecht hun renteaftrek behouden tot maximaal 30 jaar vanaf eerste opname.
+
+Bijleenregeling (artikel 3.119aa)
+
+Bij verkoop van een eigen woning en aankoop van een nieuwe: het deel van de schuld dat met overwaarde uit de oude woning gekocht had kunnen worden, mag niet opnieuw met aftrekbare hypotheekrente gefinancierd worden. Doel: voorkomen dat overwaarde wordt "uitgehold" door bewuste schuld-stapeling.
+
+Voorbeeld bijleenregeling: oude woning verkocht voor €400.000, schuld €250.000, overwaarde €150.000. Nieuwe woning gekocht voor €500.000, met €450.000 hypotheek. De aftrekbare rente geldt slechts over €350.000 (€500.000 − €150.000 overwaarde). Op €100.000 daarvan: geen renteaftrek.
+
+Praktijkvoorbeelden
+
+Voorbeeld 1 — gangbare hypotheek 2024
+WOZ-waarde €450.000.
+Forfait: 0,35% × €450.000 = €1.575 — bij Box 1 inkomen.
+Hypotheek €350.000 met rente 4,5% = €15.750 rente per jaar (annuïtair, 30-jaars).
+Maximaal aftrek-tarief: 36,93%.
+Aftrekbaar van inkomen Box 1: €15.750 (vol bedrag aftrekbaar, want totale Box 1-inkomen valt nog binnen schijf-1).
+Saldo Box 1-effect: forfait €1.575 minus rente-aftrek €15.750 = -€14.175 negatieve toerekening.
+
+Voorbeeld 2 — boven plafond
+WOZ €1.500.000. Forfait: 0,35% × €1.310.000 + 2,35% × (€1.500.000 − €1.310.000) = €4.585 + €4.465 = €9.050.
+
+Voorbeeld 3 — verhuur kamer
+Woning gedeeltelijk verhuurd. De kamerverhuur valt onder de Kamerverhuurvrijstelling (artikel 3.114): tot €5.998 per jaar (2024) onbelast, mits de huurder geen bloed/aanverwant van de eigenaar is en de verhuur duurzaam is. Boven het plafond → resultaat overige werkzaamheden in Box 1.
+
+Veelgestelde vragen
+
+V: Mijn ouders schenken mij €30.000 voor de aankoop. Kan dat?
+A: Ja, met een eenmalige verhoogde vrijstelling schenkbelasting tot €31.813 (artikel 33 lid 1 onder c SW), kind 18-40 jaar, schriftelijk vastgelegd dat het voor eigen woning is.
+
+V: Ik koop met mijn partner. Wij zijn niet getrouwd. Mogen we beiden hypotheekrente aftrekken?
+A: Ja, mits beiden mede-eigenaar én mede-schuldenaar van de hypotheek. Aftrek naar rato van eigendomsverhouding en aandeel in schuld.
+
+V: Werkruimte thuis — eigen woning of Box 1-onderneming?
+A: De ruimte blijft "in" de eigen woning (Box 1) tenzij sprake is van een **kwalificerende werkruimte** met eigen ingang/voorzieningen + voldoet aan de inkomenstoets (artikel 3.16). Dan komt de werkruimte uit Box 1 en gaat — onder voorwaarden — naar de winst-sfeer of resultaat-overige-werkzaamheden, met eigen kostenregime.

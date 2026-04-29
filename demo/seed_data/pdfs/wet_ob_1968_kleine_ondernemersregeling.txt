@@ -1,0 +1,66 @@
+# Bron: Wet op de omzetbelasting 1968, art. 25 (BWBR0002629)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet OB 1968 — Artikel 25 — Kleine Ondernemersregeling (KOR)
+
+Artikel 25 — Kleine Ondernemersregeling (omzetgrens-KOR sinds 1 januari 2020)
+
+Lid 1. Een ondernemer die zijn omzet binnen Nederland in een kalenderjaar onder de €20.000 houdt, kan ervoor kiezen om te opteren voor de Kleine Ondernemersregeling. De ondernemer is dan vrijgesteld van het in rekening brengen van omzetbelasting en hoeft geen BTW-aangifte te doen.
+
+Lid 2. De ondernemer maakt zijn keuze schriftelijk kenbaar aan de inspecteur via het formulier "Aanmelden Kleine Ondernemersregeling" (online via Mijn Belastingdienst Zakelijk). De keuze geldt voor minimaal 3 jaar, behalve bij overschrijding van de omzetgrens (dan eindigt de regeling automatisch).
+
+Lid 3. De omzetgrens van €20.000 betreft de Nederlandse belaste omzet exclusief BTW. Niet meegerekend wordt:
+- Omzet uit vrijgestelde prestaties (artikel 11)
+- Omzet uit leveringen aan ondernemers in andere EU-lidstaten met geldig BTW-id (intracommunautair)
+- Omzet uit export buiten de EU
+
+Lid 4. Wel meegerekend (sinds 2020):
+- Reguliere binnenlandse omzet aan particulieren
+- Diensten aan binnenlandse afnemers
+- Verkoop van bedrijfsmiddelen
+
+Lid 5. Bij overschrijding van €20.000 in de loop van het kalenderjaar eindigt de KOR per direct vanaf het tijdstip van overschrijding. Vanaf dat moment moet de ondernemer BTW in rekening brengen, een BTW-administratie voeren en periodieke aangifte doen.
+
+Lid 6. Een ondernemer die KOR heeft opgezegd of waarvan de regeling is geëindigd door overschrijding, kan pas na 3 volle kalenderjaren weer opnieuw KOR aanvragen.
+
+Gevolgen van KOR-deelname
+
+Voordelen
+- Geen BTW op facturen — eenvoud voor klanten en boekhouding
+- Geen periodieke BTW-aangifte
+- Geen BTW-administratie verplicht (al blijven boekhoudplicht en bewaarplicht artikel 52 AWR onverkort gelden)
+
+Nadelen
+- Geen recht op aftrek voorbelasting (artikel 15 OB) — alle BTW op inkopen, investeringen en abonnementen blijft kostenpost
+- Ongunstig voor ondernemers met hoge investeringen of B2B-klanten (die willen vaak een factuur met aftrekbare BTW)
+- Bij investering in machines of voertuigen: geen BTW-teruggaaf
+
+Overgang en herziening voorbelasting
+
+Bij toetreding tot de KOR moet de ondernemer eerder afgetrokken voorbelasting op investeringsgoederen herzien:
+- Onroerend goed (woning/bedrijfspand): 10-jaars herzieningstermijn (artikel 13 lid 2)
+- Roerende investeringsgoederen (machines, voertuigen): 5-jaars herzieningstermijn (artikel 13 lid 3)
+
+Voorbeeld: een ondernemer die in 2022 een bedrijfsbusje kocht voor €30.000 + €6.300 BTW (volledig afgetrokken) en in 2024 KOR aanvraagt: 3 van de 5 herzieningsjaren resteren. Hij moet 3/5 × €6.300 = €3.780 terugbetalen aan de Belastingdienst.
+
+Praktijkvoorbeelden
+
+Voorbeeld 1 — ZZP-coach
+Marie geeft yogalessen aan particulieren, jaaromzet €15.000. Zij past KOR toe: factureert €60 per les zonder BTW, doet geen aangifte. Haar inkopen (yogamatten, spiegels) bevatten BTW maar die kan zij niet aftrekken.
+
+Voorbeeld 2 — Webshop
+Pieter heeft een webshop, omzet €18.500 in januari-oktober 2024. In november bestelt een grote klant voor €5.000. KOR-grens overschreden bij die levering — vanaf die levering moet hij BTW gaan rekenen. Aanmelden bij Belastingdienst en aangiftesysteem activeren.
+
+Voorbeeld 3 — Hobbymatige verkoop
+Anneke verkoopt 's zomers €4.000 aan zelfgemaakte sieraden op markten. Voldoet ze aan ondernemerschap (artikel 7 OB)? Marginale activiteit, geen duurzaamheid → geen ondernemer. KOR niet eens nodig.
+
+Veelgestelde vragen
+
+V: Mag een KOR-ondernemer 9% factureren?
+A: Nee. KOR betekent vrijgesteld — geen 21%, geen 9%, geen 0%. Op de factuur staat: "Vrijgesteld van BTW op grond van artikel 25 OB 1968 (Kleine Ondernemersregeling)".
+
+V: Tellen omzet uit verschillende ondernemingen samen voor de €20.000-grens?
+A: Ja, indien sprake is van één ondernemerschap (eenmanszaak met meerdere activiteiten of een vof). Apart juridisch bestaande ondernemingen (twee BV's) tellen niet bij elkaar op.
+
+V: Geldt KOR ook voor afgekochte abonnementen of vooruitbetalingen?
+A: De omzet wordt geboekt op het moment van prestatie, niet op het moment van betaling. Een vooruitbetaalde €25.000 abonnement waarvoor de prestatie nog 12 maanden loopt telt naar rato per maand mee voor de omzetgrens.

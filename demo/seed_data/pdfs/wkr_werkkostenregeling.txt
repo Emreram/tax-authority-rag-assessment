@@ -1,0 +1,75 @@
+# Bron: Wet op de loonbelasting 1964, art. 31a (BWBR0002471)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet LB 1964 — Artikel 31a — Werkkostenregeling (WKR)
+
+Artikel 31a — Begrip vrije ruimte en gerichte vrijstellingen
+
+Lid 1. Werkgevers mogen onkostenvergoedingen, verstrekkingen en terbeschikkingstellingen aan werknemers verstrekken zonder dat dit als loon wordt belast, mits binnen de **vrije ruimte** van de werkkostenregeling.
+
+Lid 2. De vrije ruimte 2024 bedraagt:
+- **1,92%** over de eerste €400.000 van de fiscale loonsom
+- **1,18%** over het meerdere boven €400.000
+
+Lid 3. Boven de vrije ruimte: een eindheffing van **80%** voor de werkgever — geen werknemers-belasting, maar een hogere kostenpost voor de onderneming.
+
+Lid 4. Onafhankelijk van de vrije ruimte gelden bovendien **gerichte vrijstellingen** (artikel 31a lid 2). Deze tellen niet mee voor de vrije ruimte:
+a. Reiskosten woon-werkverkeer: €0,23 per kilometer (2024)
+b. Vervoer met openbaar vervoer (volledig)
+c. Tijdelijk verblijf voor werk (zakelijke reizen, hotelovernachtingen, maaltijden in zakelijke setting)
+d. Studie- en opleidingskosten ten behoeve van het werk
+e. Outplacement-kosten
+f. Vakliteratuur en abonnementen werkgerelateerd
+g. Werkkleding (mits onuitwisbaar logo of beschermend)
+h. Computer, smartphone en andere zakelijke ICT-apparatuur (zakelijk gebruik > 90%)
+i. Personeelsfeesten en jubilea (binnen normbedragen)
+
+Lid 5. Voor verstrekkingen onder gerichte vrijstellingen geldt een noodzakelijkheids-toets: kan de werknemer redelijk redelijkerwijs zonder de vergoeding/verstrekking zijn werk verrichten? Zo ja, dan onbelast.
+
+Toepassing in de praktijk
+
+Werkgever met €1.000.000 fiscale loonsom:
+- Vrije ruimte: 1,92% × €400.000 + 1,18% × €600.000 = €7.680 + €7.080 = **€14.760**
+- Hieruit kan werkgever ongelimiteerd onkostenvergoedingen verstrekken (cadeaus, bonus-overuren-vergoeding, etc.) tot €14.760 zonder loonheffing.
+
+Hier bovenop kunnen alle gericht vrijgestelde verstrekkingen blijven (kilometers, OV, opleiding) — die belasten de vrije ruimte niet.
+
+Voorbeelden onbelast en belast
+
+Onbelast (binnen vrije ruimte):
+- Kerstpakket €60
+- Bonus voor goede prestatie €200
+- Bedrijfsfeest met alcohol (per werknemer)
+- Vergoeding sportabonnement €30/maand
+
+Onbelast (gericht vrijgesteld, los van vrije ruimte):
+- Reiskostenvergoeding €0,23/km
+- Computer voor thuiswerken
+- Cursus Spaans voor klantcontact
+- Functionele werkkleding
+
+Belast (eindheffing 80%):
+- Verstrekkingen boven vrije ruimte
+- Cadeau aan privé-relatie van werknemer (verjaardag echtgenote)
+
+Niet-WKR — gewoon brutoloon:
+- Salaris
+- Vakantiegeld (8% bruto)
+- Pensioen-werkgeversbijdrage (apart fiscaal regime)
+
+Praktische vragen
+
+V: Mag de werkgever mijn thuiswerkplek financieren?
+A: Onder gerichte vrijstelling artikel 31a lid 2 onder h: ja, mits zakelijke noodzaak (bijv. een ergonomisch bureau voor thuiswerken). Of binnen vrije ruimte: ook ja, tot maximum.
+
+V: Geldt WKR ook voor ZZP'ers?
+A: Nee, WKR is een werkgeversregeling (Wet LB). Een ZZP'er bepaalt zelf zijn zakelijke kosten via artikel 3.7 IB.
+
+V: Hoe wordt de WKR-vrijstelling administratief verwerkt?
+A: De werkgever boekt de uitgaven in de eindejaarsverwerking salarisadministratie. Bij overschrijding van vrije ruimte vóór jaareinde: 80%-eindheffing reserveren bij volgende loonaangifte.
+
+V: Mag een werkgever maaltijden in de bedrijfskantine vergoeden?
+A: Maaltijden ter plaatse op kantoor: een normbedrag van €3,90 per maaltijd geldt als waardering — de werkelijke kosten daarboven gaan deels via vrije ruimte. Maaltijden bij externe gebeurtenissen (training, conferentie): gericht vrijgesteld.
+
+V: Personeelsuitje naar Disneyland Parijs — onder WKR?
+A: Internationale uitstapjes vallen onder de vrije ruimte zoals binnenlandse personeelsfeesten. Bij overschrijding: eindheffing 80%. Praktisch: budgetteer vooraf en houd rekening met cumulatie met andere onkostenvergoedingen.

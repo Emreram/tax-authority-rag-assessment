@@ -1,0 +1,98 @@
+# Bron: Successiewet 1956, art. 24-25 (BWBR0002226)
+# Versie 2024 — geldend per 1 januari 2024
+
+Successiewet 1956 — Artikel 24 — Tarieven erf- en schenkbelasting
+
+Artikel 24 — Tarieven
+
+Lid 1. De tarieven gelden zowel voor erfbelasting als voor schenkbelasting en zijn afhankelijk van twee variabelen: de relatie tot de erflater of schenker (verkrijger-categorie) en de hoogte van het belastbare bedrag (na aftrek vrijstelling artikel 32/33).
+
+Lid 2. Tariefcategorieën in 2024:
+
+**Categorie I — partner of (klein)kind**
+Schijf 1 — eerste €152.368 belastbaar: tarief **10%**
+Schijf 2 — boven €152.368: tarief **20%**
+
+**Categorie I-A — kleinkinderen, achterkleinkinderen**
+Schijf 1 — eerste €152.368 belastbaar: tarief **18%**
+Schijf 2 — boven €152.368: tarief **36%**
+
+**Categorie II — overige verkrijgers (broer/zus, ouder, niet-familie)**
+Schijf 1 — eerste €152.368 belastbaar: tarief **30%**
+Schijf 2 — boven €152.368: tarief **40%**
+
+Lid 3. De schijfgrens van €152.368 wordt jaarlijks geïndexeerd voor inflatie (artikel 35a). De percentages staan vast en wijzigen alleen via wetswijziging.
+
+Artikel 25 — Verkrijger-categorieën nader bepaald
+
+Lid 1. Tot Categorie I behoren:
+- Echtgenoot of geregistreerde partner
+- Eigen kinderen, stief- en pleegkinderen (mits voldaan aan voorwaarden van artikel 19)
+- Pleegkinderen ook na overlijden van de pleegouder waar zij verzorgd zijn
+
+Lid 2. Tot Categorie I-A behoren:
+- Kleinkinderen
+- Achterkleinkinderen
+
+Lid 3. Tot Categorie II behoren:
+- Ouders van de overledene/schenker
+- Broers, zusters, halfbroers, halfzussen
+- Tantes, ooms, neefjes, nichtjes
+- Niet-familieleden, kennissen, derden
+
+Lid 4. Voor samenwoners zonder geregistreerd partnerschap: alleen samenwoners die ten minste 5 jaar onafgebroken samen hebben gewoond op één adres en een notarieel samenlevingscontract hebben, vallen onder Categorie I (artikel 1a SW).
+
+Berekeningssystematiek — stappenplan
+
+Stap 1: Bepaal de verkrijging per persoon (waardering vermogensbestanddelen op overlijdens- of schenkingsdatum).
+Stap 2: Trek de vrijstelling van artikel 32 of 33 af.
+Stap 3: Pas het tarief toe per schijf:
+- Eerste €152.368 belastbaar tegen tarief schijf 1
+- Daarboven tegen tarief schijf 2
+Stap 4: Verminder met eventuele heffingsverlaging bij bedrijfsopvolgingsregeling (artikel 35b — BOR — zie apart document).
+Stap 5: Resterende belasting is verschuldigd binnen 8 maanden na overlijden of vóór 1 maart na schenkingsjaar.
+
+Praktijkvoorbeelden
+
+Voorbeeld 1 — Kind erft €400.000
+Verkrijging: €400.000
+Vrijstelling kind (artikel 32): €25.187
+Belastbaar: €374.813
+Schijf 1: 10% × €152.368 = €15.237
+Schijf 2: 20% × (€374.813 − €152.368) = 20% × €222.445 = €44.489
+**Totale erfbelasting: €59.726**
+
+Voorbeeld 2 — Echtgenoot erft €1.000.000
+Verkrijging: €1.000.000
+Vrijstelling echtgenoot: €795.156
+Belastbaar: €204.844
+Schijf 1: 10% × €152.368 = €15.237
+Schijf 2: 20% × €52.476 = €10.495
+**Totale erfbelasting: €25.732**
+
+Voorbeeld 3 — Niet-familie erft €100.000
+Vermogen overgedragen aan vriend: €100.000
+Vrijstelling derden: €2.658
+Belastbaar: €97.342
+Schijf 1 categorie II: 30% × €97.342 = €29.203
+**Totale erfbelasting: €29.203**
+
+Voorbeeld 4 — Schenking aan kleinkind boven vrijstelling
+Grootouder schenkt kleinkind in 2024 totaal €30.000.
+Vrijstelling jaarlijks (artikel 33 lid 1 onder e): €2.658
+Belastbaar: €27.342
+Categorie I-A schijf 1: 18% × €27.342 = **€4.922 schenkbelasting**
+
+Veelgestelde vragen
+
+V: Mijn ouders zijn weduwe/weduwnaar. Maakt dat verschil voor de vrijstelling?
+A: Voor de erfbelasting geen verschil — vrijstelling kind blijft €25.187. Voor de schenkbelasting: ook geen verschil. Wel speelt de imputatieregel (artikel 32 lid 2) een rol bij pensioenaanspraken.
+
+V: Welk tarief geldt voor mijn schoonkind?
+A: Echtgenoot of geregistreerd partner van een kind valt onder Categorie I als kind. Dus 10%/20%-tarieven en €25.187 vrijstelling. Bij scheiding ten tijde van overlijden vervalt deze status.
+
+V: Wat als de erflater partneralimentatie aan ex-echtgenoot betaalde?
+A: Niet-betaalde alimentatieverplichtingen op overlijdensdatum zijn aftrekbaar van de nalatenschap (artikel 5 SW). Belastbaar wordt het netto-vermogen na aftrek van schulden inclusief de contante waarde van openstaande alimentatieverplichtingen.
+
+V: Geldt het tarief ook voor pensioenaanspraken die overgaan op de partner?
+A: Pensioenrechten die in het kader van een pensioenregeling overgaan op de partner zijn niet onderworpen aan erfbelasting (artikel 32 lid 4 onder b SW). Wel speelt de imputatieregel — de waarde van de pensioenaanspraak verlaagt voor de helft de vrijstelling van €795.156.

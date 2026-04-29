@@ -1,0 +1,84 @@
+# Bron: Wet op de omzetbelasting 1968, art. 9 + bijlage I + bijlage II (BWBR0002629)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet OB 1968 — Artikel 9 — BTW-tarieven en hun toepassing
+
+Artikel 9 — Tarieven omzetbelasting
+
+Lid 1. De belasting bedraagt 21% van de vergoeding (algemeen tarief). Dit is het uitgangspunt: alle leveringen van goederen en diensten zijn belast met 21% tenzij een wettelijke uitzondering geldt.
+
+Lid 2. Het tarief bedraagt 9% (verlaagd tarief) voor de leveringen, diensten en intracommunautaire verwervingen die zijn opgenomen in de bij deze wet behorende bijlage I (zie volledig overzicht hieronder).
+
+Lid 3. Het tarief bedraagt 0% (nul-tarief) voor de leveringen en diensten die zijn opgenomen in bijlage II (intracommunautaire leveringen, export buiten de EU, internationale luchtvaart en zeescheepvaart).
+
+Bijlage I — overzicht 9%-tarief (samenvatting per categorie)
+
+Voedingsmiddelen
+- Voedingsmiddelen voor menselijke consumptie, inclusief alcoholvrije dranken
+- Uitgesloten: alcoholische dranken (21%), restaurantspijs ter plaatse genuttigd in de horeca-context (verschillend tarief afhankelijk van setting)
+
+Boeken, tijdschriften, kranten, nieuwsdiensten
+- Fysieke boeken én elektronische uitgaven (per 2020 gelijkgesteld)
+- Educatieve software (digitaal of fysiek)
+- Online toegang tot kranten en tijdschriften
+
+Geneesmiddelen en hulpmiddelen
+- Geregistreerde geneesmiddelen (CBG-registratie)
+- Verbandmiddelen, hulpmiddelen voor gehandicapten op recept
+- Niet: cosmetische tandverzorging, supplementen zonder geneesmiddelregistratie
+
+Personenvervoer
+- Trein, tram, bus, metro
+- Taxi en georganiseerd vervoer voor personen
+- Niet: goederenvervoer (21%)
+
+Cultuur en entertainment
+- Theater, bioscoop, concert, museum (entreeprijs)
+- Sportbeoefening (toegang sportaccommodatie)
+- Diergaarden, dierentuinen
+- Niet: sportartikelen of -kleding (21%)
+
+Hotel- en logiesverstrekking
+- Overnachting in hotel, B&B, camping
+- Niet: zakelijke huur of vergaderzalen (21%)
+
+Reparatie van fietsen, schoenen, kleding
+- Specifiek deze drie categorieën reparatiediensten — niet andere reparaties (auto, electronica = 21%)
+
+Kappers
+- Knippen, scheren, aansluitende verzorging in kapperszaak
+
+Schilder- en stukadoorswerk binnen oude woningen
+- Voor woningen ouder dan 2 jaar (verlaagd tarief stimuleert renovatie)
+- Strikte toets: alleen schilder- en stukadoorswerk, niet andere bouw
+
+Tuinwerk en hovenierwerk
+- In/op privégrond bij woning ouder dan 2 jaar
+- Alleen arbeid, niet de gekochte materialen
+
+Bijlage II — overzicht 0%-tarief (samenvatting)
+
+- Intracommunautaire leveringen aan BTW-plichtige afnemers in andere EU-lidstaten (mits geldig BTW-id-nummer en bewijs van vervoer)
+- Export naar landen buiten de EU
+- Levering van zeeschepen en luchtvaartuigen voor internationaal vervoer
+- Brandstof en proviandering voor internationaal verkeer
+- Diensten in verband met internationale handel
+
+Praktische toepassing
+
+Een restaurant rekent voor afhaalmaaltijden 9% (voedingsmiddelen) maar voor consumpties ter plaatse genuttigd 21% (restaurantdienst). Sinds 2024 is dit onderscheid in casu nog steeds van toepassing.
+
+Een schilder die een huurwoning van 5 jaar oud schildert voor de verhuurder past 9% toe op zijn arbeid. Zijn rekening voor materialen blijft op 21% — die zijn geen onderdeel van het 9%-regime.
+
+Een online cursus over fotografie is 21% (geen erkende opleiding). Diezelfde cursus aangeboden door een geregistreerde onderwijsinstelling kan vrijgesteld zijn (artikel 11 lid 1 onder o).
+
+Veelgestelde vragen
+
+V: Wat is het BTW-tarief op fiscaal advies?
+A: Fiscaal advies door een belastingadviseur of accountant valt onder het algemene tarief van 21%. Geen verlaagd tarief, geen vrijstelling.
+
+V: Mag een ZZP'er die onder de Kleine Ondernemersregeling valt nog 9% berekenen?
+A: Onder de KOR (artikel 25) wordt geen BTW in rekening gebracht — geen 21%, geen 9%. De ZZP'er noemt op de factuur "Vrijgesteld van BTW op grond van artikel 25 OB 1968 (KOR)".
+
+V: Wanneer geldt 0%?
+A: Alleen voor de in bijlage II genoemde leveringen — vooral export en internationale handel. Een Nederlandse winkel die aan een Nederlandse klant verkoopt past nooit 0% toe.

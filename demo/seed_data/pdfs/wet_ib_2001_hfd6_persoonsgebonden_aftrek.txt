@@ -1,0 +1,38 @@
+# Bron: Wet inkomstenbelasting 2001, hoofdstuk 6 — Persoonsgebonden aftrek (BWBR0011353)
+# Versie 2024 — geldend per 1 januari 2024
+
+Wet IB 2001 — Hoofdstuk 6 — Persoonsgebonden aftrek — algemene bepalingen
+
+Artikel 6.1 — Begripsbepaling persoonsgebonden aftrek
+
+Lid 1. De persoonsgebonden aftrek is het gezamenlijke bedrag van de in dit hoofdstuk genoemde aftrekposten dat de belastingplichtige in het kalenderjaar aan zijn inkomen kan onttrekken voor de heffing van inkomstenbelasting.
+
+Lid 2. De persoonsgebonden aftrek wordt eerst in mindering gebracht op het inkomen uit werk en woning (Box 1), daarna — voor zover er nog ruimte is — op het inkomen uit aanmerkelijk belang (Box 2) en daarna op het inkomen uit sparen en beleggen (Box 3).
+
+Lid 3. Voor zover de persoonsgebonden aftrek in het kalenderjaar niet kan worden verrekend, wordt deze doorgeschoven naar volgende kalenderjaren (artikel 6.2a).
+
+Artikel 6.2 — Volgorde verrekening
+
+De aftrekposten worden verrekend in de volgorde waarin zij in dit hoofdstuk worden genoemd: eerst onderhoudsverplichtingen (alimentatie, art. 6.3), dan uitgaven voor specifieke zorgkosten (art. 6.17), vervolgens weekenduitgaven gehandicapten (art. 6.25), studiekosten (afgeschaft per 2022 — uitfasering geldt nog voor lopende verplichtingen), giften (art. 6.32) en restcategorieën.
+
+Artikel 6.3 — Onderhoudsverplichtingen (alimentatie)
+
+Lid 1. Aftrekbaar zijn de in het kalenderjaar betaalde onderhoudsverplichtingen aan de gewezen echtgenoot of geregistreerde partner, voor zover deze rechtstreeks voortvloeien uit het familierecht of een daarmee gelijk te stellen overeenkomst.
+
+Lid 2. Eenmalige afkoop van alimentatie in een lump sum is volledig aftrekbaar in het jaar van betaling, mits zakelijk overeengekomen en niet hoger dan de redelijkerwijs bedongen waarde van de toekomstige termijnen.
+
+Lid 3. Onderhoud van kinderen jonger dan 21 jaar is niet aftrekbaar onder dit artikel — voor kinderen geldt het kindgebonden budget en de inkomensafhankelijke combinatiekorting in plaats van een aftrekpost.
+
+Artikel 6.5 — Drempelbedrag persoonsgebonden aftrek
+
+Voor sommige posten geldt een drempel waaronder geen aftrek wordt verleend (zie specifiek per artikel — bijv. zorgkosten kennen een inkomensafhankelijke drempel in artikel 6.20).
+
+Praktische werkwijze
+
+Een belastingplichtige met €45.000 inkomen Box 1 en €4.000 alimentatie aan ex-partner doet aangifte van een persoonsgebonden aftrek van €4.000. Dit verlaagt het inkomen waarop de progressieve heffing van toepassing is.
+
+Heeft de belastingplichtige in een jaar geen of weinig Box 1-inkomen (bijv. door verlies of werkloosheid), dan blijft de niet-verrekende aftrek staan voor latere jaren — onbeperkt voorwaarts compensabel.
+
+Documentatie-eis
+
+Voor elke aftrekpost geldt: bewaar bewijsstukken minstens 5 jaar. De inspecteur kan navorderen tot 5 jaar na het belastingjaar (artikel 16 AWR), of 12 jaar bij buitenlandse vermogensbestanddelen (artikel 16 lid 4 AWR).
